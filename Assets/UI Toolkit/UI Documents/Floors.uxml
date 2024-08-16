@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/floors.uss?fileID=7433441132597879392&amp;guid=51b8729cd36a9a74394b618d8f5a8ff0&amp;type=3#floors" />
+    <ui:VisualElement style="flex-grow: 1; width: 100px; height: 250px; align-self: flex-end; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; max-height: 250px; top: 100px;">
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="UpButton" class="button-up" />
+        <ui:Label tabindex="-1" text="10" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Floor" style="background-color: rgb(193, 221, 218);" />
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="DownButton" class="button-down" />
+    </ui:VisualElement>
+</ui:UXML>

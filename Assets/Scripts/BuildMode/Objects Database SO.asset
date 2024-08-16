@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a9420d57d11c9249aa9cf5fd57dd26a, type: 3}
+  m_Name: Objects Database SO
+  m_EditorClassIdentifier: 
+  objectsData:
+  - <Name>k__BackingField: Tree
+    <ID>k__BackingField: 0
+    <Cost>k__BackingField: 100
+    <Size>k__BackingField: {x: 6, y: 6}
+    <Prefab>k__BackingField: {fileID: 2738747756972398897, guid: 71aec4fd7655960429a4ed4beea6db66, type: 3}
+    <ObjectTypes>k__BackingField: 15
+  - <Name>k__BackingField: Table
+    <ID>k__BackingField: 1
+    <Cost>k__BackingField: 60
+    <Size>k__BackingField: {x: 1, y: 2}
+    <Prefab>k__BackingField: {fileID: 5118323665441042967, guid: 3a516774f6880b646a9599671f71c02d, type: 3}
+    <ObjectTypes>k__BackingField: 1

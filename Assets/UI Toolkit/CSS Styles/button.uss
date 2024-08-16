@@ -1,0 +1,361 @@
+.viewport-button {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: 300px;
+    min-height: 300px;
+    -unity-text-align: lower-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 228, 236);
+    font-size: 22px;
+}
+
+.viewport-button:hover {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: 300px;
+    min-height: 300px;
+    -unity-text-align: lower-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 209, 214);
+    font-size: 22px;
+}
+
+.viewport-button:active {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: 300px;
+    min-height: 300px;
+    -unity-text-align: lower-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(154, 198, 204);
+    font-size: 22px;
+}
+
+.unity-scroller {
+    height: 15px;
+}
+
+.unity-scroller .unity-slider .unity-base-slider__tracker {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    height: 16px;
+    width: auto;
+}
+
+.unity-scroller .unity-slider .unity-base-slider__dragger {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 10px;
+    background-color: rgb(185, 204, 204);
+}
+
+.unity-scroller .unity-repeat-button {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    width: 20px;
+    height: 20px;
+    transform-origin: center;
+    translate: 0 2px;
+    display: none;
+    visibility: hidden;
+}
+
+#CancelButton {
+    margin-left: 7px;
+    margin-right: 7px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 80px;
+    height: 55px;
+    background-color: rgb(224, 42, 42);
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-left-color: rgb(185, 36, 36);
+    border-right-color: rgb(185, 36, 36);
+    border-top-color: rgb(185, 36, 36);
+    border-bottom-color: rgb(185, 36, 36);
+}
+
+#CancelButton:hover {
+    margin-left: 7px;
+    margin-right: 7px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 80px;
+    height: 55px;
+    background-color: rgb(185, 36, 36);
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-left-color: rgb(152, 54, 54);
+    border-right-color: rgb(152, 54, 54);
+    border-top-color: rgb(152, 54, 54);
+    border-bottom-color: rgb(152, 54, 54);
+}
+
+#CancelButton:active {
+    margin-left: 7px;
+    margin-right: 7px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 80px;
+    height: 55px;
+    background-color: rgb(123, 26, 26);
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-left-color: rgb(53, 16, 16);
+    border-right-color: rgb(53, 16, 16);
+    border-top-color: rgb(53, 16, 16);
+    border-bottom-color: rgb(53, 16, 16);
+}
+
+.tools-button {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: auto;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 228, 236);
+    font-size: 24px;
+    max-height: 55px;
+    min-width: 100px;
+}
+
+.tools-button:hover {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: auto;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 209, 214);
+    font-size: 24px;
+    max-height: 55px;
+    min-width: 100px;
+}
+
+.tools-button:active {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: auto;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(154, 198, 204);
+    font-size: 24px;
+    max-height: 55px;
+    min-width: 100px;
+}
+
+.sections-button {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: 100px;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 228, 236);
+    font-size: 24px;
+    min-width: 80px;
+}
+
+.sections-button:hover {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: 100px;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(173, 209, 214);
+    font-size: 24px;
+    min-width: 80px;
+}
+
+.sections-button:active {
+    border-top-left-radius: 27.5px;
+    border-bottom-left-radius: 27.5px;
+    border-top-right-radius: 27.5px;
+    border-bottom-right-radius: 27.5px;
+    border-left-color: rgba(185, 185, 185, 0);
+    border-right-color: rgba(185, 185, 185, 0);
+    border-top-color: rgba(185, 185, 185, 0);
+    border-bottom-color: rgba(185, 185, 185, 0);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -unity-font-definition: initial;
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    width: auto;
+    min-height: 100px;
+    -unity-text-align: middle-center;
+    text-overflow: clip;
+    -unity-font-style: normal;
+    background-color: rgb(154, 198, 204);
+    font-size: 24px;
+    min-width: 80px;
+}

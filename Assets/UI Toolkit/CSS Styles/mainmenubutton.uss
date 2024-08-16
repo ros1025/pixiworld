@@ -1,0 +1,113 @@
+.unity-button {
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    background-color: rgb(100, 142, 130);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    -unity-font-definition: initial;
+    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium');
+    height: 100px;
+    width: 100px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.unity-button:hover {
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    background-color: rgb(93, 125, 119);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    -unity-font-definition: initial;
+    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium');
+    height: 100px;
+    width: 100px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.unity-button:active {
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    background-color: rgb(83, 108, 104);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    -unity-font-definition: initial;
+    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium');
+    height: 100px;
+    width: 100px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+#Settings {
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-left-color: rgb(69, 166, 141);
+    border-right-color: rgb(69, 166, 141);
+    border-top-color: rgb(69, 166, 141);
+    border-bottom-color: rgb(69, 166, 141);
+    background-color: rgba(69, 166, 141, 0.98);
+}
+
+#Settings:hover {
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-left-color: rgb(69, 166, 141);
+    border-right-color: rgb(69, 166, 141);
+    border-top-color: rgb(69, 166, 141);
+    border-bottom-color: rgb(69, 166, 141);
+    background-color: rgba(64, 153, 130, 0.98);
+}
+
+#Settings:active {
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-left-color: rgb(69, 166, 141);
+    border-right-color: rgb(69, 166, 141);
+    border-top-color: rgb(69, 166, 141);
+    border-bottom-color: rgb(69, 166, 141);
+    background-color: rgba(59, 140, 119, 0.98);
+}

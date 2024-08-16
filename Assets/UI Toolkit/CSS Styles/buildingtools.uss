@@ -1,0 +1,75 @@
+.unity-button {
+    width: 80px;
+    height: 80px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#PlaceButton {
+    background-color: rgb(91, 176, 143);
+}
+
+#PlaceButton:hover {
+    background-color: rgb(82, 152, 125);
+}
+
+#CancelButton {
+    background-color: rgb(224, 84, 73);
+}
+
+#CancelButton:hover {
+    background-color: rgb(188, 74, 65);
+}
+
+#SellButton {
+    background-color: rgb(190, 169, 94);
+}
+
+#SellButton:hover {
+    background-color: rgb(161, 144, 82);
+}
+
+#InventoryButton {
+    background-color: rgb(99, 177, 200);
+}
+
+#InventoryButton:hover {
+    background-color: rgb(84, 146, 164);
+}
+
+.infotext {
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    background-color: rgb(189, 217, 213);
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium');
+    -unity-font-definition: initial;
+    font-size: 44px;
+    -unity-text-align: middle-left;
+    align-items: auto;
+    max-height: 80px;
+    min-width: 100px;
+}

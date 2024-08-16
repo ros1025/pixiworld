@@ -1,0 +1,35 @@
+fileFormatVersion: 2
+guid: 59feeb6e54cb02047a55f46d48ae321a
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - VAG Rounded Next
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 20cfe8ead58876847b8dd9c29ab72536, type: 3}
+  - {fileID: 12800000, guid: 66bdbfa94236c6049b78ccaf6d643221, type: 3}
+  - {fileID: 12800000, guid: 237b9e17e09ee4644bdb7092ac1211d2, type: 3}
+  - {fileID: 12800000, guid: 537f530ab0baf994abdd49c043e2c49d, type: 3}
+  - {fileID: 12800000, guid: 7256a7a49af1714459145245d86f6696, type: 3}
+  - {fileID: 12800000, guid: 114d78182aec8ad4d9c10eefc757a221, type: 3}
+  - {fileID: 12800000, guid: 035710a472c5c4d44b713810fa479674, type: 3}
+  - {fileID: 12800000, guid: 20408057961fb2a45a1011f9b9479f99, type: 3}
+  - {fileID: 12800000, guid: 9444a0c5a4bab9b4f9c069b072dca799, type: 3}
+  - {fileID: 12800000, guid: e107709d40fd0224e96f50b848288765, type: 3}
+  - {fileID: 12800000, guid: d3f3e40dfd320534089fe5e2a2a04f7c, type: 3}
+  - {fileID: 12800000, guid: 73c7a8701929a0d489f5ef519be3bafe, type: 3}
+  - {fileID: 12800000, guid: a3f1de285ae225d4d95c70fca4b5435a, type: 3}
+  - {fileID: 12800000, guid: 336259dc0798e444cbd801e7d3956926, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

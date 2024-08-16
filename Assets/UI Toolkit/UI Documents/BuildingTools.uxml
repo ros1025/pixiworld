@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/buildingtools.uss?fileID=7433441132597879392&amp;guid=beefb56ce72b7314f8b1db0a8959e025&amp;type=3#buildingtools" />
+    <ui:VisualElement focusable="true" style="background-color: rgba(0, 0, 0, 0); position: absolute; flex-direction: row; bottom: 0; margin-left: 5px; margin-bottom: 5px; width: 100%; flex-grow: 1;">
+        <ui:VisualElement name="Controls" style="flex-direction: row; flex-grow: 1; height: 90px; width: 100%; min-width: auto;">
+            <ui:Button display-tooltip-when-elided="true" name="PlaceButton" />
+            <ui:Button display-tooltip-when-elided="true" name="CancelButton" />
+            <ui:Button display-tooltip-when-elided="true" name="SellButton" />
+            <ui:Button display-tooltip-when-elided="true" name="InventoryButton" />
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="CostPrice" class="infotext" />
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="Size" class="infotext" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
