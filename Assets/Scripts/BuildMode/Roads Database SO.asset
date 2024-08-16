@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40758225a32ed444ab494757d83b48d, type: 3}
+  m_Name: Roads Database SO
+  m_EditorClassIdentifier: 
+  roadsData:
+  - <Name>k__BackingField: Dual Way Single Road
+    <ID>k__BackingField: 0
+    <Cost>k__BackingField: 10
+    <width>k__BackingField: 1
+    <TwoWay>k__BackingField: 1
+    <tex>k__BackingField: {fileID: 2800000, guid: 72f1ddc299ec9694d933713392331458, type: 3}

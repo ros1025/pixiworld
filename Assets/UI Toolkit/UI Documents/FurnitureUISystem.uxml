@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/button.uss?fileID=7433441132597879392&amp;guid=72f57eda9e9f7274bbe1ea038305b0c1&amp;type=3#button" />
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: auto; width: 100%; min-height: 420px; max-height: 420px; min-width: auto; bottom: 0; position: absolute;">
+        <ui:VisualElement name="TopBar" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; max-height: 70px; bottom: 340px; position: absolute;">
+            <ui:Button display-tooltip-when-elided="true" name="CancelButton" style="background-image: none; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Packages/com.unity.collab-proxy/Editor/PlasticSCM/Assets/Images/d_iconclosebutton@2x.png?fileID=2800000&amp;guid=0525793900d728a42936791a8a6de63b&amp;type=3#d_iconclosebutton@2x&quot;); height: 45px; width: 45px; left: 10px;" />
+            </ui:Button>
+            <ui:VisualElement name="categories" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: 70px; width: 1825px;">
+                <ui:ScrollView mode="Horizontal" touch-scroll-type="Elastic" style="flex-direction: row; height: 75px; width: 100%;">
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="BottomBar" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; height: 340px; max-height: 340px; position: absolute; bottom: 0; width: 100%; min-width: 100%;">
+            <ui:VisualElement name="sections" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); max-width: 90px; min-width: 90px; width: 90px;">
+                <ui:Button display-tooltip-when-elided="true" name="Furniture" class="sections-button" />
+                <ui:Button display-tooltip-when-elided="true" name="Building" class="sections-button" />
+                <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Inventory" class="sections-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="items" style="background-color: rgba(42, 69, 89, 0.4); border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; border-left-color: rgb(120, 152, 229); border-right-color: rgb(120, 152, 229); border-top-color: rgb(120, 152, 229); border-bottom-color: rgb(120, 152, 229); min-height: 340px; padding-bottom: 0; width: 100%;">
+                <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" nested-interaction-kind="ForwardScrolling" name="ScrollView" style="height: 100%; min-height: auto; min-width: auto; -unity-text-align: upper-left; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
+                    <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" />
+                    <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />
+                    <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />
+                    <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />
+                    <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

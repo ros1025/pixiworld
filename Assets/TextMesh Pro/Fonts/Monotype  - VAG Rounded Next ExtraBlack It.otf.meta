@@ -1,0 +1,25 @@
+fileFormatVersion: 2
+guid: 7256a7a49af1714459145245d86f6696
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - VAG Rounded Next
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 20cfe8ead58876847b8dd9c29ab72536, type: 3}
+  - {fileID: 12800000, guid: 114d78182aec8ad4d9c10eefc757a221, type: 3}
+  - {fileID: 12800000, guid: 20408057961fb2a45a1011f9b9479f99, type: 3}
+  - {fileID: 12800000, guid: e107709d40fd0224e96f50b848288765, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
