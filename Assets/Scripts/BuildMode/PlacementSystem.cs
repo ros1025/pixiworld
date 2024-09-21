@@ -106,7 +106,11 @@ public class PlacementSystem : MonoBehaviour
                                            objectPlacer,
                                            soundFeedback);
         buildToolsUI.Call();
+<<<<<<< HEAD
+        inputManager.ClearActions();
+=======
         inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -127,7 +131,11 @@ public class PlacementSystem : MonoBehaviour
                                             zonePlacer,
                                             soundFeedback);
         buildToolsUI.Call();
+<<<<<<< HEAD
+        inputManager.ClearActions();
+=======
         inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -148,7 +156,11 @@ public class PlacementSystem : MonoBehaviour
                                             roads,
                                             soundFeedback);
         buildToolsUI.Call();
+<<<<<<< HEAD
+        inputManager.ClearActions();
+=======
         inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -166,7 +178,11 @@ public class PlacementSystem : MonoBehaviour
                                             this,
                                             soundFeedback);
         buildToolsUI.Call();
+<<<<<<< HEAD
+        inputManager.ClearActions();
+=======
         inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -252,7 +268,11 @@ public class PlacementSystem : MonoBehaviour
                                        inputManager,
                                        soundFeedback);
             buildToolsUI.Call();
+<<<<<<< HEAD
+            inputManager.ClearActions();
+=======
             inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -273,7 +293,11 @@ public class PlacementSystem : MonoBehaviour
                            inputManager,
                            soundFeedback);
             buildToolsUI.Call();
+<<<<<<< HEAD
+            inputManager.ClearActions();
+=======
             inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -294,7 +318,11 @@ public class PlacementSystem : MonoBehaviour
                            roads,
                            soundFeedback);
             buildToolsUI.Call();
+<<<<<<< HEAD
+            inputManager.ClearActions();
+=======
             inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -314,7 +342,11 @@ public class PlacementSystem : MonoBehaviour
                 inputManager,
                 soundFeedback);
             buildToolsUI.Call();
+<<<<<<< HEAD
+            inputManager.ClearActions();
+=======
             inputManager.OnHold -= SelectObject;
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;

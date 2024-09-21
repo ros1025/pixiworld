@@ -52,7 +52,12 @@ public class SettingsController : MonoBehaviour
         List<string> PerformanceModes = new List<string> { "Performance", "Optimised", "Standard", "Battery" };
         MakeDropdownBar("graphics_performancemodes", "Performance Mode", settings.DetermineCurrentPerformanceMode(), PerformanceModes, settings.SetPerformanceMode);
 
+<<<<<<< HEAD
+        List<string> fpsModes = new List<string> { "24", "30", "60", "90", "120", "Unlimited" };
+        MakeDropdownBar("graphics_targetfps", "FPS Level", settings.DetermineTargetFPS(), fpsModes, settings.SetTargetFPS);
+=======
         MakeIntSliderBar("graphics_targetfps", "Target FPS", settings.DetermineTargetFPS(), 24, 166, " FPS", settings.SetTargetFPS);
+>>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     }
 
     void InvokeProgressSettings()
