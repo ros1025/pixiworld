@@ -1,10 +1,6 @@
 .top-bar-controls {
     -unity-font-definition: initial;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     font-size: 32px;
     height: 80px;
     max-height: none;
@@ -36,11 +32,7 @@
 
 .top-bar-controls:hover {
     -unity-font-definition: initial;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     font-size: 32px;
     height: 80px;
     max-height: none;
@@ -72,11 +64,7 @@
 
 .selected-bar-control {
     -unity-font-definition: initial;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     font-size: 32px;
     height: 80px;
     max-height: none;
@@ -114,17 +102,10 @@
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
-<<<<<<< HEAD
     border-top-left-radius: 47px;
     border-bottom-left-radius: 47px;
     border-top-right-radius: 47px;
     border-bottom-right-radius: 47px;
-=======
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     margin-bottom: 12px;
 }
 
@@ -135,11 +116,7 @@
     margin-top: 12px;
     margin-bottom: 12px;
     -unity-font-definition: initial;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     color: rgb(255, 255, 255);
     font-size: 28px;
     -unity-text-align: middle-left;
@@ -154,7 +131,6 @@
     margin-top: 0;
     margin-bottom: 0;
     -unity-font-definition: initial;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
     color: rgb(255, 255, 255);
     font-size: 28px;
@@ -163,16 +139,6 @@
     border-bottom-left-radius: 35px;
     border-top-right-radius: 35px;
     border-bottom-right-radius: 35px;
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
-    color: rgb(255, 255, 255);
-    font-size: 28px;
-    -unity-text-align: middle-left;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     width: auto;
     max-width: none;
     background-color: rgb(197, 197, 197);
@@ -182,22 +148,14 @@
 
 .unity-base-field__label {
     width: 40%;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     -unity-font-definition: initial;
     color: rgb(255, 255, 255);
     font-size: 32px;
 }
 
 .unity-base-popup-field__text {
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     -unity-font-definition: initial;
     color: rgb(51, 40, 67);
     font-size: 32px;
@@ -265,11 +223,7 @@
 .settings-options-button {
     width: 500px;
     height: 200px;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     -unity-font-definition: initial;
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;
@@ -296,11 +250,7 @@
 .settings-options-button:hover {
     width: 500px;
     height: 200px;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     -unity-font-definition: initial;
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;
@@ -327,11 +277,7 @@
 .settings-options-button:active {
     width: 500px;
     height: 200px;
-<<<<<<< HEAD
     -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular");
-=======
-    -unity-font: url('project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Regular.otf?fileID=12800000&guid=537f530ab0baf994abdd49c043e2c49d&type=3#Monotype  - VAG Rounded Next Regular');
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     -unity-font-definition: initial;
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;

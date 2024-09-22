@@ -22,7 +22,7 @@
     -unity-text-align: lower-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 228, 236);
+    background-color: rgb(255, 255, 255);
     font-size: 22px;
 }
 
@@ -50,7 +50,7 @@
     -unity-text-align: lower-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 209, 214);
+    background-color: rgb(202, 202, 202);
     font-size: 22px;
 }
 
@@ -78,7 +78,7 @@
     -unity-text-align: lower-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(154, 198, 204);
+    background-color: rgb(168, 168, 168);
     font-size: 22px;
 }
 
@@ -207,10 +207,11 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 228, 236);
+    background-color: rgb(81, 135, 162);
     font-size: 24px;
     max-height: 55px;
     min-width: 100px;
+    color: rgb(255, 255, 255);
 }
 
 .tools-button:hover {
@@ -237,10 +238,11 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 209, 214);
+    background-color: rgb(111, 146, 164);
     font-size: 24px;
     max-height: 55px;
     min-width: 100px;
+    color: rgb(255, 255, 255);
 }
 
 .tools-button:active {
@@ -267,17 +269,17 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(154, 198, 204);
+    background-color: rgb(76, 105, 119);
     font-size: 24px;
     max-height: 55px;
     min-width: 100px;
 }
 
 .sections-button {
-    border-top-left-radius: 27.5px;
-    border-bottom-left-radius: 27.5px;
-    border-top-right-radius: 27.5px;
-    border-bottom-right-radius: 27.5px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
     border-left-color: rgba(149, 149, 149, 0);
     border-right-color: rgba(149, 149, 149, 0);
     border-top-color: rgba(149, 149, 149, 0);
@@ -297,16 +299,16 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 228, 236);
+    background-color: rgb(81, 135, 162);
     font-size: 24px;
     min-width: 80px;
 }
 
 .sections-button:hover {
-    border-top-left-radius: 27.5px;
-    border-bottom-left-radius: 27.5px;
-    border-top-right-radius: 27.5px;
-    border-bottom-right-radius: 27.5px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
     border-left-color: rgba(185, 185, 185, 0);
     border-right-color: rgba(185, 185, 185, 0);
     border-top-color: rgba(185, 185, 185, 0);
@@ -326,16 +328,16 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(173, 209, 214);
+    background-color: rgb(111, 146, 164);
     font-size: 24px;
     min-width: 80px;
 }
 
 .sections-button:active {
-    border-top-left-radius: 27.5px;
-    border-bottom-left-radius: 27.5px;
-    border-top-right-radius: 27.5px;
-    border-bottom-right-radius: 27.5px;
+    border-top-left-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
     border-left-color: rgba(185, 185, 185, 0);
     border-right-color: rgba(185, 185, 185, 0);
     border-top-color: rgba(185, 185, 185, 0);
@@ -355,7 +357,7 @@
     -unity-text-align: middle-center;
     text-overflow: clip;
     -unity-font-style: normal;
-    background-color: rgb(154, 198, 204);
+    background-color: rgb(76, 105, 119);
     font-size: 24px;
     min-width: 80px;
 }

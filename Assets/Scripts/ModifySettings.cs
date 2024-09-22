@@ -66,7 +66,6 @@ public class ModifySettings : MonoBehaviour
         QualitySettings.SetQualityLevel(options.IndexOf(evt.newValue));
     }
 
-<<<<<<< HEAD
     public void SetTargetFPS(ChangeEvent<string> evt, List<string> options)
     {
         int i = options.IndexOf(evt.newValue);
@@ -89,22 +88,10 @@ public class ModifySettings : MonoBehaviour
         else if (i == 4)
         {
             Application.targetFrameRate = 120;
-=======
-    public void SetTargetFPS(ChangeEvent<int> evt, Label label)
-    {
-        if (evt.newValue <= 165)
-        {
-            Application.targetFrameRate = evt.newValue;
-            label.text = $"{evt.newValue} FPS";
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         }
         else
         {
             Application.targetFrameRate = -1;
-<<<<<<< HEAD
-=======
-            label.text = "Unlimited";
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         }
     }
 
@@ -118,30 +105,18 @@ public class ModifySettings : MonoBehaviour
             ctrl.CpuLevel = ctrl.MaxCpuPerformanceLevel;
             ctrl.GpuLevel = ctrl.MaxGpuPerformanceLevel;
         }
-<<<<<<< HEAD
         else if (i == 1)
         {
             ctrl.AutomaticPerformanceControl = true;
         }
         else if (i == 2)
-=======
-        if (i == 1)
-        {
-            ctrl.AutomaticPerformanceControl = true;
-        }
-        if (i == 2)
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         {
             ctrl.AutomaticPerformanceControl = false;
             Application.targetFrameRate = -1;
             ctrl.CpuLevel = Mathf.RoundToInt(ctrl.MaxCpuPerformanceLevel / 2);
             ctrl.GpuLevel = Mathf.RoundToInt(ctrl.MaxGpuPerformanceLevel / 2);
         }
-<<<<<<< HEAD
         else if (i == 3)
-=======
-        if (i == 3)
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         {
             ctrl.AutomaticPerformanceControl = false;
             Application.targetFrameRate = -1;
@@ -180,7 +155,6 @@ public class ModifySettings : MonoBehaviour
 
     public int DetermineTargetFPS()
     {
-<<<<<<< HEAD
         if (Application.targetFrameRate <= 24)
             return 0;
         else if (Application.targetFrameRate > 24 && Application.targetFrameRate <= 30)
@@ -193,12 +167,6 @@ public class ModifySettings : MonoBehaviour
             return 4;
         else
             return 5;
-=======
-        if (Application.targetFrameRate > 0)
-            return Application.targetFrameRate;
-        else
-            return 166;
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
     }
 
     public bool DetermineFPSSliderAvailability()

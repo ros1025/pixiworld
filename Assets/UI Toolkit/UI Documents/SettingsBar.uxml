@@ -1,13 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/mainmenubutton.uss?fileID=7433441132597879392&amp;guid=806125723630d7447a6dd7f8d33aea28&amp;type=3#mainmenubutton" />
     <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: auto; height: 100px; flex-direction: column; align-self: flex-end; justify-content: flex-start; max-height: 100px;">
-<<<<<<< HEAD
         <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Settings" style="align-self: flex-end; background-image: none; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255);">
             <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&quot;project://database/Assets/Sprites/Icons/settings.png?fileID=2800000&amp;guid=7b73e9049d0661b439606fff0e3046a6&amp;type=3#settings&quot;);" />
-=======
-        <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Settings" style="align-self: flex-end; background-image: none;">
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&apos;project://database/Assets/settings.png?fileID=2800000&amp;guid=7b73e9049d0661b439606fff0e3046a6&amp;type=3#settings&apos;);" />
->>>>>>> ef16a6effb940f44dabded59d2944f4ed867b362
         </ui:Button>
     </ui:VisualElement>
 </ui:UXML>
