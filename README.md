@@ -9,3 +9,5 @@ It is recommended to use GitHub Desktop to clone. Otherwise, on the git CMD, `gi
 
 ## How to Merge
 It is recommended to create a new branch and commit your changes onto the new branch. Use GitHub Desktop, or the appropriate commands for this if you are an advanced user.
+
+To ensure that you have the latest updates while developing the propgram, you should also fetch from main regularly.
