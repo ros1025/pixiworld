@@ -155,7 +155,7 @@ public class ModifySettings : MonoBehaviour
 
     public int DetermineTargetFPS()
     {
-        if (Application.targetFrameRate <= 24)
+        if (Application.targetFrameRate > 0 && Application.targetFrameRate <= 24)
             return 0;
         else if (Application.targetFrameRate > 24 && Application.targetFrameRate <= 30)
             return 1;

@@ -14,7 +14,6 @@ public class WallMapping : MonoBehaviour
     [SerializeField] private GameObject wallParent;
     [SerializeField] private GameObject floorParent;
     [SerializeField] private GameObject ceilParent;
-    [SerializeField] private GameObject gizmoPointer;
     [SerializeField] private SplineSampler m_SplineSampler;
     [SerializeField] private SplineContainer m_SplineContainer;
     [SerializeField] private Material defaultWallMaterial;
@@ -391,7 +390,7 @@ public class WallMapping : MonoBehaviour
                 trisS.AddRange(new List<int> { offset + 0, offset + 1, offset + 4, offset + 4, offset + 3, offset + 0 });
                 trisS.AddRange(new List<int> { offset + 0, offset + 3, offset + 4, offset + 4, offset + 1, offset + 0 });
                 trisA.Add(new List<int> { offset + 1, offset + 2, offset + 5, offset + 5, offset + 4, offset + 1, offset + 1, offset + 4, offset + 5, offset + 5, offset + 2, offset + 1 });
-                trisC.AddRange(new List<int> { offset + 1, offset + 2, offset + 5, offset + 5, offset + 4, offset + 1, offset + 1, offset + 4, offset + 5, offset + 5, offset + 2, offset + 1 });
+                //trisC.AddRange(new List<int> { offset + 1, offset + 2, offset + 5, offset + 5, offset + 4, offset + 1, offset + 1, offset + 4, offset + 5, offset + 5, offset + 2, offset + 1 });
 
                 float distanceA = Vector3.Distance(a, b) / 4f;
                 float distanceB = Vector3.Distance(b, c) / 4f;
@@ -411,7 +410,7 @@ public class WallMapping : MonoBehaviour
 
                 offset = j * 4;
                 trisA.Add(new List<int> { offset + 0, offset + 2, offset + 3, offset + 3, offset + 1, offset + 0 });
-                trisC.AddRange(new List<int> { offset + 0, offset + 2, offset + 3, offset + 3, offset + 1, offset + 0 });
+                //trisC.AddRange(new List<int> { offset + 0, offset + 2, offset + 3, offset + 3, offset + 1, offset + 0 });
 
                 float distanceA = Vector3.Distance(a, b);
                 uvs.AddRange(new List<Vector2> { new Vector2(uvOffset, 0), new Vector2(uvOffset + distanceA, 0),
@@ -422,6 +421,65 @@ public class WallMapping : MonoBehaviour
                 newMaterials[j + 1] = walls[j].renderer.materials[hand[j]];
             }
         }
+
+        List<Vector3> colVert = new();
+        Vector3 p1x = center + new Vector3(-0.05f, 0, -0.05f);
+        Vector3 p2x = center + new Vector3(-0.05f, 0, 0.05f);
+        Vector3 p3x = center + new Vector3(0.05f, 0, -0.05f);
+        Vector3 p4x = center + new Vector3(0.05f, 0, 0.05f);
+        Vector3 p5x = p1x + new Vector3(0, 2f, 0);
+        Vector3 p6x = p2x + new Vector3(0, 2f, 0);
+        Vector3 p7x = p3x + new Vector3(0, 2f, 0);
+        Vector3 p8x = p4x + new Vector3(0, 2f, 0);
+
+        //Debug.Log($"{p1} {p2} {p3} {p4}");
+
+        int t1 = 0;
+        int t2 = 2;
+        int t3 = 3;
+        int t4 = 3;
+        int t5 = 1;
+        int t6 = 0;
+
+        int t7 = 4;
+        int t8 = 6;
+        int t9 = 7;
+        int t10 = 7;
+        int t11 = 5;
+        int t12 = 4;
+
+        int t13 = 0;
+        int t14 = 2;
+        int t15 = 6;
+        int t16 = 6;
+        int t17 = 4;
+        int t18 = 0;
+
+        int t19 = 2;
+        int t20 = 3;
+        int t21 = 7;
+        int t22 = 7;
+        int t23 = 6;
+        int t24 = 2;
+
+        int t25 = 3;
+        int t26 = 1;
+        int t27 = 5;
+        int t28 = 5;
+        int t29 = 7;
+        int t30 = 3;
+
+        int t31 = 1;
+        int t32 = 0;
+        int t33 = 4;
+        int t34 = 4;
+        int t35 = 5;
+        int t36 = 1;
+
+        colVert.AddRange(new List<Vector3> { p1x, p2x, p3x, p4x, p5x, p6x, p7x, p8x });
+        trisC.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12,
+        t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24,
+        t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35, t36});
 
         renderer.sharedMaterials = newMaterials;
 
@@ -434,10 +492,10 @@ public class WallMapping : MonoBehaviour
         mesh.SetUVs(0, uvs);
         collider.gameObject.GetComponent<MeshFilter>().mesh = mesh;
 
-        col.SetVertices(vertices);
-        trisC.AddRange(trisS);
+        col.SetVertices(colVert);
+        //trisC.AddRange(trisS);
         col.SetTriangles(trisC, 0);
-        col.SetUVs(0, uvs);
+        //col.SetUVs(0, uvs);
         collider.sharedMesh = col;
     }
 
@@ -506,6 +564,29 @@ public class WallMapping : MonoBehaviour
                 maxY = rooms[i].points[pointIndex].z;
         }
 
+        List<List<Vector3>> wallPoints = new();
+        List<List<Vector3>> wallPoints2 = new();
+        for (int pointIndex = 0; pointIndex < rooms[i].points.Count; pointIndex++)
+        {
+            Wall thisWall = walls.Find(item => item.points.FindIndex(obj => Vector3.Distance(obj, rooms[i].points[(pointIndex + 1) % rooms[i].points.Count]) < 0.1f) != -1 && item.points.FindIndex(obj => Vector3.Distance(obj, rooms[i].points[pointIndex]) < 0.1f) != -1);
+            List<Vector3> localWallPoints = new();
+            List<Vector3> localWallPoints2 = new();
+
+            int resolution = thisWall.resolution;
+            float step = 1f / (float)resolution;
+            for (int j = 0; j <= resolution; j++)
+            {
+                float t = step * j;
+
+                Vector3 point = thisWall.wall.EvaluatePosition(t);
+                localWallPoints.Add(point);
+                localWallPoints2.Add(point + new Vector3(0, 2f, 0));
+            }
+
+            wallPoints.Add(localWallPoints);
+            wallPoints2.Add(localWallPoints2);
+        }
+
         List<List<Vector3>> pointsList = new();
         List<List<Vector3>> pointsList2 = new();
         List<Vector3> edgePoints = new();
@@ -531,7 +612,7 @@ public class WallMapping : MonoBehaviour
                     dirA *= -1;
                 }
 
-                if (Vector3.Angle(dirA, targetPoint - nearest) < 90 || Vector3.SqrMagnitude(targetPoint - nearest) < 0.01f)
+                if (Vector3.Angle(dirA, targetPoint - nearest) < 90 || Vector3.Distance(targetPoint, nearest) < 0.01f)
                 {
                     localPointsList.Add(targetPoint);
                     localPointsList2.Add(targetPoint + new Vector3(0, 2f, 0));
@@ -548,24 +629,26 @@ public class WallMapping : MonoBehaviour
                 {
                     if (localPointsList.FindIndex(item => item.z == y - 0.5f) != -1)
                     {
-                        edgePoints.Add(targetPoint + new Vector3(0, 2f, -0.5f));
+                        edgePoints.Add(targetPoint + new Vector3(0, 0f, -0.5f));
                         edgePoints2.Add(targetPoint + new Vector3(0, 2f, -0.5f));
                     }
                     if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y) != -1)
                     {
-                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 2f, 0));
+                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 0f, 0));
                         edgePoints2.Add(targetPoint + new Vector3(-0.5f, 2f, 0));
                     }
-                    if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y - 0.5f) != -1 && !edgePoints.Contains(targetPoint + new Vector3(-0.5f, 2f, -0.5f)))
+                    /*
+                    if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y - 0.5f) != -1 && !edgePoints.Contains(targetPoint + new Vector3(-0.5f, 0f, -0.5f)))
                     {
-                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 2f, -0.5f));
+                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 0f, -0.5f));
                         edgePoints2.Add(targetPoint + new Vector3(-0.5f, 2f, -0.5f));
                     }
-                    if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y + 0.5f) != -1 && !edgePoints.Contains(targetPoint + new Vector3(-0.5f, 2f, 0.5f)))
+                    if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y + 0.5f) != -1 && !edgePoints.Contains(targetPoint + new Vector3(-0.5f, 0f, 0.5f)))
                     {
-                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 2f, 0.5f));
+                        edgePoints.Add(targetPoint + new Vector3(-0.5f, 0f, 0.5f));
                         edgePoints2.Add(targetPoint + new Vector3(-0.5f, 2f, 0.5f));
                     }
+                    */
                 }
             }
 
@@ -574,9 +657,9 @@ public class WallMapping : MonoBehaviour
         }
 
 
-        BuildRoomPoints(rooms[i], 0, 0.02f, pointsList, angle, verts, tris, uvs, vertsB, trisB);
+        BuildRoomPoints(rooms[i], 0, 0.02f, pointsList, wallPoints, edgePoints, angle, verts, tris, uvs, vertsB, trisB);
 
-        BuildRoomPoints(rooms[i], 0, -0.02f, pointsList2, angle, verts2, tris2, uvs2, verts2B, tris2B);
+        BuildRoomPoints(rooms[i], 0, -0.02f, pointsList2, wallPoints2, edgePoints2, angle, verts2, tris2, uvs2, verts2B, tris2B);
 
         mesh.subMeshCount = 1;
         mesh.SetVertices(verts);
@@ -614,7 +697,7 @@ public class WallMapping : MonoBehaviour
         }
     }
 
-    private void BuildRoomPoints(Room room, int offset, float height, List<List<Vector3>> points, float angle, List<Vector3> verts, List<int> tris, List<Vector2> uvs, List<Vector3> vertsB, List<int> trisB)
+    private void BuildRoomPoints(Room room, int offset, float height, List<List<Vector3>> points, List<List<Vector3>> walls, List<Vector3> edges, float angle, List<Vector3> verts, List<int> tris, List<Vector2> uvs, List<Vector3> vertsB, List<int> trisB)
     {
         for (int i = 0; i < points.Count - 1; i++)
         {
@@ -624,10 +707,10 @@ public class WallMapping : MonoBehaviour
                 {
                     if (Vector3.Distance(points[i][j], points[i][j + 1]) < 0.51f)
                     {
-                        Vector3 p1 = transform.InverseTransformPoint(points[i][j]);
-                        Vector3 p2 = transform.InverseTransformPoint(points[i][j + 1]);
-                        Vector3 p3 = transform.InverseTransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f)]);
-                        Vector3 p4 = transform.InverseTransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f)]);
+                        Vector3 p1 = transform.TransformPoint(points[i][j]);
+                        Vector3 p2 = transform.TransformPoint(points[i][j + 1]);
+                        Vector3 p3 = transform.TransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f)]);
+                        Vector3 p4 = transform.TransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f)]);
                         Vector3 p5 = p1 + new Vector3(0, height, 0);
                         Vector3 p6 = p2 + new Vector3(0, height, 0);
                         Vector3 p7 = p3 + new Vector3(0, height, 0);
@@ -660,9 +743,183 @@ public class WallMapping : MonoBehaviour
                         offset += 8;
                     }
                 }
+
+                else if (points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f) == -1 && points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f) != -1)
+                {
+                    if (Vector3.Distance(points[i][j], points[i][j + 1]) < 0.51f)
+                    {
+                        Vector3 p1 = transform.TransformPoint(points[i][j]);
+                        Vector3 p2 = transform.TransformPoint(points[i][j + 1]);
+                        Vector3 p3 = transform.TransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f)]);
+                        Vector3 p5 = p1 + new Vector3(0, height, 0);
+                        Vector3 p6 = p2 + new Vector3(0, height, 0);
+                        Vector3 p7 = p3 + new Vector3(0, height, 0);
+
+                        int t1 = offset + 0;
+                        int t2 = offset + 1;
+                        int t3 = offset + 2;
+                        int t4 = offset + 3;
+                        int t5 = offset + 4;
+                        int t6 = offset + 5;
+
+                        verts.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                        trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+
+                        uvs.AddRange(new List<Vector2> { new Vector2(p1.x - points[0][0].x, p1.z - points[0][0].z), new Vector2(p2.x - points[0][0].x, p2.z - points[0][0].z),
+                        new Vector2(p3.x - points[0][0].x, p3.z - points[0][0].z), new Vector2(p5.x - points[0][0].x, p5.z - points[0][0].z),
+                        new Vector2(p6.x - points[0][0].x, p6.z - points[0][0].z), new Vector2(p7.x - points[0][0].x, p7.z - points[0][0].z)});
+
+                        offset += 6;
+                    }
+                }
+
+                else if (points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f) != -1 && points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f) == -1)
+                {
+                    if (Vector3.Distance(points[i][j], points[i][j + 1]) < 0.51f)
+                    {
+                        Vector3 p1 = transform.TransformPoint(points[i][j]);
+                        Vector3 p2 = transform.TransformPoint(points[i][j + 1]);
+                        Vector3 p3 = transform.TransformPoint(points[i + 1][points[i + 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f)]);
+                        Vector3 p5 = p1 + new Vector3(0, height, 0);
+                        Vector3 p6 = p2 + new Vector3(0, height, 0);
+                        Vector3 p7 = p3 + new Vector3(0, height, 0);
+
+                        int t1 = offset + 0;
+                        int t2 = offset + 1;
+                        int t3 = offset + 2;
+                        int t4 = offset + 3;
+                        int t5 = offset + 4;
+                        int t6 = offset + 5;
+
+                        verts.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                        trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+
+                        uvs.AddRange(new List<Vector2> { new Vector2(p1.x - points[0][0].x, p1.z - points[0][0].z), new Vector2(p2.x - points[0][0].x, p2.z - points[0][0].z),
+                        new Vector2(p3.x - points[0][0].x, p3.z - points[0][0].z), new Vector2(p5.x - points[0][0].x, p5.z - points[0][0].z),
+                        new Vector2(p6.x - points[0][0].x, p6.z - points[0][0].z), new Vector2(p7.x - points[0][0].x, p7.z - points[0][0].z)});
+
+                        offset += 6;
+                    }
+                }
             }
         }
-    }
+
+        for (int i = 1; i < points.Count; i++)
+        {
+            for (int j = 0; j < points[i].Count - 1; j++)
+            {
+                if (points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f) == -1 && points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f) != -1)
+                {
+                    if (Vector3.Distance(points[i][j], points[i][j + 1]) < 0.51f)
+                    {
+                        Vector3 p1 = transform.TransformPoint(points[i][j]);
+                        Vector3 p2 = transform.TransformPoint(points[i][j + 1]);
+                        Vector3 p3 = transform.TransformPoint(points[i - 1][points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f)]);
+                        Vector3 p5 = p1 + new Vector3(0, height, 0);
+                        Vector3 p6 = p2 + new Vector3(0, height, 0);
+                        Vector3 p7 = p3 + new Vector3(0, height, 0);
+
+                        int t1 = offset + 0;
+                        int t2 = offset + 1;
+                        int t3 = offset + 2;
+                        int t4 = offset + 3;
+                        int t5 = offset + 4;
+                        int t6 = offset + 5;
+
+                        verts.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                        trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+
+                        uvs.AddRange(new List<Vector2> { new Vector2(p1.x - points[0][0].x, p1.z - points[0][0].z), new Vector2(p2.x - points[0][0].x, p2.z - points[0][0].z),
+                        new Vector2(p3.x - points[0][0].x, p3.z - points[0][0].z), new Vector2(p5.x - points[0][0].x, p5.z - points[0][0].z),
+                        new Vector2(p6.x - points[0][0].x, p6.z - points[0][0].z), new Vector2(p7.x - points[0][0].x, p7.z - points[0][0].z)});
+
+                        offset += 6;
+                    }
+                }
+
+                else if (points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f) != -1 && points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j + 1].z) < 0.1f) == -1)
+                {
+                    if (Vector3.Distance(points[i][j], points[i][j + 1]) < 0.51f)
+                    {
+                        Vector3 p1 = transform.TransformPoint(points[i][j]);
+                        Vector3 p2 = transform.TransformPoint(points[i][j + 1]);
+                        Vector3 p3 = transform.TransformPoint(points[i - 1][points[i - 1].FindIndex(item => Mathf.Abs(item.z - points[i][j].z) < 0.1f)]);
+                        Vector3 p5 = p1 + new Vector3(0, height, 0);
+                        Vector3 p6 = p2 + new Vector3(0, height, 0);
+                        Vector3 p7 = p3 + new Vector3(0, height, 0);
+
+                        int t1 = offset + 0;
+                        int t2 = offset + 1;
+                        int t3 = offset + 2;
+                        int t4 = offset + 3;
+                        int t5 = offset + 4;
+                        int t6 = offset + 5;
+
+                        verts.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
+                        tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                        trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+
+                        uvs.AddRange(new List<Vector2> { new Vector2(p1.x - points[0][0].x, p1.z - points[0][0].z), new Vector2(p2.x - points[0][0].x, p2.z - points[0][0].z),
+                        new Vector2(p3.x - points[0][0].x, p3.z - points[0][0].z), new Vector2(p5.x - points[0][0].x, p5.z - points[0][0].z),
+                        new Vector2(p6.x - points[0][0].x, p6.z - points[0][0].z), new Vector2(p7.x - points[0][0].x, p7.z - points[0][0].z)});
+
+                        offset += 6;
+                    }
+                }
+            }
+        }
+
+        //DrawPoints(edges);
+        for (int i = 0; i < walls.Count; i++)
+        {
+            for (int j = 0; j < walls[i].Count - 1; j++)
+            {
+                Vector3 p1 = transform.TransformPoint(walls[i][j]);
+                Vector3 p2 = transform.TransformPoint(walls[i][j + 1]);
+                Vector3 p3 = transform.TransformPoint(DrawEdgePoint(edges, walls[i][j]));
+                Vector3 p4 = transform.TransformPoint(DrawEdgePoint(edges, walls[i][j + 1]));
+                Vector3 p5 = p1 + new Vector3(0, height, 0);
+                Vector3 p6 = p2 + new Vector3(0, height, 0);
+                Vector3 p7 = p3 + new Vector3(0, height, 0);
+                Vector3 p8 = p4 + new Vector3(0, height, 0);
+
+                //Debug.Log($"{p1} {p2} {p3} {p4}");
+
+                int t1 = offset + 0;
+                int t2 = offset + 2;
+                int t3 = offset + 3;
+                int t4 = offset + 3;
+                int t5 = offset + 1;
+                int t6 = offset + 0;
+
+                int t7 = offset + 4;
+                int t8 = offset + 6;
+                int t9 = offset + 7;
+                int t10 = offset + 7;
+                int t11 = offset + 5;
+                int t12 = offset + 4;
+
+                verts.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
+                vertsB.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
+                tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
+                trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
+
+                uvs.AddRange(new List<Vector2> { new Vector2(p1.x - points[0][0].x, p1.z - points[0][0].z), new Vector2(p2.x - points[0][0].x, p2.z - points[0][0].z),
+                new Vector2(p3.x - points[0][0].x, p3.z - points[0][0].z), new Vector2(p4.x - points[0][0].x, p4.z - points[0][0].z),
+                new Vector2(p5.x - points[0][0].x, p5.z - points[0][0].z), new Vector2(p6.x - points[0][0].x, p6.z - points[0][0].z),
+                new Vector2(p7.x - points[0][0].x, p7.z - points[0][0].z), new Vector2(p8.x - points[0][0].x, p8.z - points[0][0].z)});
+
+                offset += 8;
+            }
+        }
+     }
 
     private void FilterIntersections(Spline s, Spline r, float sT)
     {
@@ -698,6 +955,28 @@ public class WallMapping : MonoBehaviour
                 }
             }
         }
+    }
+
+    private Vector3 DrawEdgePoint(List<Vector3> list, Vector3 origin)
+    {
+        List<Vector3> possible = new();
+        possible.AddRange(list.FindAll(obj => Vector3.Distance(obj, origin) <= 0.5f));
+        Vector3 selected = new();
+        if (possible.Count > 0)
+        {
+             selected = possible[0];
+        }
+        else Debug.Log(origin);
+
+        for (int i = 1; i < possible.Count; i++)
+        {
+            if (Vector3.Distance(possible[i], origin) < Vector3.Distance(selected, origin))
+            {
+                selected = possible[i];
+            }
+        }
+
+        return selected;
     }
 
     private bool SplineInIntersection(Intersection i, Spline s, BezierKnot k)
@@ -1092,6 +1371,9 @@ public class WallMapping : MonoBehaviour
             }
         }
 
+        List<BezierKnot> possibleNextKnots = new();
+        List<Intersection.JunctionInfo> possibleNextJuncts = new();
+
         foreach (Intersection intersection in nextJunctions)
         {
             foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
@@ -1104,44 +1386,54 @@ public class WallMapping : MonoBehaviour
 
                     if (!knotList.Contains(nextKnot))
                     {
-                        List<BezierKnot> newKnotList = new();
-                        for (int i = 0; i < knotList.Count; i++)
-                        {
-                            newKnotList.Add(knotList[i]);
-                        }
-
-                        if (points.Contains(knot))
-                        {
-                            float angleA = Vector3.SignedAngle(nextKnot.Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
-                            float angleB = Vector3.SignedAngle(points[(points.IndexOf(knot)) % points.Count].Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
-
-                            if (angleA < 0 && angle > 0)
-                            {
-                                angleA += 360;
-                            }
-                            else if (angleA > 0 && angle < 0)
-                            {
-                                angle -= 360;
-                            }
-
-                            if (angleB < 0 && angle > 0)
-                            {
-                                angleA += 360;
-                            }
-                            else if (angleB > 0 && angle < 0)
-                            {
-                                angle -= 360;
-                            }
-
-                            if (angleA <= angleB)
-                            {
-                                items.Add(DetermineMinLength(junction.spline, nextKnot, target, angle, dir, points, newKnotList, distance + Vector3.Distance(nextKnot.Position, knot.Position)));
-                            }
-                        }
-                        else items.Add(DetermineMinLength(junction.spline, nextKnot, target, angle, dir, points, newKnotList, distance + Vector3.Distance(nextKnot.Position, knot.Position)));
+                        possibleNextKnots.Add(nextKnot);
+                        possibleNextJuncts.Add(junction);
                     }
                 }
             }
+        }
+
+        if (possibleNextKnots.Count > 0)
+        {
+            BezierKnot currentKnot = possibleNextKnots[0];
+            Intersection.JunctionInfo currentJunction = possibleNextJuncts[0];
+
+            for (int i = 1; i < possibleNextKnots.Count; i++)
+            {
+                float angleA = Vector3.SignedAngle(possibleNextKnots[i].Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
+                float angleB = Vector3.SignedAngle(currentKnot.Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
+
+                if (angleA < 0 && angle > 0)
+                {
+                    angleA += 360;
+                }
+                else if (angleA > 0 && angle < 0)
+                {
+                    angle -= 360;
+                }
+
+                if (angleB < 0 && angle > 0)
+                {
+                    angleA += 360;
+                }
+                else if (angleB > 0 && angle < 0)
+                {
+                    angle -= 360;
+                }
+
+                if (Mathf.Abs(angleA) <= Mathf.Abs(angleB))
+                {
+                    currentKnot = possibleNextKnots[i];
+                    currentJunction = possibleNextJuncts[i];
+                }
+            }
+
+            List<BezierKnot> newKnotList = new();
+            for (int i = 0; i < knotList.Count; i++)
+            {
+                newKnotList.Add(knotList[i]);
+            }
+            items.Add(DetermineMinLength(currentJunction.spline, currentKnot, target, angle, currentJunction.knotIndex == 0 ? 1 : 0, points, newKnotList, distance + Vector3.Distance(currentKnot.Position, knot.Position)));
         }
 
         if (items.Count == 0)
@@ -1267,7 +1559,7 @@ public class WallMapping : MonoBehaviour
 
             List<List<Spline>> wallsList = new();
             List<List<BezierKnot>> knotsList = new();
-            List<int> hitRemoveList = new();
+            List<Vector3> hitRemoveList = new();
             List<RaycastHit> hitList = new();
 
             //Uses a boxcast to determine intersection points
@@ -1305,6 +1597,7 @@ public class WallMapping : MonoBehaviour
                     {
                         Spline spline2 = new Spline();
                         List<Vector3> spline2Points = new();
+                        Debug.Log(intersections[j].collider.name);
 
                         Vector3 center = Vector3.zero;
                         foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
@@ -1386,15 +1679,7 @@ public class WallMapping : MonoBehaviour
                             }
                         }
 
-                        for (int k = 0; k < hitList.Count; k++)
-                        {
-                            Vector3 compA = new Vector3(hitList[k].point.x, 0, hitList[k].point.z);
-                            Vector3 compB = new Vector3(intersectingSplinePoint.x, 0, intersectingSplinePoint.z);
-                            if (Vector3.Distance(compA, compB) < 1f && !hitList[k].Equals(hit))
-                            {
-                                hitRemoveList.Add(k);
-                            }
-                        }
+                        hitRemoveList.Add(hit.point);
                     }
                 }
             }
@@ -1403,7 +1688,7 @@ public class WallMapping : MonoBehaviour
             {
                 for (int j = 0; j < walls.Count; j++)
                 {
-                    if (hit.collider == walls[j].collider && !hitRemoveList.Contains(hitList.IndexOf(hit)))
+                    if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
                     {
                         Spline spline2 = new Spline();
                         List<Vector3> spline2Points = new();
@@ -1563,7 +1848,7 @@ public class WallMapping : MonoBehaviour
 
         List<List<Spline>> wallsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<int> hitRemoveList = new();
+        List<Vector3> hitRemoveList = new();
         List<RaycastHit> hitList = new();
         List<Intersection> removeIntersectionList = new();
 
@@ -1729,15 +2014,7 @@ public class WallMapping : MonoBehaviour
                         }
                     }
 
-                    for (int k = 0; k < hitList.Count; k++)
-                    {
-                        Vector3 compA = new Vector3(hitList[k].point.x, 0, hitList[k].point.z);
-                        Vector3 compB = new Vector3(intersectingSplinePoint.x, 0, intersectingSplinePoint.z);
-                        if (Vector3.Distance(compA, compB) < 1f && !hitList[k].Equals(hit))
-                        {
-                            hitRemoveList.Add(k);
-                        }
-                    }
+                    hitRemoveList.Add(hit.point);
                 }
             }
         }
@@ -1746,7 +2023,7 @@ public class WallMapping : MonoBehaviour
         {
             for (int j = 0; j < walls.Count; j++)
             {
-                if (hit.collider == walls[j].collider && !hitRemoveList.Contains(hitList.IndexOf(hit)) && walls[j] != wall && !intersectList.Contains(wall.wall))
+                if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
                 {
                     Spline spline2 = new Spline();
                     List<Vector3> spline2Points = new();
@@ -1973,7 +2250,7 @@ public class WallMapping : MonoBehaviour
         collider.AddComponent<MeshCollider>();
         collider.AddComponent<MeshFilter>();
         collider.AddComponent<MeshRenderer>();
-        collider.layer = 6;
+        collider.layer = LayerMask.NameToLayer("Selector");
 
         intersections.Add(intersection);
         intersection.collider = collider.GetComponent<MeshCollider>();
@@ -1995,14 +2272,14 @@ public class WallMapping : MonoBehaviour
         collider.AddComponent<MeshCollider>();
         collider.AddComponent<MeshFilter>();
         collider.AddComponent<MeshRenderer>();
-        collider.layer = 6;
+        collider.layer = LayerMask.NameToLayer("Selector");
 
         GameObject ceilingCollider = new();
         ceilingCollider.name = $"Ceiling{rooms.Count}";
         ceilingCollider.transform.SetParent(ceilParent.transform);
         ceilingCollider.AddComponent<MeshFilter>();
         ceilingCollider.AddComponent<MeshRenderer>();
-        ceilingCollider.layer = 6;
+        ceilingCollider.layer = LayerMask.NameToLayer("Selector");
 
         Room newRoom = new Room(pointsList, knotList, collider.GetComponent<MeshCollider>(), collider.GetComponent<MeshRenderer>(), collider.GetComponent<MeshFilter>(), ceilingCollider.GetComponent<MeshFilter>(), ceilingCollider.GetComponent<MeshRenderer>(), defaultFloorMaterial);
         rooms.Add(newRoom);
@@ -2093,32 +2370,6 @@ public class WallMapping : MonoBehaviour
     {
         ceilParent.SetActive(toggle);
     }
-
-    private void DrawPoints(List<Vector3> points)
-    {
-        Color c = Random.ColorHSV();
-
-        for (int i = 0; i < points.Count; i++)
-        {
-            GameObject obj = Instantiate(gizmoPointer);
-            obj.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            obj.transform.position = points[i];
-            obj.GetComponent<Renderer>().material.color = c;
-        }
-    }
-
-
-    private void DrawPoints(Vector3 points)
-    {
-        Color c = Random.ColorHSV();
-
-        GameObject obj = Instantiate(gizmoPointer);
-        obj.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        obj.transform.position = points;
-        obj.GetComponent<Renderer>().material.color = c;
-    }
-
-
 }
 
 [System.Serializable]

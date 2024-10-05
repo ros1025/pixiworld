@@ -722,7 +722,7 @@ public class RoadMapping : MonoBehaviour
         List<RaycastHit> hitList = new();
         List<List<Spline>> roadsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<int> hitRemoveList = new();
+        List<Vector3> hitRemoveList = new();
         //detects overlap and creates an intersection automatically
         for (int i = 1; i < pointsRef.Count; i++)
         {
@@ -881,17 +881,13 @@ public class RoadMapping : MonoBehaviour
 
                     for (int k = 0; k < hitList.Count; k++)
                     {
-                        if ((hitList[k].point.x >= intersectingSplinePoint.x - (dir1.normalized.x * 3f) || hitList[k].point.x <= intersectingSplinePoint.x + (dir1.normalized.x * 3f) ||
-                            hitList[k].point.z >= intersectingSplinePoint.z - (dir1.normalized.z * 3f) || hitList[k].point.z <= intersectingSplinePoint.z + (dir1.normalized.z * 3f)) && !hitList[k].Equals(hit))
-                        {
-                            hitRemoveList.Add(k);
-                        }
+                        hitRemoveList.Add(hit.point);
                     }
                 }
             }
             for (int j = 0; j < roads.Count; j++)
             {
-                if (hit.collider == roads[j].collider && !hitRemoveList.Contains(hitList.IndexOf(hit)))
+                if (hit.collider == roads[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
                 {
                     Spline spline2 = new(); Spline spline3 = new();
                     Dictionary<Vector3, List<BezierKnot>> spline2Points = new(); Dictionary<Vector3, List<BezierKnot>> spline3Points = new();
@@ -1578,7 +1574,7 @@ public class RoadMapping : MonoBehaviour
         collider.name = $"Intersection{intersections.Count}";
         collider.transform.SetParent(this.transform);
         collider.AddComponent<MeshCollider>();
-        collider.layer = 6;
+        collider.layer = LayerMask.NameToLayer("Selector");
         AddJunction(intersection, collider.GetComponent<MeshCollider>());
     }
 
