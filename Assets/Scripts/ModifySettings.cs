@@ -66,17 +66,32 @@ public class ModifySettings : MonoBehaviour
         QualitySettings.SetQualityLevel(options.IndexOf(evt.newValue));
     }
 
-    public void SetTargetFPS(ChangeEvent<int> evt, Label label)
+    public void SetTargetFPS(ChangeEvent<string> evt, List<string> options)
     {
-        if (evt.newValue <= 165)
+        int i = options.IndexOf(evt.newValue);
+        if (i == 0)
         {
-            Application.targetFrameRate = evt.newValue;
-            label.text = $"{evt.newValue} FPS";
+            Application.targetFrameRate = 24;
+        }
+        else if (i == 1)
+        {
+            Application.targetFrameRate = 30;
+        }
+        else if (i == 2)
+        {
+            Application.targetFrameRate = 60;
+        }
+        else if (i == 3)
+        {
+            Application.targetFrameRate = 90;
+        }
+        else if (i == 4)
+        {
+            Application.targetFrameRate = 120;
         }
         else
         {
             Application.targetFrameRate = -1;
-            label.text = "Unlimited";
         }
     }
 
@@ -90,18 +105,18 @@ public class ModifySettings : MonoBehaviour
             ctrl.CpuLevel = ctrl.MaxCpuPerformanceLevel;
             ctrl.GpuLevel = ctrl.MaxGpuPerformanceLevel;
         }
-        if (i == 1)
+        else if (i == 1)
         {
             ctrl.AutomaticPerformanceControl = true;
         }
-        if (i == 2)
+        else if (i == 2)
         {
             ctrl.AutomaticPerformanceControl = false;
             Application.targetFrameRate = -1;
             ctrl.CpuLevel = Mathf.RoundToInt(ctrl.MaxCpuPerformanceLevel / 2);
             ctrl.GpuLevel = Mathf.RoundToInt(ctrl.MaxGpuPerformanceLevel / 2);
         }
-        if (i == 3)
+        else if (i == 3)
         {
             ctrl.AutomaticPerformanceControl = false;
             Application.targetFrameRate = -1;
@@ -140,10 +155,18 @@ public class ModifySettings : MonoBehaviour
 
     public int DetermineTargetFPS()
     {
-        if (Application.targetFrameRate > 0)
-            return Application.targetFrameRate;
+        if (Application.targetFrameRate > 0 && Application.targetFrameRate <= 24)
+            return 0;
+        else if (Application.targetFrameRate > 24 && Application.targetFrameRate <= 30)
+            return 1;
+        else if (Application.targetFrameRate > 30 && Application.targetFrameRate <= 60)
+            return 2;
+        else if (Application.targetFrameRate > 60 && Application.targetFrameRate <= 90)
+            return 3;
+        else if (Application.targetFrameRate > 90 && Application.targetFrameRate <= 120)
+            return 4;
         else
-            return 166;
+            return 5;
     }
 
     public bool DetermineFPSSliderAvailability()

@@ -24,4 +24,4 @@
 - [ ] Different Age Groups
 - [ ] Interactable Workplaces (releated to interactions)
 
-Please suggest any new features at [this email!](redoctobers1025@proton.me)!
+Please suggest any new features at [this email!](redoctobers.1025@proton.me)!

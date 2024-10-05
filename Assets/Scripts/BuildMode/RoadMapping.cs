@@ -122,12 +122,12 @@ public class RoadMapping : MonoBehaviour
 
                 currentVerts.AddRange(new List<Vector3> { p1, p2, p3, p4 });
                 currentVerts.AddRange(new List<Vector3> { p1 + new Vector3(0, 0.025f, 0), p2 + new Vector3(0, 0.025f, 0), p3 + new Vector3(0, 0.025f, 0), p4 + new Vector3(0, 0.025f, 0) });
-                currentTris.AddRange(new List<int> { t1 - (4 * calculateRes(currentSplineIndex)), t2 - (4 * calculateRes(currentSplineIndex)), t3 - (4 * calculateRes(currentSplineIndex)), t4 - (4 * calculateRes(currentSplineIndex)), t5 - (4 * calculateRes(currentSplineIndex)), t6 - (4 * calculateRes(currentSplineIndex)) });
-                contactTris.AddRange(new List<int> { t7 - (4 * calculateRes(currentSplineIndex)), t8 - (4 * calculateRes(currentSplineIndex)), t9 - (4 * calculateRes(currentSplineIndex)), t10 - (4 * calculateRes(currentSplineIndex)), t11 - (4 * calculateRes(currentSplineIndex)), t12 - (4 * calculateRes(currentSplineIndex)) });
-                contactTris.AddRange(new List<int> { t1 - (4 * calculateRes(currentSplineIndex)), t7 - (4 * calculateRes(currentSplineIndex)), t8 - (4 * calculateRes(currentSplineIndex)), t8 - (4 * calculateRes(currentSplineIndex)), t2 - (4 * calculateRes(currentSplineIndex)), t1 - (4 * calculateRes(currentSplineIndex)) });
-                contactTris.AddRange(new List<int> { t5 - (4 * calculateRes(currentSplineIndex)), t11 - (4 * calculateRes(currentSplineIndex)), t9 - (4 * calculateRes(currentSplineIndex)), t9 - (4 * calculateRes(currentSplineIndex)), t3 - (4 * calculateRes(currentSplineIndex)), t5 - (4 * calculateRes(currentSplineIndex)) });
-                contactTris.AddRange(new List<int> { t1 - (4 * calculateRes(currentSplineIndex)), t7 - (4 * calculateRes(currentSplineIndex)), t11 - (4 * calculateRes(currentSplineIndex)), t11 - (4 * calculateRes(currentSplineIndex)), t5 - (4 * calculateRes(currentSplineIndex)), t1 - (4 * calculateRes(currentSplineIndex)) });
-                contactTris.AddRange(new List<int> { t2 - (4 * calculateRes(currentSplineIndex)), t8 - (4 * calculateRes(currentSplineIndex)), t9 - (4 * calculateRes(currentSplineIndex)), t9 - (4 * calculateRes(currentSplineIndex)), t3 - (4 * calculateRes(currentSplineIndex)), t2 - (4 * calculateRes(currentSplineIndex)) });
+                currentTris.AddRange(new List<int> { t1 - (8 * calculateRes(currentSplineIndex)), t2 - (8 * calculateRes(currentSplineIndex)), t3 - (8 * calculateRes(currentSplineIndex)), t4 - (8 * calculateRes(currentSplineIndex)), t5 - (8 * calculateRes(currentSplineIndex)), t6 - (8 * calculateRes(currentSplineIndex)) });
+                contactTris.AddRange(new List<int> { t7 - (8 * calculateRes(currentSplineIndex)), t8 - (8 * calculateRes(currentSplineIndex)), t9 - (8 * calculateRes(currentSplineIndex)), t10 - (8 * calculateRes(currentSplineIndex)), t11 - (8 * calculateRes(currentSplineIndex)), t12 - (8 * calculateRes(currentSplineIndex)) });
+                contactTris.AddRange(new List<int> { t1 - (8 * calculateRes(currentSplineIndex)), t7 - (8 * calculateRes(currentSplineIndex)), t8 - (8 * calculateRes(currentSplineIndex)), t8 - (8 * calculateRes(currentSplineIndex)), t2 - (8 * calculateRes(currentSplineIndex)), t1 - (8 * calculateRes(currentSplineIndex)) });
+                contactTris.AddRange(new List<int> { t5 - (8 * calculateRes(currentSplineIndex)), t11 - (8 * calculateRes(currentSplineIndex)), t9 - (8 * calculateRes(currentSplineIndex)), t9 - (8 * calculateRes(currentSplineIndex)), t3 - (8 * calculateRes(currentSplineIndex)), t5 - (8 * calculateRes(currentSplineIndex)) });
+                contactTris.AddRange(new List<int> { t1 - (8 * calculateRes(currentSplineIndex)), t7 - (8 * calculateRes(currentSplineIndex)), t11 - (8 * calculateRes(currentSplineIndex)), t11 - (8 * calculateRes(currentSplineIndex)), t5 - (8 * calculateRes(currentSplineIndex)), t1 - (8 * calculateRes(currentSplineIndex)) });
+                contactTris.AddRange(new List<int> { t2 - (8 * calculateRes(currentSplineIndex)), t8 - (8 * calculateRes(currentSplineIndex)), t9 - (8 * calculateRes(currentSplineIndex)), t9 - (8 * calculateRes(currentSplineIndex)), t3 - (8 * calculateRes(currentSplineIndex)), t2 - (8 * calculateRes(currentSplineIndex)) });
                 tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
                 tris.AddRange(new List<int> { t7, t8, t9, t10, t11, t12 });
                 tris.AddRange(new List<int> { t1, t7, t8, t8, t2, t1 });
@@ -239,29 +239,36 @@ public class RoadMapping : MonoBehaviour
             for (int j = 1; j <= curvePoints.Count; j++)
             {
                 currentVerts.Add(center);
-                contactVerts.Add(center + (Vector3.up / 4));
+                currentVerts.Add(center + new Vector3(0, 0.025f, 0));
                 currentVerts.Add(curvePoints[j - 1]);
-                contactVerts.Add(curvePoints[j - 1] + (Vector3.up / 4));
+                currentVerts.Add(curvePoints[j - 1] + new Vector3(0, 0.025f, 0));
                 uvs.Add(new Vector2(center.z, center.x));
+                uvs.Add(new Vector2(center.z, center.x));
+                uvs.Add(new Vector2(curvePoints[j - 1].z, curvePoints[j - 1].x));
                 uvs.Add(new Vector2(curvePoints[j - 1].z, curvePoints[j - 1].x));
                 if (j == curvePoints.Count)
                 {
                     currentVerts.Add(curvePoints[0]);
-                    contactVerts.Add(curvePoints[0] + (Vector3.up / 4));
+                    currentVerts.Add(curvePoints[0] + new Vector3(0, 0.025f, 0));
+                    uvs.Add(new Vector2(curvePoints[0].z, curvePoints[0].x));
                     uvs.Add(new Vector2(curvePoints[0].z, curvePoints[0].x));
                 }
                 else
                 {
                     currentVerts.Add(curvePoints[j]);
-                    contactVerts.Add(curvePoints[j] + (Vector3.up / 4));
+                    currentVerts.Add(curvePoints[j] + new Vector3(0, 0.025f, 0));
+                    uvs.Add(new Vector2(curvePoints[j].z, curvePoints[j].x));
                     uvs.Add(new Vector2(curvePoints[j].z, curvePoints[j].x));
                 }
 
-                trisB.Add(pointsOffset + ((j - 1) * 3) + 0); trisB.Add(pointsOffset + ((j - 1) * 3) + 1); trisB.Add(pointsOffset + ((j - 1) * 3) + 2);
-                contactTris.Add(((j - 1) * 3) + 0); contactTris.Add(((j - 1) * 3) + 1); contactTris.Add(((j - 1) * 3) + 2);
-                contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 0); contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 1); contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 2);
-                contactTris.Add(((j - 1) * 3) + 0); contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 0); contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 2);
-                contactTris.Add(((j - 1 + curvePoints.Count) * 3) + 2); contactTris.Add(((j - 1) * 3) + 2); contactTris.Add(((j - 1) * 3) + 0);
+                trisB.Add(pointsOffset + ((j - 1) * 6) + 0); trisB.Add(pointsOffset + ((j - 1) * 6) + 2); trisB.Add(pointsOffset + ((j - 1) * 6) + 4);
+                trisB.Add(pointsOffset + ((j - 1) * 6) + 1); trisB.Add(pointsOffset + ((j - 1) * 6) + 3); trisB.Add(pointsOffset + ((j - 1) * 6) + 5);
+                trisB.Add(pointsOffset + ((j - 1) * 6) + 2); trisB.Add(pointsOffset + ((j - 1) * 6) + 3); trisB.Add(pointsOffset + ((j - 1) * 6) + 5);
+                trisB.Add(pointsOffset + ((j - 1) * 6) + 5); trisB.Add(pointsOffset + ((j - 1) * 6) + 4); trisB.Add(pointsOffset + ((j - 1) * 6) + 2);
+                contactTris.Add(((j - 1) * 6) + 0); contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 4);
+                contactTris.Add(((j - 1) * 6) + 1); contactTris.Add(((j - 1) * 6) + 3); contactTris.Add(((j - 1) * 6) + 5);
+                contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 3); contactTris.Add(((j - 1) * 6) + 5);
+                contactTris.Add(((j - 1) * 6) + 5); contactTris.Add(((j - 1) * 6) + 4); contactTris.Add(((j - 1) * 6) + 2);
             }
 
             verts.AddRange(currentVerts);
@@ -715,7 +722,7 @@ public class RoadMapping : MonoBehaviour
         List<RaycastHit> hitList = new();
         List<List<Spline>> roadsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<int> hitRemoveList = new();
+        List<Vector3> hitRemoveList = new();
         //detects overlap and creates an intersection automatically
         for (int i = 1; i < pointsRef.Count; i++)
         {
@@ -874,17 +881,13 @@ public class RoadMapping : MonoBehaviour
 
                     for (int k = 0; k < hitList.Count; k++)
                     {
-                        if ((hitList[k].point.x >= intersectingSplinePoint.x - (dir1.normalized.x * 3f) || hitList[k].point.x <= intersectingSplinePoint.x + (dir1.normalized.x * 3f) ||
-                            hitList[k].point.z >= intersectingSplinePoint.z - (dir1.normalized.z * 3f) || hitList[k].point.z <= intersectingSplinePoint.z + (dir1.normalized.z * 3f)) && !hitList[k].Equals(hit))
-                        {
-                            hitRemoveList.Add(k);
-                        }
+                        hitRemoveList.Add(hit.point);
                     }
                 }
             }
             for (int j = 0; j < roads.Count; j++)
             {
-                if (hit.collider == roads[j].collider && !hitRemoveList.Contains(hitList.IndexOf(hit)))
+                if (hit.collider == roads[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
                 {
                     Spline spline2 = new(); Spline spline3 = new();
                     Dictionary<Vector3, List<BezierKnot>> spline2Points = new(); Dictionary<Vector3, List<BezierKnot>> spline3Points = new();
@@ -1571,7 +1574,7 @@ public class RoadMapping : MonoBehaviour
         collider.name = $"Intersection{intersections.Count}";
         collider.transform.SetParent(this.transform);
         collider.AddComponent<MeshCollider>();
-        collider.layer = 6;
+        collider.layer = LayerMask.NameToLayer("Selector");
         AddJunction(intersection, collider.GetComponent<MeshCollider>());
     }
 

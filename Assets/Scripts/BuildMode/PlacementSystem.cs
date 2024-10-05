@@ -106,7 +106,7 @@ public class PlacementSystem : MonoBehaviour
                                            objectPlacer,
                                            soundFeedback);
         buildToolsUI.Call();
-        inputManager.OnHold -= SelectObject;
+        inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -127,7 +127,7 @@ public class PlacementSystem : MonoBehaviour
                                             zonePlacer,
                                             soundFeedback);
         buildToolsUI.Call();
-        inputManager.OnHold -= SelectObject;
+        inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -148,7 +148,7 @@ public class PlacementSystem : MonoBehaviour
                                             roads,
                                             soundFeedback);
         buildToolsUI.Call();
-        inputManager.OnHold -= SelectObject;
+        inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -166,7 +166,7 @@ public class PlacementSystem : MonoBehaviour
                                             this,
                                             soundFeedback);
         buildToolsUI.Call();
-        inputManager.OnHold -= SelectObject;
+        inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
         inputManager.OnExit += StopPlacement;
@@ -252,7 +252,7 @@ public class PlacementSystem : MonoBehaviour
                                        inputManager,
                                        soundFeedback);
             buildToolsUI.Call();
-            inputManager.OnHold -= SelectObject;
+            inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -273,7 +273,7 @@ public class PlacementSystem : MonoBehaviour
                            inputManager,
                            soundFeedback);
             buildToolsUI.Call();
-            inputManager.OnHold -= SelectObject;
+            inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -294,7 +294,7 @@ public class PlacementSystem : MonoBehaviour
                            roads,
                            soundFeedback);
             buildToolsUI.Call();
-            inputManager.OnHold -= SelectObject;
+            inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
@@ -314,7 +314,7 @@ public class PlacementSystem : MonoBehaviour
                 inputManager,
                 soundFeedback);
             buildToolsUI.Call();
-            inputManager.OnHold -= SelectObject;
+            inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
