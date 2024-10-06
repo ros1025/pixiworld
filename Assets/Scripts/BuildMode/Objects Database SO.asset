@@ -18,10 +18,10 @@ MonoBehaviour:
     <Cost>k__BackingField: 100
     <Size>k__BackingField: {x: 6, y: 6}
     <Prefab>k__BackingField: {fileID: 2738747756972398897, guid: 71aec4fd7655960429a4ed4beea6db66, type: 3}
-    <ObjectTypes>k__BackingField: 15
+    <objectTypeId>k__BackingField: 150000001f270000
   - <Name>k__BackingField: Table
     <ID>k__BackingField: 1
     <Cost>k__BackingField: 60
     <Size>k__BackingField: {x: 1, y: 2}
     <Prefab>k__BackingField: {fileID: 5118323665441042967, guid: 3a516774f6880b646a9599671f71c02d, type: 3}
-    <ObjectTypes>k__BackingField: 1
+    <objectTypeId>k__BackingField: 0000000011270000

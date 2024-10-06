@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ObjectTypes { Living_Room, Dining_Room, Bedroom, Bathroom, Kitchen, Baby, Toddler, Children, Preteen, Teen, Electronics, Lifestyle, Decorations, Lighting, Pool_Decorations, Vegetation, Outdoor_Decorations }
+//public enum ObjectTypes { Living_Room, Dining_Room, Bedroom, Bathroom, Kitchen, Baby, Toddler, Children, Preteen, Teen, Electronics, Lifestyle, Decorations, Lighting, Pool_Decorations, Vegetation, Outdoor_Decorations }
 
-[CreateAssetMenu]
+[CreateAssetMenu(fileName = "ObjectsDatabaseSO", menuName = "Scriptable Objects/ObjectsDatabaseSO")]
 public class ObjectsDatabaseSO : ScriptableObject
 {
     public List<ObjectData> objectsData;
@@ -25,5 +25,5 @@ public class ObjectData
     [field: SerializeField]
     public GameObject Prefab { get; private set; }
     [field: SerializeField]
-    public ObjectTypes ObjectTypes { get; private set; }
+    public List<int> objectTypeId { get; private set; }
 }

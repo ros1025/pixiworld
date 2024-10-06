@@ -2685,7 +2685,6 @@ MonoBehaviour:
   wallParent: {fileID: 1954349493}
   floorParent: {fileID: 669154116}
   ceilParent: {fileID: 735313780}
-  gizmoPointer: {fileID: 7813196849824801433, guid: 93c2238499d80df48bc81d6944f78676, type: 3}
   m_SplineSampler: {fileID: 1954349495}
   m_SplineContainer: {fileID: 1954349496}
   defaultWallMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
@@ -2764,6 +2763,8 @@ MonoBehaviour:
   objectsData: {fileID: 11400000, guid: d98d509234850e743ab4503daa16f2e6, type: 2}
   zoneData: {fileID: 11400000, guid: 959bae3319981bd4cbbad4d0592ba15a, type: 2}
   roadsData: {fileID: 11400000, guid: d824a957b7b865f4a9274b0214ba6644, type: 2}
+  objectCategories: {fileID: 11400000, guid: 535a39c3c6a308f41a2420ff98c4065a, type: 2}
+  objectMasterCategories: {fileID: 11400000, guid: 29800e4bf01fada43b87d07f8cab0f77, type: 2}
 --- !u!1 &1947106175
 GameObject:
   m_ObjectHideFlags: 0

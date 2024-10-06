@@ -18,6 +18,10 @@ public class BuildModeMenu : MonoBehaviour
     private ZonesDatabaseSO zoneData;
     [SerializeField]
     private RoadsDatabaseSO roadsData;
+    [SerializeField]
+    private ObjectCategoriesSO objectCategories;
+    [SerializeField]
+    private ObjectCategoriesSO objectMasterCategories;
 
     VisualElement root; VisualElement top; VisualElement bottom;
     Button cancelButton; Button furniture; Button building; Button inventory;
@@ -55,12 +59,12 @@ public class BuildModeMenu : MonoBehaviour
     {
         categories.Clear();
         items.Clear();
-        foreach (ObjectTypes type in Enum.GetValues(typeof(ObjectTypes)))
+        foreach (ObjectCategory type in objectMasterCategories.categories)
         {
             AddCategory(type);
         }
 
-        ShowCategories(ObjectTypes.Living_Room);
+        ShowCategories(objectMasterCategories.categories[0].id);
     }
 
     private void SetBuilding()
@@ -89,16 +93,15 @@ public class BuildModeMenu : MonoBehaviour
         mainController.SetMainMenu();
     }
 
-    private void AddCategory(ObjectTypes type)
+    private void AddCategory(ObjectCategory type)
     {
-        string[] words = type.ToString().Split('_');
-        string label = String.Join(" ", words);
+        string label = type.Name;
         Button button = new Button();
         button.name = type.ToString();
         button.text = label;
         button.AddToClassList("tools-button");
         categories.Add(button);
-        button.RegisterCallback<ClickEvent, ObjectTypes>(ShowCategoriesOnClick, type);
+        button.RegisterCallback<ClickEvent, int>(ShowCategoriesOnClick, type.id);
     }
 
     private void AddCategory(string name, string label, EventCallback<ClickEvent> func)
@@ -165,15 +168,15 @@ public class BuildModeMenu : MonoBehaviour
         button.RegisterCallback<ClickEvent>(PlaceWall);
     }
 
-    private void ShowCategoriesOnClick(ClickEvent evt, ObjectTypes type)
+    private void ShowCategoriesOnClick(ClickEvent evt, int type)
     {
         ShowCategories(type);
     }
 
-    private void ShowCategories(ObjectTypes type)
+    private void ShowCategories(int type)
     {
         items.Clear();
-        List<ObjectData> itemsList = objectsData.objectsData.FindAll(data => data.ObjectTypes == type);
+        List<ObjectData> itemsList = objectsData.objectsData.FindAll(data => data.objectTypeId.Contains(type));
         foreach (ObjectData item in itemsList)
         {
             Button button = new Button();

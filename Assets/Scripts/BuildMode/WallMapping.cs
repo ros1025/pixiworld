@@ -1602,7 +1602,7 @@ public class WallMapping : MonoBehaviour
                         Vector3 center = Vector3.zero;
                         foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
                         {
-                            center += (Vector3)junction.knot.Position;
+                            center += ((Vector3)junction.knot.Position);
                         }
 
                         center /= intersections[j].junctions.Count;
@@ -1611,11 +1611,12 @@ public class WallMapping : MonoBehaviour
                         Unity.Mathematics.float3 intersectingSplinePointf3;
                         SplineUtility.GetNearestPoint(spline, center, out intersectingSplinePointf3, out float t1, (int)(spline.GetLength() * 2));
                         Vector3 intersectingSplinePoint = intersectingSplinePointf3;
+                        Debug.Log(intersectingSplinePoint);
 
                         if (Vector3.Distance(intersectingSplinePoint, transform.InverseTransformPoint(p1)) < 0.1f)
-                            intersectingSplinePoint = p1;
+                            intersectingSplinePoint = transform.InverseTransformPoint(p1);
                         else if (Vector3.Distance(intersectingSplinePoint, transform.InverseTransformPoint(p2)) < 0.1f)
-                            intersectingSplinePoint = p2;
+                            intersectingSplinePoint = transform.InverseTransformPoint(p2);
 
                         //determine the direction to move the splines in
                         Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
@@ -1679,7 +1680,7 @@ public class WallMapping : MonoBehaviour
                             }
                         }
 
-                        hitRemoveList.Add(hit.point);
+                        hitRemoveList.Add(transform.TransformPoint(intersectingSplinePoint));
                     }
                 }
             }
@@ -2014,7 +2015,7 @@ public class WallMapping : MonoBehaviour
                         }
                     }
 
-                    hitRemoveList.Add(hit.point);
+                    hitRemoveList.Add(transform.TransformPoint(intersectingSplinePoint));
                 }
             }
         }
