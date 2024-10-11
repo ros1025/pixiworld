@@ -16,9 +16,9 @@ public class SelectionState : IBuildingState
     private Vector3 displayPosition;
     private int rotation; private int originalRotation;
     bool edited;
-    private Vector3Int originalPosition;
+    private Vector3 originalPosition;
 
-    public SelectionState(Vector3Int gridPosition,
+    public SelectionState(Vector3 gridPosition,
                           Grid grid,
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
@@ -36,7 +36,7 @@ public class SelectionState : IBuildingState
         this.soundFeedback = soundFeedback;
 
         soundFeedback.PlaySound(SoundType.Click);
-        selectedObject = objectPlacer.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
+        selectedObject = objectPlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
         edited = false;
@@ -46,7 +46,7 @@ public class SelectionState : IBuildingState
         rotation = originalRotation;
         placementSystem.SetRotation(originalRotation);
         previewSystem.StartMovingObjectPreview(
-            grid.CellToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
+            grid.LocalToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
             database.objectsData[gameObjectIndex].Size
@@ -60,12 +60,12 @@ public class SelectionState : IBuildingState
         if (edited == false)
         {
             Renderer[] renderers = database.objectsData[gameObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
-            displayPosition = grid.CellToWorld(originalPosition);
+            displayPosition = grid.LocalToWorld(originalPosition);
             objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, originalRotation, renderers);
         }
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -73,7 +73,7 @@ public class SelectionState : IBuildingState
         this.rotation = rotation;
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -85,28 +85,28 @@ public class SelectionState : IBuildingState
             return;
         }
         soundFeedback.PlaySound(SoundType.Place);
-        displayPosition = grid.CellToWorld(gridPosition);
+        displayPosition = grid.LocalToWorld(gridPosition);
         Renderer[] renderers = database.objectsData[gameObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
 
         objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, rotation, renderers);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), true, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         //GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ?
         //    floorData :
         //    furnitureData;
         bool validity = false;
 
-        if (objectPlacer.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
+        if (objectPlacer.CanMoveObjectAt(selectedObject, previewSystem.previewSelector))
         {
-            if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), database.objectsData[selectedObjectIndex].Size, rotation))
+            if (placementSystem.CanMoveOnArea(selectedObject))
             {
                 validity = true;
             }
@@ -114,9 +114,9 @@ public class SelectionState : IBuildingState
 
         return validity;
     }
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), validity, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
     }
 }

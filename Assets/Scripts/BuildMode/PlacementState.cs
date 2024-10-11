@@ -14,7 +14,7 @@ public class PlacementState : IBuildingState
     private Vector3 displayPosition;
     private int rotation;
 
-    public PlacementState(Vector3Int gridPosition,
+    public PlacementState(Vector3 gridPosition,
                           int iD,
                           Grid grid,
                           PreviewSystem previewSystem,
@@ -49,7 +49,7 @@ public class PlacementState : IBuildingState
         previewSystem.StopShowingPreview();
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -57,7 +57,7 @@ public class PlacementState : IBuildingState
         this.rotation = rotation;
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -69,15 +69,15 @@ public class PlacementState : IBuildingState
             return;
         }
         soundFeedback.PlaySound(SoundType.Place);
-        displayPosition = grid.CellToWorld(gridPosition);
+        displayPosition = grid.LocalToWorld(gridPosition);
 
         objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, gridPosition,
             displayPosition, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].ID, rotation);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), false, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), false, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         //GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ?
         //    floorData :
@@ -87,7 +87,7 @@ public class PlacementState : IBuildingState
 
         if (objectPlacer.CanPlaceObjectAt(previewSystem.previewSelector))
         {
-            if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), database.objectsData[selectedObjectIndex].Size, rotation))
+            if (placementSystem.CanPlaceOnArea(grid.LocalToWorld(gridPosition), database.objectsData[selectedObjectIndex].Size, rotation))
             {
                 validity = true;
             }
@@ -96,10 +96,10 @@ public class PlacementState : IBuildingState
         return validity;
     }
 
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
     }
 }

@@ -21,7 +21,7 @@ public class ZonePlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceZones(Vector3 position, Vector3Int gridPos, int ID, Vector2Int size, float yOffset, int rotation)
+    public void PlaceZones(Vector3 position, Vector3 gridPos, int ID, Vector2Int size, float yOffset, int rotation)
     {
         GameObject zoneObject = Instantiate(zoneIndicator);
         zoneObject.transform.position = position;
@@ -40,7 +40,7 @@ public class ZonePlacer : MonoBehaviour
         zoneObject.transform.SetParent(this.transform);
     }
 
-    public void MoveZoneAt(GameObject prefab, Vector3Int gridPos, int ID, Vector3 position, Vector2Int size, int rotation)
+    public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, int rotation)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -96,7 +96,7 @@ public class ZonePlacer : MonoBehaviour
         bool ans = true;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
         previewSelector.name = "Intersector";
-        previewSelector.transform.localScale = new Vector3Int(size.x, size.y, size.y);
+        previewSelector.transform.localScale = new Vector3(size.x, size.y, size.y);
 
         if (zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true) != -1)
             ans = false;
@@ -118,11 +118,11 @@ public class ZonePlacer : MonoBehaviour
         return true;
     }
 
-    public bool CanMoveObjectAt(Vector3 originalPos, GameObject previewSelector)
+    public bool CanMoveObjectAt(GameObject selectedObject, GameObject previewSelector)
     {
         int index = zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true);
 
-        if (index != -1 && zoneData[index].occupiedPosition != originalPos)
+        if (index != -1 && zoneData[index].prefab != selectedObject)
             return false;
         return true;
     }
@@ -131,7 +131,7 @@ public class ZonePlacer : MonoBehaviour
     {
         GameObject m_Object = null;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
-        previewSelector.transform.localScale = new Vector3Int(size.x, size.y, size.y);
+        previewSelector.transform.localScale = new Vector3(size.x, size.y, size.y);
 
         int index = zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true);
         if (index != -1)
@@ -157,11 +157,11 @@ public class ZonePlacer : MonoBehaviour
         return zoneData[index].ID;
     }
 
-    internal Vector3Int GetObjectCoordinate(GameObject prefab)
+    internal Vector3 GetObjectCoordinate(GameObject prefab)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
-            return new Vector3Int(0, 0, 0);
+            return new Vector3(0, 0, 0);
         return zoneData[index].occupiedPosition;
     }
 
@@ -186,7 +186,7 @@ public class ZonePlacer : MonoBehaviour
 public class ZoneSaveData : PlacementData
 {
     public List<LevelData> levels { get; private set; }
-    public ZoneSaveData(GameObject prefab, Vector3Int occupiedPosition, int rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, int rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
     {
         this.levels = levels;
     }

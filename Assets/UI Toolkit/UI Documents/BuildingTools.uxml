@@ -8,6 +8,8 @@
             <ui:Button display-tooltip-when-elided="true" name="InventoryButton" />
             <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="CostPrice" class="infotext" />
             <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="Size" class="infotext" />
+            <ui:Button name="GridSnap" class="general-button" />
+            <ui:Button name="CustomTexture" class="general-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

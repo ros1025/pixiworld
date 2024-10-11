@@ -15,13 +15,13 @@ public class ZoneSelectionState : IBuildingState
     SoundFeedback soundFeedback;
     private Vector3 displayPosition;
     private Vector2Int size;
-    private Vector3Int pos;
+    private Vector3 pos;
     private int rotation; private int originalRotation;
     bool edited;
-    private Vector3Int originalPosition;
+    private Vector3 originalPosition;
     private Vector2Int originalSize;
 
-    public ZoneSelectionState(Vector3Int gridPosition,
+    public ZoneSelectionState(Vector3 gridPosition,
                           Grid grid,
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
@@ -39,7 +39,7 @@ public class ZoneSelectionState : IBuildingState
         this.soundFeedback = soundFeedback;
 
         soundFeedback.PlaySound(SoundType.Click);
-        selectedObject = zonePlacer.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
+        selectedObject = zonePlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !zonePlacer.HasKey(selectedObject))
             return;
         edited = false;
@@ -52,7 +52,7 @@ public class ZoneSelectionState : IBuildingState
         rotation = originalRotation;
         placementSystem.SetRotation(rotation);
         previewSystem.StartMovingZones(
-            grid.CellToWorld(pos),
+            grid.LocalToWorld(pos),
             rotation,
             selectedObject,
             size
@@ -65,7 +65,7 @@ public class ZoneSelectionState : IBuildingState
         previewSystem.StopMovingObject();
         if (edited == false)
         {
-            displayPosition = grid.CellToWorld(originalPosition);
+            displayPosition = grid.LocalToWorld(originalPosition);
             zonePlacer.MoveZoneAt(selectedObject, pos, database.zonesData[gameObjectIndex].ID, displayPosition, size, rotation);
         }
         else
@@ -74,13 +74,13 @@ public class ZoneSelectionState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         if (previewSystem.expand == true)
         {
-            previewSystem.UpdateSize(grid.CellToWorld(gridPosition));
+            previewSystem.UpdateSize(grid.LocalToWorld(gridPosition));
             size = previewSystem.previewSize;
-            pos = grid.WorldToCell(previewSystem.previewPos);
+            pos = grid.WorldToLocal(previewSystem.previewPos);
             UpdateState(pos, rotation);
         }
         else
@@ -91,7 +91,7 @@ public class ZoneSelectionState : IBuildingState
         }
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, gameObjectIndex);
         if (placementValidity == false)
@@ -100,26 +100,26 @@ public class ZoneSelectionState : IBuildingState
             return;
         }
         soundFeedback.PlaySound(SoundType.Place);
-        pos = grid.WorldToCell(previewSystem.previewPos);
-        displayPosition = grid.CellToWorld(pos);
+        pos = grid.WorldToLocal(previewSystem.previewPos);
+        displayPosition = grid.LocalToWorld(pos);
         size = previewSystem.previewSize;
 
         zonePlacer.MoveZoneAt(selectedObject, pos, database.zonesData[gameObjectIndex].ID, displayPosition, size, rotation);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(pos), true, size, (database.zonesData[gameObjectIndex].Cost * (size.x * size.y)) - (database.zonesData[gameObjectIndex].Cost * (originalSize.x * originalSize.y)), rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(pos), true, size, (database.zonesData[gameObjectIndex].Cost * (size.x * size.y)) - (database.zonesData[gameObjectIndex].Cost * (originalSize.x * originalSize.y)), rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         bool validity = false;
 
-        if (zonePlacer.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
+        if (zonePlacer.CanMoveObjectAt(selectedObject, previewSystem.previewSelector))
         {
-            if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), size, rotation))
+            if (placementSystem.CanMoveOnArea(selectedObject))
             {
                 validity = true;
             }
@@ -127,9 +127,9 @@ public class ZoneSelectionState : IBuildingState
 
         return validity;
     }
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), validity, size, (database.zonesData[gameObjectIndex].Cost * (size.x * size.y)) - (database.zonesData[gameObjectIndex].Cost * (originalSize.x * originalSize.y)), rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, size, (database.zonesData[gameObjectIndex].Cost * (size.x * size.y)) - (database.zonesData[gameObjectIndex].Cost * (originalSize.x * originalSize.y)), rotation);
     }
 }

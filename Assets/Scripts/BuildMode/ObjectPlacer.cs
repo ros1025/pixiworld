@@ -20,7 +20,7 @@ public class ObjectPlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceObject(GameObject prefab, Vector3Int gridPos, Vector3 position, Vector2Int size, int ID, int rotation)
+    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, int rotation)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = position;
@@ -35,7 +35,7 @@ public class ObjectPlacer : MonoBehaviour
         newObject.transform.SetParent(this.transform);
     }
 
-    internal void MoveObjectAt(GameObject prefab, Vector3Int gridPos, Vector3 position, Vector2Int size, int ID, int rotation, Renderer[] renderers)
+    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, int rotation, Renderer[] renderers)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -119,11 +119,11 @@ public class ObjectPlacer : MonoBehaviour
         return true;
     }
 
-    public bool CanMoveObjectAt(Vector3 originalPos, GameObject previewSelector)
+    public bool CanMoveObjectAt(GameObject selectedObject, GameObject previewSelector)
     {
         int index = furnitureData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true);
 
-        if (index != -1 && furnitureData[index].occupiedPosition != originalPos)
+        if (index != -1 && furnitureData[index].prefab != selectedObject)
             return false;
         return true;
     }
@@ -158,7 +158,7 @@ public class ObjectPlacer : MonoBehaviour
         return furnitureData[index].ID;
     }
 
-    internal Vector3Int GetObjectCoordinate(GameObject prefab)
+    internal Vector3 GetObjectCoordinate(GameObject prefab)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -186,7 +186,7 @@ public class ObjectPlacer : MonoBehaviour
 [Serializable]
 public class ObjectSaveData : PlacementData
 {
-    public ObjectSaveData(GameObject prefab, Vector3Int occupiedPosition, int rotation, Vector2Int size, int iD) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, int rotation, Vector2Int size, int iD) : base(prefab, occupiedPosition, rotation, size, iD)
     {
 
     }

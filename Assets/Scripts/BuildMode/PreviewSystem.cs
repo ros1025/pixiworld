@@ -50,6 +50,7 @@ public class PreviewSystem : MonoBehaviour
     [NonSerialized] public Vector3 previewPos;
     [NonSerialized] public bool expand;
     [NonSerialized] public bool dynamic;
+    [NonSerialized] public bool gridSnap;
     [NonSerialized] public Vector2Int previewSize;
     private Vector2Int minSize;
 

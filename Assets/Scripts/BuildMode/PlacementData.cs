@@ -6,13 +6,13 @@ using System.Collections.Generic;
 public class PlacementData
 {
     public GameObject prefab { get; private set; }
-    public Vector3Int occupiedPosition;
+    public Vector3 occupiedPosition;
     public int rotation;
     public Vector2Int size { get; private set; }
     public int ID { get; private set; }
     //public int PlacedObjectIndex { get; private set; }
 
-    public PlacementData(GameObject prefab, Vector3Int occupiedPosition, int rotation, Vector2Int size, int iD)
+    public PlacementData(GameObject prefab, Vector3 occupiedPosition, int rotation, Vector2Int size, int iD)
     {
         this.prefab = prefab;
         this.occupiedPosition = occupiedPosition;

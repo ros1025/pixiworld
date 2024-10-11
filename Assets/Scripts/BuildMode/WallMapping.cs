@@ -2234,20 +2234,23 @@ public class WallMapping : MonoBehaviour
     public bool CheckWallSelect(Vector3 position, Vector2Int size, int rotation)
     {
         Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x + 0.05f, position.y, position.z + 0.05f), new Vector3(size.x / 2f - 0.1f, 0.5f, size.y / 2f - 0.1f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
-        bool ans = false;
-        foreach (Wall wall in walls)
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (walls.FindIndex(wall => overlapsList.Contains(wall.collider)) != -1)
         {
-            Collider selector = wall.collider;
-            foreach (Collider hit in overlaps)
-            {
-                if (hit == selector)
-                {
-                    ans = true;
-                    break;
-                }
-            }
+            return true;
         }
-        return ans;
+        return false;
+    }
+
+    public bool CheckWallSelect(GameObject previewSelector)
+    {
+        Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (walls.FindIndex(wall => overlapsList.Contains(wall.collider)) != -1)
+        {
+            return true;
+        }
+        return false;
     }
 
     private void DeleteWall(Wall wall)

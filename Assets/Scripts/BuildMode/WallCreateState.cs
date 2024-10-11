@@ -9,7 +9,7 @@ public class WallCreateState : IBuildingState
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
     SoundFeedback soundFeedback;
-    private List<Vector3Int> posList;
+    private List<Vector3> posList;
     float length;
 
     public WallCreateState(Grid grid,
@@ -46,7 +46,7 @@ public class WallCreateState : IBuildingState
     }
 
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
@@ -55,7 +55,7 @@ public class WallCreateState : IBuildingState
         {
             posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
             CalculateLength();
-            previewSystem.MovePointer(grid.CellToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
         }
         else
         {
@@ -69,7 +69,7 @@ public class WallCreateState : IBuildingState
 
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
@@ -87,7 +87,7 @@ public class WallCreateState : IBuildingState
         List<Vector3> displayPos = new();
         for (int i = 0; i < posList.Count; i++)
         {
-            displayPos.Add(grid.CellToWorld(posList[i]));
+            displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
         wallMapping.AddWalls(displayPos);
@@ -96,12 +96,12 @@ public class WallCreateState : IBuildingState
         previewSystem.ClearPointer();
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         for (int i = 1; i < posList.Count; i++)
         {
-            Vector3 p1 = grid.CellToWorld(posList[i - 1]);
-            Vector3 p2 = grid.CellToWorld(posList[i]);
+            Vector3 p1 = grid.LocalToWorld(posList[i - 1]);
+            Vector3 p2 = grid.LocalToWorld(posList[i]);
 
             if (!placementSystem.CanPlaceOnArea(p1, p2, 0.04f, 2f))
             {
@@ -116,10 +116,10 @@ public class WallCreateState : IBuildingState
     }
 
 
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePointer(grid.CellToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
     }
 }

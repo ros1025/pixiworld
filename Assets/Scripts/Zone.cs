@@ -16,15 +16,15 @@ public class Zone : MonoBehaviour
     [HideInInspector] public PlacementSystem placement;
     [SerializeField] private Material zoneMaterial;
     VisualElement root; VisualElement lRoot;
-    Button button; Button upButton; Button downButton;
+    [SerializeField] UnityEngine.UI.Button button; 
+    Button upButton; Button downButton;
     Label floorLabel;
 
     // Start is called before the first frame update
     void Start()
     {
         root = document.rootVisualElement;
-        button = root.Q<Button>();
-        button.clicked += EnterZone;
+        //button = root.Q<Button>();
         lRoot = levels.rootVisualElement;
         upButton = lRoot.Q<Button>("UpButton");
         upButton.RegisterCallback<ClickEvent, int>(SwitchLevel, level + 1);
@@ -67,7 +67,7 @@ public class Zone : MonoBehaviour
         }
     }
 
-    void EnterZone()
+    public void EnterZone()
     {
         placement.SwitchZone(floors[level - minLevel].cursor, floors[level - minLevel].renderer, floors[level - minLevel].grid, floors[level - minLevel].objectPlacer, floors[level - minLevel].walls);
         for (int i = 0; i <= level - minLevel; i++)
@@ -84,7 +84,7 @@ public class Zone : MonoBehaviour
     {
         if (placement.inBuildMode)
         {
-            button.visible = false;
+            button.gameObject.SetActive(false);
             if (floors.Count > 0 && placement.IsGridZone(floors[level - minLevel].cursor))
             {
                 upButton.visible = true;
@@ -101,11 +101,12 @@ public class Zone : MonoBehaviour
             floorLabel.visible = true;
             if (coordinates.y > (Screen.height * 3 / 4))
             {
-                button.visible = false;
+                button.gameObject.SetActive(false);
             }
             if (coordinates.y < (Screen.height * 3 / 4))
             {
-                button.visible = true;
+                button.gameObject.SetActive(true);
+                /*
                 float ratio = (float)(1 - (0.1 * (((coordinates.y / 150) * Mathf.Cos(camera.transform.eulerAngles.x * (Mathf.PI / 180))) + (camera.transform.position.y / 50))));
                 float scaleX = (float)1920 / Screen.width; float scaleY = (float)1080 / Screen.height;
                 root.style.left = (coordinates.x - (35 * ratio)) * scaleX;
@@ -122,6 +123,8 @@ public class Zone : MonoBehaviour
                 button.style.paddingTop = padding;
                 button.style.paddingLeft = padding;
                 button.style.paddingRight = padding;
+                */
+                button.transform.position = floors[maxLevel - minLevel].cursor.transform.position + new Vector3(0, 3, 0);
             }
         }
     }
@@ -206,7 +209,7 @@ public class Zone : MonoBehaviour
         }
         else
         {
-            button.visible = false;
+            button.gameObject.SetActive(false);
             if (placement.inBuildMode == false)
             {
                 foreach (LevelData level in floors)

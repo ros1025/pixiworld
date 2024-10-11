@@ -56,7 +56,7 @@
     border-bottom-left-radius: 40px;
     border-top-right-radius: 40px;
     border-bottom-right-radius: 40px;
-    background-color: rgb(189, 217, 213);
+    background-color: rgb(165, 220, 220);
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 10px;
@@ -73,4 +73,12 @@
     max-height: 80px;
     min-width: 100px;
     letter-spacing: -6px;
+}
+
+.general-button {
+    background-color: rgb(166, 221, 221);
+}
+
+.general-button:hover {
+    background-color: rgb(132, 175, 175);
 }

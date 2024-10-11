@@ -14,11 +14,11 @@ public class RoadCreateState : IBuildingState
     SoundFeedback soundFeedback;
     int width;
     float length;
-    private List<Vector3Int> posList;
+    private List<Vector3> posList;
     private Vector3 displayPosition; 
     int rotation;
 
-    public RoadCreateState(Vector3Int gridPosition,
+    public RoadCreateState(Vector3 gridPosition,
                            int iD,
                            Grid grid,
                            PreviewSystem previewSystem,
@@ -42,7 +42,7 @@ public class RoadCreateState : IBuildingState
         {
             width = database.roadsData[selectedObjectIndex].width;
 
-            previewSystem.StartCreatingRoads(grid.CellToWorld(gridPosition));
+            previewSystem.StartCreatingRoads(grid.LocalToWorld(gridPosition));
         }
         else
             throw new System.Exception($"No object with ID {iD}");
@@ -65,13 +65,13 @@ public class RoadCreateState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         if (previewSystem.expand == true)
         {
             posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
             CalculateLength();
-            previewSystem.MovePointer(grid.CellToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
+            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
         }
         else
         {
@@ -85,7 +85,7 @@ public class RoadCreateState : IBuildingState
 
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
@@ -95,13 +95,13 @@ public class RoadCreateState : IBuildingState
             return;
         }
 
-        Vector3Int pos = grid.WorldToCell(previewSystem.previewPos);
+        Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
         soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new List<Vector3>();
         for (int i = 0; i < posList.Count; i++)
         {
-            displayPos.Add(grid.CellToWorld(posList[i]));
+            displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
         roadMapping.AddRoad(displayPos, database.roadsData[selectedObjectIndex].width, ID);
@@ -111,12 +111,12 @@ public class RoadCreateState : IBuildingState
         previewSystem.ClearPointer();
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         for (int i = 1; i < posList.Count; i++)
         {
-            Vector3 p1 = grid.CellToWorld(posList[i - 1]);
-            Vector3 p2 = grid.CellToWorld(posList[i]);
+            Vector3 p1 = grid.LocalToWorld(posList[i - 1]);
+            Vector3 p2 = grid.LocalToWorld(posList[i]);
 
             if (!placementSystem.CanPlaceOnArea(p1, p2, width, 0.1f))
             {
@@ -130,10 +130,10 @@ public class RoadCreateState : IBuildingState
         return true;
     }
 
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        previewSystem.UpdatePointer(grid.CellToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
     }
 }

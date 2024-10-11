@@ -13,11 +13,11 @@ public class ZoneCreateState : IBuildingState
     ZonePlacer zonePlacer;
     SoundFeedback soundFeedback;
     private Vector2Int size;
-    private Vector3Int pos;
+    private Vector3 pos;
     private Vector3 displayPosition; 
     int rotation;
 
-    public ZoneCreateState(Vector3Int gridPosition,
+    public ZoneCreateState(Vector3 gridPosition,
                            int iD,
                            Grid grid,
                            PreviewSystem previewSystem,
@@ -40,7 +40,7 @@ public class ZoneCreateState : IBuildingState
         {
             pos = gridPosition;
 
-            previewSystem.StartCreatingZones(grid.CellToWorld(pos), size, new Vector2Int(5,5));
+            previewSystem.StartCreatingZones(grid.LocalToWorld(pos), size, new Vector2Int(5,5));
 
             UpdateState(pos, 0);
         }
@@ -53,13 +53,13 @@ public class ZoneCreateState : IBuildingState
         previewSystem.StopShowingPreview();
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         if (previewSystem.expand == true)
         {
-            previewSystem.UpdateSize(grid.CellToWorld(gridPosition));
+            previewSystem.UpdateSize(grid.LocalToWorld(gridPosition));
             size = previewSystem.previewSize;
-            pos = grid.WorldToCell(previewSystem.previewPos);
+            pos = grid.WorldToLocal(previewSystem.previewPos);
             UpdateState(pos, rotation);
         }
         else
@@ -70,7 +70,7 @@ public class ZoneCreateState : IBuildingState
         }
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
@@ -80,23 +80,23 @@ public class ZoneCreateState : IBuildingState
             return;
         }
 
-        pos = grid.WorldToCell(previewSystem.previewPos);
+        pos = grid.WorldToLocal(previewSystem.previewPos);
         size = previewSystem.previewSize;
-        displayPosition = grid.CellToWorld(pos);
+        displayPosition = grid.LocalToWorld(pos);
         soundFeedback.PlaySound(SoundType.Place);
 
         zonePlacer.PlaceZones(displayPosition, pos, ID, size, 0.05f, rotation);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(pos), false, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), 0);
+        previewSystem.UpdatePosition(grid.LocalToWorld(pos), false, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), 0);
     }
     
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         bool validity = false;
         
         if (zonePlacer.CanPlaceObjectAt(previewSystem.previewSelector))
         {
-            if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), size, rotation))
+            if (placementSystem.CanPlaceOnArea(grid.LocalToWorld(gridPosition), size, rotation))
             {
                 validity = true;
             }
@@ -105,10 +105,10 @@ public class ZoneCreateState : IBuildingState
         return validity;
     }
 
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), rotation);
     }
 }

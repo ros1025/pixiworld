@@ -18,6 +18,7 @@ public class PreviewTools : MonoBehaviour
 
     VisualElement root; VisualElement controls;
     Button placeButton; Button cancelButton; Button sellButton; Button inventoryButton;
+    Button gridSnap; Button customTexture;
     Label costPrice; Label size;
 
     public bool canRemove; 
@@ -36,6 +37,8 @@ public class PreviewTools : MonoBehaviour
         cancelButton = controls.Q<Button>("CancelButton");
         sellButton = controls.Q<Button>("SellButton");
         inventoryButton = controls.Q<Button>("InventoryButton");
+        gridSnap = controls.Q<Button>("GridSnap");
+        customTexture = controls.Q<Button>("CustomTexture");
 
         costPrice = controls.Q<Label>("CostPrice");
         size = controls.Q<Label>("Size");
@@ -55,6 +58,16 @@ public class PreviewTools : MonoBehaviour
         else if (isFurniture)
             sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
         else sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
+        gridSnap.clicked += () => {
+            if (!previewSystem.gridSnap)
+            {
+                previewSystem.gridSnap = true;
+            }
+            else
+            {
+                previewSystem.gridSnap = false;
+            }
+        };
 
         AccountForSafeArea();
     }

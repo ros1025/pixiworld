@@ -33,8 +33,8 @@ public class PlacementSystem : MonoBehaviour
 
     [SerializeField] private PreviewSystem preview;
 
-    private Vector3Int gridPosition = Vector3Int.zero;
-    private Vector3Int selectedPosition = Vector3Int.zero;
+    private Vector3 gridPosition = Vector3.zero;
+    private Vector3 selectedPosition = Vector3.zero;
     [HideInInspector] public Vector3 screenSelectPosition = Vector3Int.zero;
     private Vector3 pointerPosition;
     private int rotation = 0;
@@ -383,7 +383,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isSelectable()
     {
-        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -391,7 +391,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isZone()
     {
-        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -421,9 +421,23 @@ public class PlacementSystem : MonoBehaviour
             return true;
     }
 
+    public bool CanMoveOnArea(GameObject previewObject)
+    {
+        if (roads != null && roads.CheckRoadSelect(previewObject))
+            return false;
+        else if (walls != null && walls.CheckWallSelect(previewObject))
+            return false;
+        else if (zonePlacer != null && zonePlacer.CanMoveObjectAt(previewObject, preview.previewSelector) == false)
+            return false;
+        else if (objectPlacer != null && objectPlacer.CanMoveObjectAt(previewObject, preview.previewSelector) == false)
+            return false;
+        else
+            return true;
+    }
+
     private bool isRoad()
     {
-        if (roads != null && roads.CheckRoadSelect(grid.CellToWorld(gridPosition), Vector2Int.one, 0))
+        if (roads != null && roads.CheckRoadSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
             return true;
         else
             return false;
@@ -431,7 +445,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isWall()
     {
-        if (walls != null && walls.CheckWallSelect(grid.CellToWorld(gridPosition), Vector2Int.one, 0))
+        if (walls != null && walls.CheckWallSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
             return true;
         else
             return false;
@@ -500,7 +514,11 @@ public class PlacementSystem : MonoBehaviour
     {
         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
         pointerPosition = inputManager.GetMousePosition();
-        gridPosition = grid.WorldToCell(mousePosition);
+        if (preview.gridSnap)
+        {
+            gridPosition = grid.CellToLocal(grid.WorldToCell(mousePosition));
+        }
+        else gridPosition = grid.WorldToLocal(mousePosition);
     }
 
     public void SetRotation(int rotation)

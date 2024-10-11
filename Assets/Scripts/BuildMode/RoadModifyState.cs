@@ -16,11 +16,11 @@ public class RoadModifyState : IBuildingState
     int width;
     int index;
     float length;
-    private List<Vector3Int> posList;
-    private List<Vector3Int> originalPosList;
+    private List<Vector3> posList;
+    private List<Vector3> originalPosList;
     bool edited;
 
-    public RoadModifyState(Vector3Int gridPosition,
+    public RoadModifyState(Vector3 gridPosition,
                            Grid grid,
                            PreviewSystem previewSystem,
                            PlacementSystem placementSystem,
@@ -39,14 +39,14 @@ public class RoadModifyState : IBuildingState
 
 
         soundFeedback.PlaySound(SoundType.Click);
-        roadMapping.SelectRoad(grid.CellToWorld(gridPosition), Vector2Int.one, 0, out selectedRoad, out index, out width, out selectedObjectIndex, out List<Vector3> displayPosList);
+        roadMapping.SelectRoad(grid.LocalToWorld(gridPosition), Vector2Int.one, 0, out selectedRoad, out index, out width, out selectedObjectIndex, out List<Vector3> displayPosList);
         if (index == -1)
             return;
         edited = false;
         posList = new();
         for (int i = 0; i < displayPosList.Count; i++)
         {
-            posList.Add(grid.WorldToCell(displayPosList[i]));
+            posList.Add(grid.WorldToLocal(displayPosList[i]));
         }
         originalPosList = posList;
         CalculateLength();
@@ -61,7 +61,7 @@ public class RoadModifyState : IBuildingState
             List<Vector3> displayPosList = new();
             for (int i = 0; i < originalPosList.Count; i++)
             {
-                displayPosList.Add(grid.CellToWorld(originalPosList[i]));
+                displayPosList.Add(grid.LocalToWorld(originalPosList[i]));
             }
         }
     }
@@ -78,13 +78,13 @@ public class RoadModifyState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3Int gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, int rotation = 0)
     {
         if (previewSystem.expand == true)
         {
             posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
             CalculateLength();
-            previewSystem.MovePointer(grid.CellToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
+            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
         }
         else
         {
@@ -98,7 +98,7 @@ public class RoadModifyState : IBuildingState
 
     }
 
-    public void OnAction(Vector3Int gridPosition)
+    public void OnAction(Vector3 gridPosition)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
@@ -108,13 +108,13 @@ public class RoadModifyState : IBuildingState
             return;
         }
 
-        Vector3Int pos = grid.WorldToCell(previewSystem.previewPos);
+        Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
         soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new List<Vector3>();
         for (int i = 0; i < posList.Count; i++)
         {
-            displayPos.Add(grid.CellToWorld(posList[i]));
+            displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
         roadMapping.ModifyRoad(selectedRoad, displayPos, database.roadsData[selectedObjectIndex].width, selectedObjectIndex);
@@ -126,12 +126,12 @@ public class RoadModifyState : IBuildingState
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
     {
         for (int i = 1; i < posList.Count; i++)
         {
-            Vector3 p1 = grid.CellToWorld(posList[i - 1]);
-            Vector3 p2 = grid.CellToWorld(posList[i]);
+            Vector3 p1 = grid.LocalToWorld(posList[i - 1]);
+            Vector3 p2 = grid.LocalToWorld(posList[i]);
 
             if (!placementSystem.CanPlaceOnArea(p1, p2, width, 0.1f))
             {
@@ -145,11 +145,11 @@ public class RoadModifyState : IBuildingState
         return true;
     }
 
-    public void UpdateState(Vector3Int gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, int rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        previewSystem.UpdatePointer(grid.CellToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
     }
 }
 

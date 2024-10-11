@@ -1631,19 +1631,23 @@ public class RoadMapping : MonoBehaviour
     public bool CheckRoadSelect(Vector3 position, Vector2Int size, int rotation)
     {
         Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x + 0.05f, position.y, position.z + 0.05f), new Vector3(size.x/2f - 0.1f, 0.5f, size.y/2f - 0.1f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector") );
-        bool ans = false;
-        foreach (Roads road in roads)
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (roads.FindIndex(road => overlapsList.Contains(road.collider)) != -1)
         {
-            Collider selector = road.collider;
-            foreach (Collider hit in overlaps)
-            {
-                if (hit == selector)
-                {
-                    ans = true;
-                }
-            }
+            return true;
         }
-        return ans;
+        return false;
+    }
+
+    public bool CheckRoadSelect(GameObject previewSelector)
+    {
+        Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (roads.FindIndex(road => overlapsList.Contains(road.collider)) != -1)
+        {
+            return true;
+        }
+        return false;
     }
 }
 
