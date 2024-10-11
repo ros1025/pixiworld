@@ -10,7 +10,6 @@ public class SelectionState : IBuildingState
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
     ObjectsDatabaseSO database;
-    GridData furnitureData;
     ObjectPlacer objectPlacer;
     InputManager inputManager;
     SoundFeedback soundFeedback;
@@ -32,40 +31,27 @@ public class SelectionState : IBuildingState
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
         this.database = database;
-        this.furnitureData = objectPlacer.furnitureData;
         this.objectPlacer = objectPlacer;
         this.inputManager = inputManager;
         this.soundFeedback = soundFeedback;
-        GridData selectedData = null;
-        if (furnitureData.CanPlaceObjectAt(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
-        {
-            selectedData = furnitureData;
-        }
 
-        if (selectedData == null)
-        {
+        soundFeedback.PlaySound(SoundType.Click);
+        selectedObject = objectPlacer.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
+        if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
-        }
-        else
-        {
-            soundFeedback.PlaySound(SoundType.Click);
-            selectedObject = selectedData.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
-            if (!furnitureData.HasKey(selectedObject))
-                return;
-            edited = false;
-            gameObjectIndex = selectedData.GetObjectID(selectedObject);
-            originalPosition = selectedData.GetObjectCoordinate(selectedObject);
-            originalRotation = selectedData.GetObjectRotation(selectedObject);
-            rotation = originalRotation;
-            placementSystem.SetRotation(originalRotation);
-            previewSystem.StartMovingObjectPreview(
-                grid.CellToWorld(selectedData.GetObjectCoordinate(selectedObject)),
-                selectedData.GetObjectRotation(selectedObject),
-                selectedObject,
-                database.objectsData[gameObjectIndex].Size
-            );
-            UpdateState(originalPosition, rotation);
-        }
+        edited = false;
+        gameObjectIndex = objectPlacer.GetObjectID(selectedObject);
+        originalPosition = objectPlacer.GetObjectCoordinate(selectedObject);
+        originalRotation = objectPlacer.GetObjectRotation(selectedObject);
+        rotation = originalRotation;
+        placementSystem.SetRotation(originalRotation);
+        previewSystem.StartMovingObjectPreview(
+            grid.CellToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
+            objectPlacer.GetObjectRotation(selectedObject),
+            selectedObject,
+            database.objectsData[gameObjectIndex].Size
+        );
+        UpdateState(originalPosition, rotation);
     }
 
     public void EndState()
@@ -118,7 +104,7 @@ public class SelectionState : IBuildingState
         //    furnitureData;
         bool validity = false;
 
-        if (furnitureData.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
+        if (objectPlacer.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
         {
             if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), database.objectsData[selectedObjectIndex].Size, rotation))
             {

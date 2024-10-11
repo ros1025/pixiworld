@@ -9,7 +9,6 @@ public class PlacementState : IBuildingState
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
     ObjectsDatabaseSO database;
-    GridData furnitureData;
     ObjectPlacer objectPlacer;
     SoundFeedback soundFeedback;
     private Vector3 displayPosition;
@@ -29,7 +28,6 @@ public class PlacementState : IBuildingState
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
         this.database = database;
-        this.furnitureData = objectPlacer.furnitureData;
         this.objectPlacer = objectPlacer;
         this.soundFeedback = soundFeedback;
 
@@ -87,7 +85,7 @@ public class PlacementState : IBuildingState
         //GridData selectedData = furnitureData;
         bool validity = false;
 
-        if (furnitureData.CanPlaceObjectAt(previewSystem.previewSelector))
+        if (objectPlacer.CanPlaceObjectAt(previewSystem.previewSelector))
         {
             if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), database.objectsData[selectedObjectIndex].Size, rotation))
             {

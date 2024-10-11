@@ -11,7 +11,6 @@ public class ZoneCreateState : IBuildingState
     PlacementSystem placementSystem;
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
-    GridData zoneData;
     SoundFeedback soundFeedback;
     private Vector2Int size;
     private Vector3Int pos;
@@ -33,7 +32,6 @@ public class ZoneCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.zonePlacer = zonePlacer;
-        zoneData = zonePlacer.zoneData;
         this.soundFeedback = soundFeedback;
         size = new Vector2Int(10, 10);
 
@@ -96,7 +94,7 @@ public class ZoneCreateState : IBuildingState
     {
         bool validity = false;
         
-        if (zoneData.CanPlaceObjectAt(previewSystem.previewSelector))
+        if (zonePlacer.CanPlaceObjectAt(previewSystem.previewSelector))
         {
             if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), size, rotation))
             {

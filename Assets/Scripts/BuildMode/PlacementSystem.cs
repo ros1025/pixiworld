@@ -172,35 +172,33 @@ public class PlacementSystem : MonoBehaviour
         inputManager.OnExit += StopPlacement;
     }
 
-    public void StartRemoving(GameObject prefab)
+    public void RemoveObject(GameObject prefab)
     {
-        GridData selectedData = null;
-        if (objectPlacer.furnitureData.HasKey(prefab))
+        if (objectPlacer.HasKey(prefab))
         {
-            selectedData = objectPlacer.furnitureData;
+            soundFeedback.PlaySound(SoundType.Remove);
+            objectPlacer.RemoveObjectAt(prefab);
+            zonePlacer.RemoveZoneAt(prefab);
+            StopPlacement();
         }
-        else if (zonePlacer.zoneData.HasKey(prefab))
-        {
-            selectedData = zonePlacer.zoneData;
-        }
-
-        if (selectedData == null)
+        else
         {
             soundFeedback.PlaySound(SoundType.wrongPlacement);
         }
-        else if (selectedData == zonePlacer.zoneData)
+    }
+
+    public void RemoveZone(GameObject prefab)
+    {
+        if (objectPlacer.HasKey(prefab))
         {
             soundFeedback.PlaySound(SoundType.Remove);
-            selectedData.RemoveObjectAt(prefab);
+            zonePlacer.RemoveZoneAt(prefab);
             objectPlacer.RemoveObjectAt(prefab);
             StopPlacement();
         }
-        else if (selectedData == objectPlacer.furnitureData)
+        else
         {
-            soundFeedback.PlaySound(SoundType.Remove);
-            selectedData.RemoveObjectAt(prefab);
-            zonePlacer.RemoveZoneAt(prefab);
-            StopPlacement();
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
         }
     }
 
@@ -385,7 +383,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isSelectable()
     {
-        if (objectPlacer != null && objectPlacer.furnitureData.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -393,7 +391,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isZone()
     {
-        if (zonePlacer != null && zonePlacer.zoneData.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -401,9 +399,9 @@ public class PlacementSystem : MonoBehaviour
 
     public bool CanPlaceOnArea(Vector3 p1, Vector3 p2, float width, float height)
     {
-        if (zonePlacer != null && zonePlacer.zoneData.CanPlaceObjectAt(p1, p2, width, height) == false)
+        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(p1, p2, width, height) == false)
             return false;
-        else if (objectPlacer != null && objectPlacer.furnitureData.CanPlaceObjectAt(p1, p2, width, height) == false)
+        else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(p1, p2, width, height) == false)
             return false;
         else
             return true;
@@ -411,13 +409,13 @@ public class PlacementSystem : MonoBehaviour
 
     public bool CanPlaceOnArea(Vector3 pos, Vector2Int size, int rotation)
     {
-        if (roads != null && roads.CheckRoadSelect(pos + new Vector3(size.x / 2f, 0, size.y/2f), size, rotation) == true)
+        if (roads != null && roads.CheckRoadSelect(pos + new Vector3(size.x / 2f, 0, size.y / 2f), size, rotation))
             return false;
-        else if (walls != null && walls.CheckWallSelect(pos + new Vector3(size.x / 2f, 0, size.y / 2f), size, rotation) == true)
+        else if (walls != null && walls.CheckWallSelect(pos + new Vector3(size.x / 2f, 0, size.y / 2f), size, rotation))
             return false;
-        else if (zonePlacer != null && zonePlacer.zoneData.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
+        else if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
             return false;
-        else if (objectPlacer != null && objectPlacer.furnitureData.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
+        else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
             return false;
         else
             return true;

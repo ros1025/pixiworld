@@ -11,7 +11,6 @@ public class ZoneSelectionState : IBuildingState
     PlacementSystem placementSystem;
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
-    GridData zoneData;
     InputManager inputManager;
     SoundFeedback soundFeedback;
     private Vector3 displayPosition;
@@ -38,17 +37,16 @@ public class ZoneSelectionState : IBuildingState
         this.zonePlacer = zonePlacer;
         this.inputManager = inputManager;
         this.soundFeedback = soundFeedback;
-        zoneData = zonePlacer.zoneData;
 
         soundFeedback.PlaySound(SoundType.Click);
-        selectedObject = zoneData.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
-        if (selectedObject == null || !zoneData.HasKey(selectedObject))
+        selectedObject = zonePlacer.GetObject(previewSystem.previewSelectorObject, grid.CellToWorld(gridPosition), Vector2Int.one, 0);
+        if (selectedObject == null || !zonePlacer.HasKey(selectedObject))
             return;
         edited = false;
-        gameObjectIndex = zoneData.GetObjectID(selectedObject);
-        originalPosition = zoneData.GetObjectCoordinate(selectedObject);
-        originalRotation = zoneData.GetObjectRotation(selectedObject);
-        originalSize = zoneData.GetObjectSize(selectedObject);
+        gameObjectIndex = zonePlacer.GetObjectID(selectedObject);
+        originalPosition = zonePlacer.GetObjectCoordinate(selectedObject);
+        originalRotation = zonePlacer.GetObjectRotation(selectedObject);
+        originalSize = zonePlacer.GetObjectSize(selectedObject);
         pos = originalPosition;
         size = originalSize;
         rotation = originalRotation;
@@ -119,7 +117,7 @@ public class ZoneSelectionState : IBuildingState
     {
         bool validity = false;
 
-        if (zoneData.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
+        if (zonePlacer.CanMoveObjectAt(originalPosition, previewSystem.previewSelector))
         {
             if (placementSystem.CanPlaceOnArea(grid.CellToWorld(gridPosition), size, rotation))
             {

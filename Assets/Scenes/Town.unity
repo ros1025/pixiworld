@@ -739,6 +739,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1690a100cba19ff459476f72cecc19fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  zoneData: []
   zoneIndicator: {fileID: 3706936160302216349, guid: 2064c2917b4e1aa43a7372e84554f144, type: 3}
   selectorObject: {fileID: 3706936160302216349, guid: ba3e99b26bb2c5c44ad3733a8b360744, type: 3}
   placementSystem: {fileID: 275286407}
@@ -2809,6 +2810,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0771d76d01d2dec499ce8b0c3e758a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  furnitureData: []
   zoneIndicator: {fileID: 3706936160302216349, guid: 2064c2917b4e1aa43a7372e84554f144, type: 3}
   selectorObject: {fileID: 3706936160302216349, guid: ba3e99b26bb2c5c44ad3733a8b360744, type: 3}
   placementSystem: {fileID: 275286407}

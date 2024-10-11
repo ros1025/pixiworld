@@ -7,7 +7,7 @@ public class ZonePlacer : MonoBehaviour
 {
  
     [SerializeField]
-    public GridData zoneData = new();
+    public List<ZoneSaveData> zoneData = new();
 
     [SerializeField]
     public GameObject zoneIndicator;
@@ -34,15 +34,18 @@ public class ZonePlacer : MonoBehaviour
         previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + 0.01f, position.z + 0.05f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
+        Debug.Log(zoneComponent.gameObject);
         zoneComponent.InstantiateNew(placementSystem, ID, size);
-        zoneData.AddObjectAt(gridPos, zoneObject, size, ID, rotation);
+        zoneData.Add(new ZoneSaveData(zoneObject, gridPos, rotation, size, ID, zoneComponent.floors));
         zoneObject.transform.SetParent(this.transform);
     }
 
     public void MoveZoneAt(GameObject prefab, Vector3Int gridPos, int ID, Vector3 position, Vector2Int size, int rotation)
     {
-        if (!zoneData.HasKey(prefab))
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
             return;
+        ZoneSaveData data = zoneData[index];
         GameObject m_Object = prefab;
         m_Object.transform.position = position;
         m_Object.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -51,15 +54,140 @@ public class ZonePlacer : MonoBehaviour
         m_Object.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Renderer>().material = selectorObjectMaterial;
         Zone zoneComponent = m_Object.GetComponentInChildren<Zone>();
         zoneComponent.EditPosition(ID, size);
-        zoneData.MoveObjectAt(gridPos, prefab, size, ID, rotation);
+
+        data.occupiedPosition = gridPos;
+        data.rotation = rotation;
     }
 
     public void RemoveZoneAt(GameObject prefab)
     {
-        if (zoneData.HasKey(prefab))
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
             return;
+        else
+        {
+            Destroy(prefab);
+            zoneData.RemoveAt(index);
+        }
+    }
 
-        Destroy(prefab);
-        zoneData.RemoveObjectAt(prefab);
+    bool ObjectValidation(GameObject hitbox, GameObject previewSelector)
+    {
+        Collider collider1 = previewSelector.transform.GetChild(0).gameObject.GetComponent<Collider>();
+        Collider collider2 = hitbox.transform.GetChild(0).gameObject.GetComponent<Collider>();
+        Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (overlapsList.Contains(collider2))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool CanPlaceObjectAt(GameObject previewSelector)
+    {
+        if (zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true) != -1)
+            return false;
+        return true;
+    }
+
+    public bool CanPlaceObjectAt(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    {
+        bool ans = true;
+        GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
+        previewSelector.name = "Intersector";
+        previewSelector.transform.localScale = new Vector3Int(size.x, size.y, size.y);
+
+        if (zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true) != -1)
+            ans = false;
+
+        GameObject.Destroy(previewSelector);
+        return ans;
+    }
+
+    public bool CanPlaceObjectAt(Vector3 p1, Vector3 p2, float width, float height)
+    {
+        RaycastHit[] hits = Physics.BoxCastAll(p1 + new Vector3(0, height / 2f, 0), new Vector3(width - 0.05f, height / 2f, width - 0.05f), p2 - p1, Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0), Vector3.Distance(p1, p2), LayerMask.GetMask("Selector"));
+        List<RaycastHit> hitList = new(); hitList.AddRange(hits);
+
+        if (zoneData.FindIndex(item => hitList.FindIndex(col => col.collider == item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) != -1) != -1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool CanMoveObjectAt(Vector3 originalPos, GameObject previewSelector)
+    {
+        int index = zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true);
+
+        if (index != -1 && zoneData[index].occupiedPosition != originalPos)
+            return false;
+        return true;
+    }
+
+    public GameObject GetObject(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    {
+        GameObject m_Object = null;
+        GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
+        previewSelector.transform.localScale = new Vector3Int(size.x, size.y, size.y);
+
+        int index = zoneData.FindIndex(item => ObjectValidation(item.prefab.transform.Find("Selector").gameObject, previewSelector) == true);
+        if (index != -1)
+            m_Object = zoneData[index].prefab;
+
+        GameObject.Destroy(previewSelector);
+        return m_Object;
+    }
+
+    internal bool HasKey(GameObject prefab)
+    {
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return false;
+        return true;
+    }
+
+    internal int GetObjectID(GameObject prefab)
+    {
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return -1;
+        return zoneData[index].ID;
+    }
+
+    internal Vector3Int GetObjectCoordinate(GameObject prefab)
+    {
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return new Vector3Int(0, 0, 0);
+        return zoneData[index].occupiedPosition;
+    }
+
+    internal Vector2Int GetObjectSize(GameObject prefab)
+    {
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return new Vector2Int(0, 0);
+        return zoneData[index].size;
+    }
+
+    internal int GetObjectRotation(GameObject prefab)
+    {
+        int index = zoneData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return -1;
+        return zoneData[index].rotation;
+    }
+}
+
+[Serializable]
+public class ZoneSaveData : PlacementData
+{
+    public List<LevelData> levels { get; private set; }
+    public ZoneSaveData(GameObject prefab, Vector3Int occupiedPosition, int rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
+    {
+        this.levels = levels;
     }
 }

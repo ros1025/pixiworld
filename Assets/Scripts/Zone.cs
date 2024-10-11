@@ -8,7 +8,7 @@ public class Zone : MonoBehaviour
     [SerializeField] private UIDocument document;
     [SerializeField] private UIDocument levels;
     [SerializeField] private GameObject zonePrefab;
-    [SerializeField] private List<LevelData> floors;
+    [SerializeField] public List<LevelData> floors { get; private set; }
     [SerializeField] private int level;
     private Vector2Int size;
     private int minLevel; private int maxLevel;
@@ -45,6 +45,7 @@ public class Zone : MonoBehaviour
         this.size = size;
         minLevel = 0;
         maxLevel = 0;
+        floors = new();
         GameObject newZone = Instantiate(zonePrefab);
         newZone.transform.position = transform.parent.position;
         newZone.transform.SetParent(transform.parent);

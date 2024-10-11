@@ -1073,64 +1073,6 @@ public class WallMapping : MonoBehaviour
         return points;
     }
 
-    private void SortPoints(List<Vector3> sort)
-    {
-        for (int j = 0; j < sort.Count - 1; j++)
-        {
-            List<Wall> searchWalls = new();
-            //Vector3 posA = sort[j];
-
-            for (int k = j + 1; k < sort.Count; k++)
-            {
-                bool matchFound = false;
-                for (int i = 0; i < walls.Count; i++)
-                {
-                    if (walls[i].points.FindIndex(data => Vector3.Distance(sort[k - 1], data) < 0.5f) != -1)
-                    {
-                        searchWalls.Add(walls[i]);
-                    }
-                }
-
-                foreach (Wall wall in searchWalls)
-                {
-                    m_SplineSampler.SampleSplinePoint(wall.wall, sort[k - 1], wall.resolution, out Vector3 hitPos, out float t);
-                    if (Vector3.Distance(hitPos, sort[k - 1]) < 0.5f)
-                    {
-                        float knotF = SplineUtility.ConvertIndexUnit(wall.wall, t, PathIndexUnit.Knot);
-                        int knot = Mathf.RoundToInt(knotF);
-                        if (knot == 0)
-                        {
-                            if (Vector3.Distance((Vector3)wall.wall[knot + 1].Position, sort[k]) < 0.5f)
-                            {
-                                Vector3 temp = sort[k];
-                                sort[k] = sort[j + 1];
-                                sort[j + 1] = sort[k];
-                                matchFound = true;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if (Vector3.Distance((Vector3)wall.wall[knot - 1].Position, sort[k]) < 0.5f)
-                            {
-                                Vector3 temp = sort[k];
-                                sort[k] = sort[j + 1];
-                                sort[j + 1] = sort[k];
-                                matchFound = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (matchFound)
-                {
-                    break;
-                }
-            }
-        }
-    }
-
     private bool IsRoomMeshContinuous(List<BezierKnot> points)
     {
         float angle = 0;
@@ -1184,7 +1126,7 @@ public class WallMapping : MonoBehaviour
         }
 
         Spline s1 = walls.Find(item => item.points.FindIndex(obj => Vector3.Distance(obj, points[0].Position) < 0.1f) != -1 && item.points.FindIndex(obj => Vector3.Distance(obj, points[1].Position) < 0.1f) != -1).wall;
-        float minLength = DetermineMinLength(s1, points[1], points[0].Position, angle, 1, points, new(), Vector3.Distance(points[1].Position, points[0].Position));
+        float minLength = DetermineMinLength(s1, points[1], points[0].Position, angle, (s1.IndexOf(points[0]) == 0 ? 1 : 0), points, new(), Vector3.Distance(points[1].Position, points[0].Position));
         if (minLength < length)
         {
             return false;
@@ -1361,79 +1303,58 @@ public class WallMapping : MonoBehaviour
             items.Add(DetermineMinLength(spline, spline[spline.IndexOf(knot) + 1], target, angle, direction, points, newKnotList, distance + Vector3.Distance(spline[spline.IndexOf(knot) + 1].Position, knot.Position)));
         }
 
-        List<Intersection> nextJunctions = new();
-        for (int i = 0; i < intersections.Count; i++)
+        else
         {
-            if (SplineInIntersection(intersections[i], spline, knot))
+            List<Intersection> nextJunctions = new();
+            for (int i = 0; i < intersections.Count; i++)
             {
-                //Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
-                nextJunctions.Add(intersections[i]);
-            }
-        }
-
-        List<BezierKnot> possibleNextKnots = new();
-        List<Intersection.JunctionInfo> possibleNextJuncts = new();
-
-        foreach (Intersection intersection in nextJunctions)
-        {
-            foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
-            {
-                if (junction.spline != spline)
+                if (SplineInIntersection(intersections[i], spline, knot))
                 {
-                    int splineIndex = junction.GetSplineIndex(m_SplineContainer);
-                    BezierKnot nextKnot = junction.knotIndex == 0 ? m_SplineContainer[splineIndex].Next(junction.knotIndex) : m_SplineContainer[splineIndex].Previous(junction.knotIndex);
-                    int dir = junction.knotIndex == 0 ? 1 : 0;
+                    //Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
+                    nextJunctions.Add(intersections[i]);
+                }
+            }
 
-                    if (!knotList.Contains(nextKnot))
+            List<BezierKnot> possibleNextKnots = new();
+            List<Intersection.JunctionInfo> possibleNextJuncts = new();
+
+            foreach (Intersection intersection in nextJunctions)
+            {
+                foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+                {
+                    if (junction.spline != spline)
                     {
-                        possibleNextKnots.Add(nextKnot);
-                        possibleNextJuncts.Add(junction);
+                        int splineIndex = junction.GetSplineIndex(m_SplineContainer);
+                        BezierKnot nextKnot = junction.knotIndex == 0 ? m_SplineContainer[splineIndex].Next(junction.knotIndex) : m_SplineContainer[splineIndex].Previous(junction.knotIndex);
+                        int dir = junction.knotIndex == 0 ? 1 : 0;
+
+                        if (!knotList.Contains(nextKnot))
+                        {
+                            possibleNextKnots.Add(nextKnot);
+                            possibleNextJuncts.Add(junction);
+                        }
                     }
                 }
             }
-        }
 
-        if (possibleNextKnots.Count > 0)
-        {
-            BezierKnot currentKnot = possibleNextKnots[0];
-            Intersection.JunctionInfo currentJunction = possibleNextJuncts[0];
-
-            for (int i = 1; i < possibleNextKnots.Count; i++)
+            if (possibleNextKnots.Count > 0)
             {
-                float angleA = Vector3.SignedAngle(possibleNextKnots[i].Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
-                float angleB = Vector3.SignedAngle(currentKnot.Position - knot.Position, knotList[^1].Position - knot.Position, Vector3.up);
+                for (int i = 0; i < possibleNextKnots.Count; i++)
+                {
+                    BezierKnot currentKnot = possibleNextKnots[i];
+                    Intersection.JunctionInfo currentJunction = possibleNextJuncts[i];
 
-                if (angleA < 0 && angle > 0)
-                {
-                    angleA += 360;
-                }
-                else if (angleA > 0 && angle < 0)
-                {
-                    angle -= 360;
-                }
-
-                if (angleB < 0 && angle > 0)
-                {
-                    angleA += 360;
-                }
-                else if (angleB > 0 && angle < 0)
-                {
-                    angle -= 360;
+                    List<BezierKnot> newKnotList = new();
+                    for (int j = 0; j < knotList.Count; j++)
+                    {
+                        newKnotList.Add(knotList[j]);
+                    }
+                    items.Add(DetermineMinLength(currentJunction.spline, currentKnot, target, angle, currentJunction.knotIndex == 0 ? 1 : 0, points, newKnotList, distance + Vector3.Distance(currentKnot.Position, knot.Position)));
                 }
 
-                if (Mathf.Abs(angleA) <= Mathf.Abs(angleB))
-                {
-                    currentKnot = possibleNextKnots[i];
-                    currentJunction = possibleNextJuncts[i];
-                }
+                //Debug.Log($"{knot.Position} {currentKnot.Position} {angle}");
+
             }
-
-            List<BezierKnot> newKnotList = new();
-            for (int i = 0; i < knotList.Count; i++)
-            {
-                newKnotList.Add(knotList[i]);
-            }
-            items.Add(DetermineMinLength(currentJunction.spline, currentKnot, target, angle, currentJunction.knotIndex == 0 ? 1 : 0, points, newKnotList, distance + Vector3.Distance(currentKnot.Position, knot.Position)));
         }
 
         if (items.Count == 0)
@@ -2322,6 +2243,7 @@ public class WallMapping : MonoBehaviour
                 if (hit == selector)
                 {
                     ans = true;
+                    break;
                 }
             }
         }

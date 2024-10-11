@@ -52,7 +52,9 @@ public class PreviewTools : MonoBehaviour
             sellButton.RegisterCallback<ClickEvent, Roads>(RemoveRoad, previewSystem.selectedRoad);
         else if (isWall)
             sellButton.RegisterCallback<ClickEvent, Wall>(RemoveWall, previewSystem.selectedWall);
-        else sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
+        else if (isFurniture)
+            sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
+        else sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
 
         AccountForSafeArea();
     }
@@ -64,7 +66,12 @@ public class PreviewTools : MonoBehaviour
 
     public void SellObject(ClickEvent evt, GameObject prefab)
     {
-        placementSystem.StartRemoving(prefab);
+        placementSystem.RemoveObject(prefab);
+    }
+
+    public void RemoveZone(ClickEvent evt, GameObject prefab)
+    {
+        placementSystem.RemoveZone(prefab);
     }
 
     public void RemoveRoad(ClickEvent evt, Roads road)
