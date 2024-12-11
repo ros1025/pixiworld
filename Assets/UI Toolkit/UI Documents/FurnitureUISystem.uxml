@@ -7,7 +7,7 @@
             </ui:Button>
             <ui:VisualElement name="categories" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: 70px; width: 1825px;">
                 <ui:ScrollView mode="Horizontal" touch-scroll-type="Elastic" mouse-wheel-scroll-size="720" style="flex-direction: row; height: 75px; width: 100%;">
-                    <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
+                    <ui:Button text="pl" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" style="-unity-text-align: middle-center;" />
                     <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
                     <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
                     <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Cinemachine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CameraController : MonoBehaviour
     public Camera cam;
     public GameObject cameraObject;
     public GameObject targetBox;
+    private BuilderInputs system;
 
     private CinemachinePositionComposer framingTransposer;
 
@@ -19,7 +21,12 @@ public class CameraController : MonoBehaviour
 
     public float cameraX = 20; public float cameraY = 0;
     public bool yawAdjustable; public bool posAdjustable;
-    public Vector2 touchDelta;
+
+    private float previousTouchDistance;
+    private float previousRotate;
+    private Vector2 previousTouchPosition;
+
+    private bool touch0; private bool touch1;
 
     public void Start()
     {
@@ -27,200 +34,212 @@ public class CameraController : MonoBehaviour
         framingTransposer.CameraDistance = 20;
         targetBox.transform.position = new Vector3(0, 0, 0);
         yawAdjustable = true; posAdjustable = true;
+        ResetTouchDefaults();
+
+        system = new BuilderInputs();
+        system.Enable();
+        system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<Vector2>().y);
+        system.camera.move.performed += _ => OnMove(system.camera.move.ReadValue<Vector2>());
+        system.camera.rotate.performed += _ => OnRotate(system.camera.rotate.ReadValue<float>());
+        system.camera.yaw.performed += _ => OnYaw(system.camera.yaw.ReadValue<float>());
+
+        system.camera.Touch0_Activated.performed += _ => touch0 = true;
+        system.camera.Touch0_Activated.canceled += _ => { touch0 = false; ResetTouchDefaults(); };
+        system.camera.Touch1_Activated.performed += _ => touch1 = true;
+        system.camera.Touch1_Activated.canceled += _ => { touch1 = false; ResetTouchDefaults(); };
+
+        system.camera.Touch0.performed += _ =>
+        {
+            if (touch0 == true && touch1 == false)
+            {
+                TouchMove(system.camera.Touch0.ReadValue<Vector2>());
+            }
+        };
+
+        system.camera.Touch1.performed += _ =>
+        {
+            if (touch0 == true && touch1 == true)
+            {
+                TouchRotate(system.camera.Touch0.ReadValue<Vector2>(), system.camera.Touch1.ReadValue<Vector2>());
+                TouchZoom((system.camera.Touch0.ReadValue<Vector2>() - system.camera.Touch1.ReadValue<Vector2>()).magnitude);
+            }
+        };
+
+        AdjustCameraBox();
     }
 
-    public void Update()
+    public void AdjustCameraBox()
     {
         cameraObject.transform.rotation = Quaternion.Euler(new Vector3(cameraX, cameraY, 0));
         targetBox.transform.rotation = Quaternion.Euler(new Vector3(0, cameraY, 0));
-        if (Input.mouseScrollDelta != Vector2.zero)
+    }
+
+    private void OnScroll(float delta)
+    {
+        if (IsPointerOverUI() == false)
         {
-            if (IsPointerOverUI() == false)
+            AdjustCameraDistance(delta);
+            AdjustCameraBox();
+        }
+    }
+
+    private void TouchZoom(float distance)
+    {
+        if (IsPointerOverUI() == false)
+        {
+            if (previousTouchDistance == 0)
             {
-                AdjustCameraDistance(Input.mouseScrollDelta.y * scale);
+                previousTouchDistance = distance;
+            }
+            float currentTouchDistance = distance;
+
+
+            //pinch to zoom
+            float deltaDistance = currentTouchDistance - previousTouchDistance;
+            AdjustCameraDistance(deltaDistance * scale);
+
+            previousTouchDistance = currentTouchDistance;
+            AdjustCameraBox();
+        }
+    }
+
+    private void TouchMove(Vector2 touch)
+    {
+        if (IsPointerOverUI() == false)
+        {
+            if (posAdjustable == true)
+            {
+                if (previousTouchPosition == Vector2.zero)
+                {
+                    previousTouchPosition = touch;
+                }
+                Vector2 currentTouchPosition = touch;
+                Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
+                targetBox.transform.Translate(new Vector3(-touchDelta.x * (Mathf.Pow(scale, 2)), 0, -touchDelta.y * Mathf.Pow(scale, 2)));
+
+                previousTouchPosition = currentTouchPosition;
+                AdjustCameraBox();
             }
         }
-        if (Input.mousePresent == true)
+    }
+
+    private void TouchRotate(Vector2 touchA, Vector2 touchB)
+    {
+        if (IsPointerOverUI() == false)
         {
-            if (IsPointerOverUI() == false)
+            float currentRotate = Vector2.SignedAngle(touchA - touchB, Vector2.zero - touchA);
+            if (previousRotate == 0)
             {
-                if (Input.GetMouseButton(1))
-                {
-                    float horizontalSpeed = Input.GetAxis("Mouse X");
-
-                    cameraY += horizontalSpeed;
-                }
-                if (Input.GetMouseButton(2))
-                {
-                    if (yawAdjustable == true)
-                    {
-                        float verticalSpeed = Input.GetAxis("Mouse Y");
-
-                        if (cameraX >= 0 && cameraX <= 90)
-                        {
-                            cameraX += verticalSpeed;
-                        }
-                        else if (cameraX < 0)
-                        {
-                            cameraX = 0;
-                        }
-                        else if (cameraX > 90)
-                        {
-                            cameraX = 90;
-                        }
-                    }
-                }
-                if (Input.GetMouseButton(0))
-                {
-                    if (posAdjustable == true)
-                    {
-                        float horizontalSpeed = Input.GetAxis("Mouse X");
-                        float verticalSpeed = Input.GetAxis("Mouse Y");
-
-                        targetBox.transform.Translate(new Vector3(-horizontalSpeed * scale, 0, -verticalSpeed * scale));
-                    }
-                }
+                previousRotate = currentRotate;
             }
+
+            //rotate y using touch
+            cameraY += currentRotate - previousRotate;
+
+            previousRotate = currentRotate;
+            AdjustCameraBox();
         }
-        if (Input.touchCount == 1)
-        {
-            if (IsPointerOverUI() == false)
-            {
-                Touch touch = Input.GetTouch(0);
-                touchDelta = touch.deltaPosition;
+    }
 
-                if (touch.phase == TouchPhase.Moved)
-                {
-                    if (posAdjustable == true)
-                    {
-                        targetBox.transform.Translate(new Vector3(-(touch.deltaPosition.x * scale / 25), 0, -(touch.deltaPosition.y * scale / 25)));
-                    }
-                }
-            }
+    private void OnRotate(float axis)
+    {
+        if (IsPointerOverUI() == false)
+        {
+            cameraY += axis * scale;
+            AdjustCameraBox();
         }
-        if (Input.touchCount == 2)
+    }
+
+    private void OnMove(Vector2 delta)
+    {
+        if (IsPointerOverUI() == false)
         {
-            if (IsPointerOverUI() == false)
+            if (posAdjustable == true)
             {
-                Vector2 primaryTouchPos; Vector2 secondaryTouchPos;
-                Touch touch1 = Input.GetTouch(0);
-                Touch touch2 = Input.GetTouch(1);
-                primaryTouchPos = touch1.position; secondaryTouchPos = touch2.position;
-
-                if (touch2.phase == TouchPhase.Moved)
-                {
-                    Vector2 primaryTouchPrevious; Vector2 secondaryTouchPrevious;
-                    primaryTouchPrevious = primaryTouchPos - touch1.deltaPosition; secondaryTouchPrevious = secondaryTouchPos - touch2.deltaPosition;
-                    float previousTouchDistance = Vector2.Distance(primaryTouchPrevious, secondaryTouchPrevious);
-                    float currentTouchDistance = Vector2.Distance(primaryTouchPos, secondaryTouchPos);
-                    float previousRotate = Vector3.SignedAngle(primaryTouchPrevious, secondaryTouchPrevious, Vector3.forward);
-                    float currentRotate = Vector3.SignedAngle(primaryTouchPos, secondaryTouchPos, Vector3.forward);
-
-                    //pinch to zoom
-                    float deltaDistance = currentTouchDistance - previousTouchDistance;
-                    AdjustCameraDistance(deltaDistance * scale / 25f);
-
-                    //rotate y using touch
-                    cameraY += currentRotate - previousRotate;
-                }
+                targetBox.transform.Translate(new Vector3(-delta.x * (Mathf.Pow(scale,2)), 0, -delta.y * Mathf.Pow(scale, 2)));
             }
+            AdjustCameraBox();
         }
-        if (Input.touchCount == 3)
+    }
+
+    private void OnYaw(float axis)
+    {
+        if (IsPointerOverUI() == false)
         {
-            if (IsPointerOverUI() == false)
+            if (yawAdjustable == true)
             {
-                Vector2 primaryTouchPos; Vector2 secondaryTouchPos; Vector2 tertiaryTouchPos;
-                Touch touch1 = Input.GetTouch(0);
-                Touch touch2 = Input.GetTouch(1);
-                Touch touch3 = Input.GetTouch(2);
-                primaryTouchPos = touch1.position; secondaryTouchPos = touch2.position; tertiaryTouchPos = touch3.position;
-
-                if (touch2.phase == TouchPhase.Moved)
+                if (cameraX >= 0 && cameraX <= 90)
                 {
-                    Vector2 primaryTouchPrevious; Vector2 secondaryTouchPrevious;
-                    primaryTouchPrevious = primaryTouchPos - touch1.deltaPosition; secondaryTouchPrevious = secondaryTouchPos - touch2.deltaPosition;
-                    float previousRotate = Vector3.SignedAngle(primaryTouchPrevious, secondaryTouchPrevious, Vector3.forward);
-                    float currentRotate = Vector3.SignedAngle(primaryTouchPos, secondaryTouchPos, Vector3.forward);
-
-                    //rotate y using touch
-                    cameraY += currentRotate - previousRotate;
+                    cameraX += axis * scale;
                 }
-                if (touch3.phase == TouchPhase.Moved)
+                else if (cameraX < 0)
                 {
-                    Vector2 primaryTouchPrevious; Vector2 secondaryTouchPrevious;
-                    primaryTouchPrevious = primaryTouchPos - touch1.deltaPosition; secondaryTouchPrevious = secondaryTouchPos - touch3.deltaPosition;
-                    float previousRotate = Vector3.SignedAngle(primaryTouchPrevious, secondaryTouchPrevious, Vector3.forward);
-                    float currentRotate = Vector3.SignedAngle(primaryTouchPos, secondaryTouchPos, Vector3.forward);
-
-                    //rotate y using touch
-                    cameraX += currentRotate - previousRotate;
+                    cameraX = 0;
+                }
+                else if (cameraX > 90)
+                {
+                    cameraX = 90;
                 }
             }
+            AdjustCameraBox();
         }
     }
 
     private void AdjustCameraDistance(float zoomLevel)
     {
         if (framingTransposer.CameraDistance >= 6)
-            framingTransposer.CameraDistance += Input.mouseScrollDelta.y * scale;
+            framingTransposer.CameraDistance += zoomLevel * scale;
         else
             framingTransposer.CameraDistance = 6;
+        AdjustCameraBox();
     }
 
     public void TopDownView()
     {
         cameraX = 90; cameraY = 0;
+        AdjustCameraBox();
     }
 
     public void PerspectiveView()
     {
         cameraX = 27.5f; cameraY = 0;
+        AdjustCameraBox();
     }
 
     public void MoveMouseX(int shift = 0)
     {
-        float horizontalSpeed = 0;
-        if (Input.mousePresent == true)
-            horizontalSpeed = (Input.GetAxis("Mouse X")) * 2.5f;
-        if (Input.touchCount > 0)
-        {
-            if ((touchDelta.x * scale) / 2.5f < 5 && (touchDelta.x * scale) / 2.5f > -5)
-                horizontalSpeed = (touchDelta.x * scale) / 2.5f;
-            else if ((touchDelta.x * scale) / 2.5f > 5)
-                horizontalSpeed = 5;
-            else
-                horizontalSpeed = -5;
-        }
+        Vector2 currentTouchPosition = system.camera.Touch0.ReadValue<Vector2>();
+        Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
+        float delta = touchDelta.x;
+
+        if (delta > 1) delta = 1;
+        if (delta < -1) delta = -1;
 
         if (shift == -1)
-            if (horizontalSpeed < 0)
-                targetBox.transform.Translate(new Vector3(horizontalSpeed, 0, 0));
+            if (delta < 0)
+                targetBox.transform.Translate(new Vector3(delta * scale, 0, 0));
         if (shift == 1)
-            if (horizontalSpeed > 0)
-                targetBox.transform.Translate(new Vector3(horizontalSpeed, 0, 0));
+            if (delta > 0)
+                targetBox.transform.Translate(new Vector3(delta * scale, 0, 0));
+        AdjustCameraBox();
     }
 
     public void MoveMouseY(int shift = 0)
     {
-        float verticalSpeed = 0;
-        if (Input.mousePresent == true)
-            verticalSpeed = (Input.GetAxis("Mouse Y")) * 2.5f;
-        if (Input.touchCount > 0)
-        {
-            if ((touchDelta.y * scale) / 2.5f < 5 && (touchDelta.y * scale) / 2.5f > -5)
-                verticalSpeed = (touchDelta.y * scale) / 2.5f;
-            else if ((touchDelta.x * scale) / 2.5f > 5)
-                verticalSpeed = 5;
-            else
-                verticalSpeed = -5;
-        }
+        Vector2 currentTouchPosition = system.camera.Touch0.ReadValue<Vector2>();
+        Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
+        float delta = touchDelta.y;
+
+        if (delta > 1) delta = 1;
+        if (delta < -1) delta = -1;
 
         if (shift == -1)
-            if (verticalSpeed < 0)
-                targetBox.transform.Translate(new Vector3(0, 0, verticalSpeed));
+            if (delta < 0)
+                targetBox.transform.Translate(new Vector3(0, 0, delta * scale));
         if (shift == 1)
-            if (verticalSpeed > 0)
-                targetBox.transform.Translate(new Vector3(0, 0, verticalSpeed));
+            if (delta > 0)
+                targetBox.transform.Translate(new Vector3(0, 0, delta * scale));
+        AdjustCameraBox();
     }
 
     public void MoveCameraToPos(Vector3 previewPos, Vector2Int previewSize)
@@ -264,6 +283,13 @@ public class CameraController : MonoBehaviour
         }
 
         targetBox.transform.position = (new Vector3(hitboxX, 0, hitboxY));
+        AdjustCameraBox();
+    }
+
+    private void ResetTouchDefaults()
+    {
+        previousTouchDistance = 0; previousRotate = 0;
+        previousTouchPosition = Vector2.zero;
     }
 
     public bool IsPointerOverUI()
@@ -273,7 +299,7 @@ public class CameraController : MonoBehaviour
             return true;
 
         //check touch
-        if (Input.touchCount > 0 && Input.touches[0].phase == TouchPhase.Began)
+        if (system.camera.Touch0_Activated.inProgress)
         {
             if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
                 return true;

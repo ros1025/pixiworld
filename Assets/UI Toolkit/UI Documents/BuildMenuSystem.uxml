@@ -1,0 +1,25 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/buildmenu.uss?fileID=7433441132597879392&amp;guid=1ce95bc0682d0084699602e9dc1b700a&amp;type=3#buildmenu" />
+    <engine:VisualElement style="flex-grow: 1; max-height: 420px; min-height: 420px; position: absolute; bottom: 0;">
+        <engine:VisualElement name="TopBar" style="flex-grow: 1; flex-direction: row;">
+            <engine:Button text="&#10;" name="CancelButton" />
+            <engine:VisualElement name="categories" style="min-height: 70px; max-height: 70px;">
+                <engine:ScrollView mode="Horizontal" vertical-scroller-visibility="Hidden" mouse-wheel-scroll-size="300" touch-scroll-type="Elastic" style="flex-direction: row;" />
+                <engine:Button text="Button" class="tools-button" />
+            </engine:VisualElement>
+        </engine:VisualElement>
+        <engine:VisualElement name="BottomBar" style="flex-grow: 1; min-height: 350px; max-height: 350px; flex-direction: row;">
+            <engine:VisualElement name="sections" style="flex-grow: 1;">
+                <engine:Button text="Button" name="Furniture" class="sections-button" />
+                <engine:Button text="Button" name="Building" class="sections-button" />
+                <engine:Button text="Button" name="Inventory" class="sections-button" />
+                <engine:Button text="Button" name="Search" class="sections-button" />
+            </engine:VisualElement>
+            <engine:VisualElement name="items" style="flex-grow: 1;">
+                <engine:ScrollView mode="Horizontal" mouse-wheel-scroll-size="300" touch-scroll-type="Elastic" style="min-height: 340px;">
+                    <engine:Button text="Button" class="viewport-button" />
+                </engine:ScrollView>
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

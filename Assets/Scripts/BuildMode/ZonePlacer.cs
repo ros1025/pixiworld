@@ -34,7 +34,6 @@ public class ZonePlacer : MonoBehaviour
         previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + 0.01f, position.z + 0.05f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
-        Debug.Log(zoneComponent.gameObject);
         zoneComponent.InstantiateNew(placementSystem, ID, size);
         zoneData.Add(new ZoneSaveData(zoneObject, gridPos, rotation, size, ID, zoneComponent.floors));
         zoneObject.transform.SetParent(this.transform);

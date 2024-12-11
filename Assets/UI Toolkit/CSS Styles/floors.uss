@@ -5,8 +5,8 @@
     align-self: center;
     justify-content: center;
     font-size: 50px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium");
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium");
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
     padding-top: 5px;
     padding-right: 5px;
     padding-bottom: 5px;
@@ -17,7 +17,7 @@
     border-top-right-radius: 35px;
     border-bottom-right-radius: 35px;
     border-bottom-left-radius: 35px;
-    letter-spacing: -6px;
+    letter-spacing: -5px;
 }
 
 .button-up {
@@ -31,7 +31,7 @@
     align-items: center;
     justify-content: center;
     -unity-text-align: middle-center;
-    background-image: url('project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-4528830608231651361&guid=6922e04171a637647a1f805a617ad8c1&type=3#arrow-up@2x');
+    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-4528830608231651361&guid=6922e04171a637647a1f805a617ad8c1&type=3#arrow-up@2x");
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
@@ -58,7 +58,7 @@
     align-items: center;
     justify-content: center;
     -unity-text-align: middle-center;
-    background-image: url('project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-1304905567622442630&guid=6922e04171a637647a1f805a617ad8c1&type=3#arrow-down@2x');
+    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-1304905567622442630&guid=6922e04171a637647a1f805a617ad8c1&type=3#arrow-down@2x");
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);

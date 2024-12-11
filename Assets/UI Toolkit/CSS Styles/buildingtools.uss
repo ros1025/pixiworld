@@ -65,14 +65,14 @@
     margin-right: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium");
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Monotype%20%20-%20VAG%20Rounded%20Next%20Medium.otf?fileID=12800000&guid=114d78182aec8ad4d9c10eefc757a221&type=3#Monotype  - VAG Rounded Next Medium");
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
     font-size: 44px;
     -unity-text-align: middle-left;
     align-items: auto;
     max-height: 80px;
     min-width: 100px;
-    letter-spacing: -6px;
+    letter-spacing: 0;
 }
 
 .general-button {
