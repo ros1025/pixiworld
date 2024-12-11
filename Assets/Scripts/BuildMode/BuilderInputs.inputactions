@@ -9,7 +9,7 @@
                     "name": "OnClicked",
                     "type": "Button",
                     "id": "d60f8f79-0243-4f43-9a79-4cff917a25e3",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -18,7 +18,7 @@
                     "name": "OnHold",
                     "type": "Button",
                     "id": "21db327e-b2e9-46e1-abfe-02bf940efb96",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -27,7 +27,7 @@
                     "name": "OnAction",
                     "type": "Button",
                     "id": "17ab5bb6-0ed9-4b1a-b530-543dd5e81e48",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -36,7 +36,7 @@
                     "name": "OnExit",
                     "type": "Button",
                     "id": "5ab808e9-5ca5-4eab-9d3e-b439c0041aab",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -54,7 +54,7 @@
                     "name": "OnRightClick",
                     "type": "Button",
                     "id": "9e131e5e-1042-49f7-ab44-87915dead8fe",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -75,7 +75,7 @@
                 {
                     "name": "",
                     "id": "132981ea-b3aa-4fba-afec-162a7150467c",
-                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "path": "<Touchscreen>/touch0/tap",
                     "interactions": "MultiTap",
                     "processors": "",
                     "groups": "",
@@ -109,7 +109,7 @@
                     "name": "",
                     "id": "bb4795db-8072-4d21-852b-bba65002a863",
                     "path": "<Keyboard>/#(P)",
-                    "interactions": "",
+                    "interactions": "Tap",
                     "processors": "",
                     "groups": "",
                     "action": "OnAction",
@@ -163,7 +163,7 @@
                 {
                     "name": "",
                     "id": "3b49104f-5a8d-4dce-9a07-bf68f1171584",
-                    "path": "<Touchscreen>/primaryTouch/delta",
+                    "path": "<Touchscreen>/touch0/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -184,7 +184,7 @@
                 },
                 {
                     "name": "",
-                    "id": "c991e19f-0f55-411b-9eea-b4157eb8bfc7",
+                    "id": "21083de9-7f96-438e-95bc-2b9bb4dc9c46",
                     "path": "<Keyboard>/#(;)",
                     "interactions": "Tap",
                     "processors": "",
@@ -203,7 +203,7 @@
                     "name": "zoom",
                     "type": "Value",
                     "id": "d2885748-1320-4889-ad56-0838ccfc6e42",
-                    "expectedControlType": "",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -212,7 +212,7 @@
                     "name": "move",
                     "type": "Value",
                     "id": "d7431411-606b-4eb2-8ea5-937269d05071",
-                    "expectedControlType": "",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -221,7 +221,7 @@
                     "name": "rotate",
                     "type": "Value",
                     "id": "ebc1dcf0-fb82-44f8-9335-ae8d6aa52d6e",
-                    "expectedControlType": "",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -230,6 +230,42 @@
                     "name": "yaw",
                     "type": "Value",
                     "id": "4bb328b1-404b-48df-8df6-9a42ac06c31c",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Touch0",
+                    "type": "Value",
+                    "id": "27c8654d-6035-466d-87e4-9d28c4ac58c2",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Touch0_Activated",
+                    "type": "Button",
+                    "id": "7bd8e000-4489-4d79-a713-c1e17a27b6f9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Touch1",
+                    "type": "Value",
+                    "id": "ff66d8ff-fe1b-4aa0-9bdd-20007cdca6da",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Touch1_Activated",
+                    "type": "Button",
+                    "id": "28b0cd74-2d9f-4cb1-86b3-a3a4b620471e",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -247,50 +283,6 @@
                     "action": "zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "TouchSystem",
-                    "id": "a77b0ab1-7c57-4eed-b0c6-900da986f8d1",
-                    "path": "TwoModifiers",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "zoom",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "modifier1",
-                    "id": "1a46d7d6-1571-4868-8427-c4f866999699",
-                    "path": "<Touchscreen>/touch0/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "zoom",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "modifier2",
-                    "id": "f99269e2-b4e3-4109-8c0d-1e6876dfa411",
-                    "path": "<Touchscreen>/touch1/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "zoom",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "a74e1ca2-6e5f-495e-b7bf-1f40c29b3182",
-                    "path": "<Touchscreen>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "zoom",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 },
                 {
                     "name": "MouseSystem",
@@ -318,39 +310,6 @@
                     "name": "binding",
                     "id": "460ca82c-557c-4c02-b59c-387a45b55c02",
                     "path": "<Mouse>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "TouchSystem",
-                    "id": "d0d9d795-93b5-44ab-a0c4-ea7409bf9983",
-                    "path": "OneModifier",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "move",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "modifier",
-                    "id": "87614bad-29c9-46e5-81ed-b147ff344374",
-                    "path": "<Touchscreen>/Press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "73f8ed9b-ae46-4969-8853-505b8d6d02da",
-                    "path": "<Touchscreen>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -392,50 +351,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "TouchSystem",
-                    "id": "b0e0d79a-eac8-4586-95fe-d1bb4da19790",
-                    "path": "TwoModifiers",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "rotate",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "modifier1",
-                    "id": "114185a4-fef8-49eb-af73-1ab3e128a859",
-                    "path": "<Touchscreen>/touch0/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "modifier2",
-                    "id": "1d4c84ea-3bff-4dc9-885c-580abbe1236d",
-                    "path": "<Touchscreen>/touch1/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "1c6e60f4-defa-4acb-88ba-7f0b8f0e333e",
-                    "path": "<Touchscreen>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
                     "name": "MouseSystem",
                     "id": "a20da618-115a-4612-998a-bdbc3ed4d6c1",
                     "path": "OneModifier",
@@ -469,48 +384,59 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "TouchSystem",
-                    "id": "2c3bf306-3efe-49e2-9048-19c27656d02f",
-                    "path": "TwoModifiers",
+                    "name": "",
+                    "id": "4fd6b8a9-50ce-4be0-bc96-e14c7d049b07",
+                    "path": "<Touchscreen>/touch0/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "yaw",
-                    "isComposite": true,
+                    "action": "Touch0",
+                    "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "modifier1",
-                    "id": "9e9f1509-87ae-4ee5-bf9c-f7eea280fea2",
-                    "path": "<Touchscreen>/touch0/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "yaw",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "modifier2",
-                    "id": "c65bfed9-85cc-4c55-b66c-57fec2cc2eea",
-                    "path": "<Touchscreen>/touch2/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "yaw",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "64bbf92b-0318-41d3-9557-b54eb01586a1",
+                    "name": "",
+                    "id": "f7a5f67b-b030-48c1-9438-1fe5e6422d28",
                     "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "yaw",
+                    "action": "Touch0",
                     "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c697032b-7263-40eb-a6f2-468ceac68f65",
+                    "path": "<Touchscreen>/touch0/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Touch0_Activated",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0baa164-5241-4623-852d-f4ad0ccba992",
+                    "path": "<Touchscreen>/touch1/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Touch1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a211d17d-317a-45fa-81c4-204b619731bb",
+                    "path": "<Touchscreen>/touch1/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Touch1_Activated",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

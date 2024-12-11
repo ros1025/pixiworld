@@ -15,7 +15,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -23,8 +23,8 @@
     -unity-font-style: normal;
     background-color: rgb(255, 255, 255);
     font-size: 22px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
-    letter-spacing: -6px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    letter-spacing: -5px;
 }
 
 .viewport-button:hover {
@@ -44,7 +44,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -71,7 +71,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -199,8 +199,7 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -211,7 +210,8 @@
     max-height: 55px;
     min-width: 100px;
     color: rgb(255, 255, 255);
-    letter-spacing: -6px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
+    letter-spacing: -5px;
 }
 
 .tools-button:hover {
@@ -231,7 +231,7 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -261,7 +261,7 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -291,7 +291,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     -unity-font-definition: initial;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;
@@ -320,7 +320,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     -unity-font-definition: initial;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;
@@ -349,7 +349,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     -unity-font-definition: initial;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Fonts/Monotype%20%20-%20VAG%20Rounded%20Next%20SemiBold.otf?fileID=12800000&guid=035710a472c5c4d44b713810fa479674&type=3#Monotype  - VAG Rounded Next SemiBold");
+    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;

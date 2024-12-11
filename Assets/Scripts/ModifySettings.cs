@@ -133,10 +133,13 @@ public class ModifySettings : MonoBehaviour
         int resolution = Resolutions[index];
         currentRes = resolution;
 
+        /*
         Display.main.SetRenderingResolution(
             Mathf.RoundToInt(resolution * displaywidth / displayheight),
             resolution
             );
+        */
+        ScalableBufferManager.ResizeBuffers((float)resolution / displayheight, (float)resolution / displayheight);
     }
 
     public int DetermineCurrentPerformanceMode()

@@ -28,7 +28,7 @@ public class InputManager : MonoBehaviour
         builder = new BuilderInputs();
         builder.Enable();
         builder.builder.OnHold.performed += OnHold_performed;
-        builder.builder.OnHold.canceled += OnMouseReleased; ;
+        builder.builder.OnHold.canceled += OnMouseReleased;
         builder.builder.OnClicked.performed += OnClicked_performed;
         builder.builder.OnClicked.canceled += OnMouseReleased;
         builder.builder.OnExit.performed += OnExit_performed;
@@ -91,6 +91,7 @@ public class InputManager : MonoBehaviour
         //    OnMoved?.Invoke();
         //}
 
+        /*
         if (Input.touchSupported == true)
         {
             Touch touch = Input.GetTouch(0);
@@ -103,6 +104,7 @@ public class InputManager : MonoBehaviour
             if (touch.phase == UnityEngine.TouchPhase.Ended)
                 OnRelease?.Invoke();
         }
+        */
     }
 
     public void InvokeAction()
@@ -150,30 +152,15 @@ public class InputManager : MonoBehaviour
     public Vector3 GetMousePosition()
     {
         Vector3 mousePos;
-        if (Input.mousePresent)
-        {
-            mousePos = Input.mousePosition;
-        }
-        else
-        {
-            Touch touch = Input.GetTouch(0);
-            mousePos = touch.position;
-        }
+        mousePos = builder.camera.Touch0.ReadValue<Vector2>();
+        //Debug.Log(mousePos);
         return mousePos;
     }
 
     public Vector3 GetSelectedMapPosition()
     {
         Vector3 mousePos;
-        if (Input.mousePresent)
-        {
-            mousePos = Input.mousePosition;
-        }
-        else
-        {
-            Touch touch = Input.GetTouch(0);
-            mousePos = touch.position;
-        }
+        mousePos = builder.camera.Touch0.ReadValue<Vector2>();
         mousePos.z = sceneCamera.nearClipPlane;
         ray = sceneCamera.ScreenPointToRay(mousePos);
         if (Physics.Raycast(ray, out hit, float.PositiveInfinity, placementLayermask))
