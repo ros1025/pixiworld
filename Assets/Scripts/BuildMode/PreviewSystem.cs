@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Splines;
 
 public class PreviewSystem : MonoBehaviour
 {
@@ -52,6 +53,16 @@ public class PreviewSystem : MonoBehaviour
     [NonSerialized] public bool dynamic;
     [NonSerialized] public bool gridSnap;
     [NonSerialized] public Vector2Int previewSize;
+
+    [SerializeField]
+    private SplineContainer dynamicCursor;
+    [SerializeField]
+    private MeshFilter dynamicMesh;
+    [SerializeField]
+    private  MeshRenderer dynamicRenderer;
+    [SerializeField]
+    private MeshCollider dynamicCollider;
+
     private Vector2Int minSize;
 
     private void Start()
@@ -173,7 +184,7 @@ public class PreviewSystem : MonoBehaviour
         selectedWall = wall;
     }
 
-    public void ModifyRoad(List<Vector3> points, Roads road, int cost, float length, int width)
+    public void ModifyRoad(List<Vector3> points, Roads road, int cost, float length, float width)
     {
         previewSelector = Instantiate(previewSelectorObject);
         previewPos = points[0];
@@ -187,7 +198,7 @@ public class PreviewSystem : MonoBehaviour
         selectedRoad = road;
         for (int i = 0; i < points.Count; i++)
         {
-            UpdatePointer(points[i], true, i, cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width);
+            UpdatePointer(points[i], true, i, cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width, 0.1f);
         }
     }
 
@@ -232,9 +243,14 @@ public class PreviewSystem : MonoBehaviour
     {
         cellIndicator.transform.localScale = Vector3.one;
         previewSelector.transform.localScale = new Vector3(1, 0.1f, 1);
-        expanderParent.AddComponent<LineRenderer>();
-        expanderParent.GetComponent<LineRenderer>().positionCount = 0;
-        expanderParent.GetComponent<LineRenderer>().material = previewMaterialPrefab;
+        //expanderParent.AddComponent<LineRenderer>();
+        //expanderParent.GetComponent<LineRenderer>().positionCount = 0;
+        //expanderParent.GetComponent<LineRenderer>().material = previewMaterialPrefab;
+
+        if (dynamicCursor.Splines.Count >= 0)
+        {
+            dynamicCursor.AddSpline();
+        }
 
         expanderParent.transform.position = new Vector3(originPos.x, 0.01f, originPos.z);
         expanderParent.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -266,7 +282,9 @@ public class PreviewSystem : MonoBehaviour
         foreach (GameObject expander in expanders)
             GameObject.Destroy(expander);
         expanders.Clear();
-        Destroy(expanderParent.GetComponent<LineRenderer>());
+        dynamicMesh.mesh = null;
+        dynamicCollider.sharedMesh = null;
+        dynamicCursor[0].Clear();
         previewObject = null;
         previewSelector = null;
     }
@@ -332,49 +350,81 @@ public class PreviewSystem : MonoBehaviour
         previewSelector.transform.localScale = new Vector3(previewSize.x - 0.1f, 0.6f, previewSize.y - 0.1f);
     }
 
-    public void UpdatePointer(Vector3 position, bool validity, int index, int cost, int length, int width)
+    public void UpdatePointer(Vector3 position, bool validity, int index, int cost, float length, float width, float height)
     {
         GameObject pointer = Instantiate(pointerCursor, new Vector3(position.x, position.y + 0.01f, position.z), Quaternion.Euler(0, 0, 0));
         pointer.transform.SetParent(expanderParent.transform);
-        expanders.Add(pointer);
+        float pointerWidth = width > 0.5f ? width * 2f : 1;
+        pointer.transform.localScale = new Vector3(pointerWidth, pointerWidth, pointerWidth);
+        expanders.Insert(index, pointer);
+        //Debug.Log(width);
 
         cellIndicator.transform.localScale = new Vector3(previewSize.x, previewSize.y, previewSize.y);
         previewSelector.transform.localScale = new Vector3(previewSize.x - 0.1f, 0.6f, previewSize.y - 0.1f);
 
-        LineRenderer line = expanderParent.GetComponent<LineRenderer>();
-        line.positionCount = index + 1;
-        line.SetPosition(index, new Vector3(position.x, position.y + 0.01f, position.z));
+        BezierKnot knot = new BezierKnot(new Vector3(position.x, position.y, position.z));
+        dynamicCursor[0].Insert(index, knot);
+
+        UpdateDirection();
 
         Color c = validity ? Color.white : Color.red;
 
         c.a = 0.5f;
-        line.material.color = c; cellIndicatorRenderer.material.color = c;
+        dynamicRenderer.material.color = c;
 
         ApplyFeedbackToCursor(validity);
         buildToolsUI.canPlace = validity;
-        buildToolsUI.AdjustLabels(cost, new Vector2Int(length, width));
+        buildToolsUI.AdjustLabels(cost, new Vector2Int(Mathf.RoundToInt(length), Mathf.RoundToInt(width) > 0 ? Mathf.RoundToInt(width) : 1));
         previewPos = position;
+
+        UpdatePreviewSpline(width, height);
     }
 
-    public void MovePointer(Vector3 position, bool validity, int cost, int length, int width)
+    public void RemovePointer(int index, bool validity, int cost, float length, float width, float height)
+    {
+        Destroy(expanders[index]);
+        expanders.RemoveAt(index);
+
+        dynamicCursor[0].RemoveAt(index);
+
+        UpdateDirection();
+
+        Color c = validity ? Color.white : Color.red;
+
+        c.a = 0.5f;
+        dynamicRenderer.material.color = c;
+
+        ApplyFeedbackToCursor(validity);
+        buildToolsUI.canPlace = validity;
+        buildToolsUI.AdjustLabels(cost, new Vector2Int(Mathf.RoundToInt(length), Mathf.RoundToInt(width) > 0 ? Mathf.RoundToInt(width) : 1));
+        UpdatePreviewSpline(width, height);
+
+    }
+
+    public void MovePointer(Vector3 position, bool validity, int cost, float length, float width, float height)
     {
         SelectedCursor.transform.position = position;
 
         cellIndicator.transform.localScale = new Vector3(previewSize.x, previewSize.y, previewSize.y);
         previewSelector.transform.localScale = new Vector3(previewSize.x - 0.1f, 0.6f, previewSize.y - 0.1f);
 
-        LineRenderer line = expanderParent.GetComponent<LineRenderer>();
+        //LineRenderer line = expanderParent.GetComponent<LineRenderer>();
         int index = expanders.IndexOf(SelectedCursor);
-        line.SetPosition(index, new Vector3(position.x, position.y + 0.01f, position.z));
+        BezierKnot kt = dynamicCursor[0][index];
+        kt.Position = position;
+        dynamicCursor[0].SetKnot(index, kt);
+
+        UpdateDirection();
 
         Color c = validity ? Color.white : Color.red;
 
         c.a = 0.5f;
-        line.material.color = c; cellIndicatorRenderer.material.color = c;
+        dynamicRenderer.material.color = c;
 
         ApplyFeedbackToCursor(validity);
         buildToolsUI.canPlace = validity;
-        buildToolsUI.AdjustLabels(cost, new Vector2Int(length, width));
+        buildToolsUI.AdjustLabels(cost, new Vector2Int(Mathf.RoundToInt(length), Mathf.RoundToInt(width) > 0 ? Mathf.RoundToInt(width) : 1));
+        UpdatePreviewSpline(width, height); 
         previewPos = position;
     }
 
@@ -383,9 +433,9 @@ public class PreviewSystem : MonoBehaviour
         foreach (GameObject expander in expanders)
             GameObject.Destroy(expander);
         expanders.Clear();
-        LineRenderer line = expanderParent.GetComponent<LineRenderer>();
-        line.ResetBounds();
-        line.positionCount = 0;
+        dynamicCursor[0].Clear();
+        dynamicMesh.mesh = null;
+        dynamicCollider.sharedMesh = null;
     }
 
     public bool CheckPreviewPositions()
@@ -409,6 +459,49 @@ public class PreviewSystem : MonoBehaviour
             }
         }
         return ans;
+    }
+
+    public bool CheckPreviewSpline()
+    {
+        if (input.RayHitObject(dynamicCollider.gameObject))
+        {
+            SelectedCursor = dynamicCollider.gameObject;
+            SelectedCursor.GetComponent<Renderer>().material.color = selectedColor;
+            return true;
+        }
+        return false;
+    }
+
+    public int GetSplineIndex(Vector3 point)
+    {
+        SplineUtility.GetNearestPoint(dynamicCursor[0], point, out _, out float t1);
+
+        if (dynamicCursor[0].Count > 0)
+        {
+            int start = 0; int end = dynamicCursor[0].Count - 1;
+
+            while (end > start)
+            {
+                int mid = (start + end) / 2;
+                float t2 = dynamicCursor[0].ConvertIndexUnit(mid, PathIndexUnit.Knot, PathIndexUnit.Normalized);
+                if (t1 > t2)
+                {
+                    start = mid + 1;
+                }
+                else if (t1 < t2)
+                {
+                    end = mid - 1;
+                }
+                else return mid;
+            }
+
+            if (t1 > dynamicCursor[0].ConvertIndexUnit(start, PathIndexUnit.Knot, PathIndexUnit.Normalized))
+            {
+                return start + 1;
+            }
+            else return start;
+        }
+        else return -1;
     }
 
     private void ApplyFeedbackToPreview(bool validity)
@@ -454,5 +547,131 @@ public class PreviewSystem : MonoBehaviour
     private void RotatePreview(int rotation)
     {
         previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+    }
+
+    private void UpdateDirection()
+    {
+        if (dynamicCursor[0].Count >= 2)
+        {
+            for (int i = 0; i < dynamicCursor[0].Count - 1; i++)
+            {
+                BezierKnot kt = dynamicCursor[0][i];
+                Vector3 vecA = (Vector3)(dynamicCursor[0][i + 1].Position - dynamicCursor[0][i].Position);
+                kt.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, vecA, Vector3.up), 0);
+                if (i > 0)
+                {
+                    Vector3 vecB = (Vector3)(dynamicCursor[0][i].Position - dynamicCursor[0][i - 1].Position);
+                    kt.TangentIn = (vecB.normalized - vecA.normalized) * 0.1f;
+                }
+                kt.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
+                dynamicCursor[0][i] = kt;
+            }
+
+            BezierKnot ktL = dynamicCursor[0][^1];
+            ktL.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, dynamicCursor[0][^1].Position - dynamicCursor[0][^2].Position, Vector3.up), 0);
+            ktL.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
+            dynamicCursor[0][^1] = ktL;
+        }
+    }
+
+    private void UpdatePreviewSpline(float width, float height)
+    {
+        if (dynamicCursor[0].Count >= 2)
+        {
+            float uvOffset = 0;
+
+            Mesh mesh = new Mesh();
+            Mesh mesh2 = new Mesh();
+
+            List<Vector3> currentVerts = new List<Vector3>();
+            List<int> tris = new List<int>();
+            List<Vector2> currentUVs = new List<Vector2>();
+
+            for (int currentPointIndex = 1; currentPointIndex < dynamicCursor[0].Count; currentPointIndex++)
+            {
+                int vertOffset = currentPointIndex;
+
+                Vector3 dir = (dynamicCursor[0][vertOffset - 1].Position - dynamicCursor[0][vertOffset].Position);
+                Vector3 side = Vector3.Cross(dir.normalized, Vector3.up);
+
+                Vector3 p1 = ((Vector3)dynamicCursor[0][vertOffset - 1].Position) - side * width;
+                Vector3 p2 = p1 + new Vector3(0, height, 0);
+                Vector3 p3 = ((Vector3)dynamicCursor[0][vertOffset - 1].Position) + side * width;
+                Vector3 p4 = p3 + new Vector3(0, height, 0);
+                Vector3 p5 = ((Vector3)dynamicCursor[0][vertOffset].Position) - side * width;
+                Vector3 p6 = p5 + new Vector3(0, height, 0);
+                Vector3 p7 = ((Vector3)dynamicCursor[0][vertOffset].Position) + side * width;
+                Vector3 p8 = p7 + new Vector3(0, height, 0);
+
+                //offset = 8 * calculateRes(currentSplineIndex);
+                int offset = 8 * (currentPointIndex - 1);
+
+                int t1 = offset + 0;
+                int t2 = offset + 4;
+                int t3 = offset + 5;
+                int t4 = offset + 5;
+                int t5 = offset + 1;
+                int t6 = offset + 0;
+
+                int t7 = offset + 2;
+                int t8 = offset + 3;
+                int t9 = offset + 7;
+                int t10 = offset + 7;
+                int t11 = offset + 6;
+                int t12 = offset + 2;
+
+                int t13 = offset + 5;
+                int t14 = offset + 7;
+                int t15 = offset + 3;
+                int t16 = offset + 3;
+                int t17 = offset + 1;
+                int t18 = offset + 5;
+
+                currentVerts.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
+                tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                tris.AddRange(new List<int> { t6, t5, t4, t3, t2, t1 });
+                tris.AddRange(new List<int> { t7, t8, t9, t10, t11, t12 });
+                tris.AddRange(new List<int> { t12, t11, t10, t9, t8, t7 });
+                tris.AddRange(new List<int> { t13, t14, t15, t16, t17, t18 });
+                tris.AddRange(new List<int> { t18, t17, t16, t15, t14, t13 });
+
+                float distance = Vector3.Distance(p1, p5);
+                float uvDistance = uvOffset + distance;
+                currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, 0), new Vector2(uvOffset, 1), new Vector2(uvOffset, 0), new Vector2(uvOffset, 1),
+                    new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)});
+
+                uvOffset += distance;
+            }
+
+            int t19 = 0;
+            int t20 = 1;
+            int t21 = 3;
+            int t22 = 3;
+            int t23 = 2;
+            int t24 = 0;
+
+            int t25 = (8 * (dynamicCursor[0].Count - 2)) + 4;
+            int t26 = (8 * (dynamicCursor[0].Count - 2)) + 6;
+            int t27 = (8 * (dynamicCursor[0].Count - 2)) + 7;
+            int t28 = (8 * (dynamicCursor[0].Count - 2)) + 7;
+            int t29 = (8 * (dynamicCursor[0].Count - 2)) + 5;
+            int t30 = (8 * (dynamicCursor[0].Count - 2)) + 4;
+
+            tris.AddRange(new List<int> { t19, t20, t21, t22, t23, t24 });
+            tris.AddRange(new List<int> { t25, t26, t27, t28, t29, t30 });
+
+            mesh.SetVertices(currentVerts);
+            mesh.SetTriangles(tris, 0);
+
+            mesh.SetUVs(0, currentUVs);
+
+            mesh2.SetVertices(currentVerts);
+            mesh2.SetTriangles(tris, 0);
+
+            mesh2.SetUVs(0, currentUVs);
+
+            dynamicMesh.mesh = mesh;
+            dynamicCollider.sharedMesh = mesh2;
+        }
     }
 }

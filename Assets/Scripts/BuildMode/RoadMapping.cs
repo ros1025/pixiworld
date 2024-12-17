@@ -1649,6 +1649,17 @@ public class RoadMapping : MonoBehaviour
         }
         return false;
     }
+
+    public bool CheckRoadSelect(InputManager input)
+    {
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (roads.FindIndex(road => overlapsList.FindIndex(col => col.collider == road.collider) != -1) != -1)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 [System.Serializable]

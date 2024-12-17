@@ -53,13 +53,36 @@ public class WallCreateState : IBuildingState
 
         if (previewSystem.expand == true)
         {
-            posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
-            CalculateLength();
-            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+            int index = previewSystem.expanders.IndexOf(previewSystem.SelectedCursor);
+            if ((index > 0 && Vector3.Distance(posList[index - 1], gridPosition) < 0.1f) || (index < posList.Count - 1 && Vector3.Distance(posList[index + 1], gridPosition) < 0.1f))
+            {
+                posList.RemoveAt(index);
+                CalculateLength();
+                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+            }
+            else if (index >= 0)
+            {
+                posList[index] = gridPosition;
+                CalculateLength();
+                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+            }
         }
         else
         {
-            if (!(posList.Contains(gridPosition)))
+            if (previewSystem.SelectedCursor == previewSystem.gameObject)
+            {
+                if (!(posList.Contains(gridPosition)))
+                {
+                    int index = previewSystem.GetSplineIndex(gridPosition);
+                    if (index >= 0)
+                    {
+                        posList.Insert(index, gridPosition);
+                        CalculateLength();
+                        UpdateState(gridPosition, 0);
+                    }
+                }
+            }
+            else if (!(posList.Contains(gridPosition)))
             {
                 posList.Add(gridPosition);
                 CalculateLength();
@@ -120,6 +143,6 @@ public class WallCreateState : IBuildingState
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }
 }
