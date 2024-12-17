@@ -181,6 +181,11 @@ public class InputManager : MonoBehaviour
         else return false;
     }
 
+    public RaycastHit[] RayHitAllObjects()
+    {
+        return Physics.RaycastAll(ray, float.PositiveInfinity, selectorLayermask);
+    }
+
     public GameObject GetObject(Vector3 pos)
     {
         if (Physics.Raycast(new Vector3(pos.x, pos.y + 10, pos.z), Vector3.down, out hit, float.PositiveInfinity, selectorLayermask))

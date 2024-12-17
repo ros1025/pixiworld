@@ -46,7 +46,7 @@ public class WallModifyState : IBuildingState
 
         for (int i = 0; i < posList.Count; i++)
         {
-            previewSystem.UpdatePointer(grid.LocalToWorld(posList[i]), true, posList.IndexOf(posList[i]), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+            previewSystem.UpdatePointer(grid.LocalToWorld(posList[i]), true, posList.IndexOf(posList[i]), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
         }
     }
 
@@ -64,7 +64,7 @@ public class WallModifyState : IBuildingState
         {
             posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
             CalculateLength();
-            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
         }
     }
 
@@ -132,6 +132,6 @@ public class WallModifyState : IBuildingState
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), Mathf.RoundToInt(length), 1);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }
 }

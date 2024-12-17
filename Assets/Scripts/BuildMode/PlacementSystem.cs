@@ -359,6 +359,13 @@ public class PlacementSystem : MonoBehaviour
             cameraController.posAdjustable = false;
             inputManager.OnMoved += PingUpdate;
         }
+        else if (preview.CheckPreviewSpline() == true)
+        {
+            preview.expand = false;
+            preview.dynamic = true;
+            cameraController.posAdjustable = false;
+            PingUpdate();
+        }
         else
         {
             preview.expand = false;
@@ -445,7 +452,7 @@ public class PlacementSystem : MonoBehaviour
 
     private bool isWall()
     {
-        if (walls != null && walls.CheckWallSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
+        if (walls != null && walls.CheckWallSelect(inputManager))
             return true;
         else
             return false;
