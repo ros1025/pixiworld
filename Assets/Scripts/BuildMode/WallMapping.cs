@@ -4,15 +4,15 @@ using UnityEngine.Splines;
 
 public class WallMapping : MonoBehaviour
 {
-    private List<Vector3> m_vertsP1;
-    private List<Vector3> m_vertsP2;
     private int times;
     public List<Wall> walls;
     public List<Room> rooms;
+    public List<Door> doors;
     public List<Intersection> intersections;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private GameObject floorParent;
     [SerializeField] private GameObject ceilParent;
+    [SerializeField] private GameObject selectorObject;
     [SerializeField] private SplineSampler m_SplineSampler;
     [SerializeField] private SplineContainer m_SplineContainer;
     [SerializeField] private Material defaultWallMaterial;
@@ -21,38 +21,10 @@ public class WallMapping : MonoBehaviour
 
     public void MakeWalls()
     {
-        //GetVerts();
         BuildMesh();
     }
 
-    private void GetVerts()
-    {
-        m_vertsP1 = new List<Vector3>();
-        m_vertsP2 = new List<Vector3>();
-
-        Vector3 p1;
-        Vector3 p2;
-        for (int j = 0; j < walls.Count; j++)
-        {
-            //int resolution = (int)(walls[j].wall.GetLength() * 2);
-            int resolution = walls[j].resolution;
-            float step = 1f / (float)resolution;
-            for (int i = 0; i < resolution; i++)
-            {
-                float t = step * i;
-
-                m_SplineSampler.SampleSplineWidth(j, t, 0.04f, out p1, out p2);
-                m_vertsP1.Add(p1);
-                m_vertsP2.Add(p2);
-            }
-
-            m_SplineSampler.SampleSplineWidth(j, 1f, 0.04f, out p1, out p2);
-            m_vertsP1.Add(p1);
-            m_vertsP2.Add(p2);
-        }
-    }
-
-    private void GetVerts(int index, out List<Vector3> vertsP1, out List<Vector3> vertsP2)
+    private void GetVerts(int index, float d, out List<Vector3> vertsP1, out List<Vector3> vertsP2)
     {
         vertsP1 = new List<Vector3>();
         vertsP2 = new List<Vector3>();
@@ -66,12 +38,12 @@ public class WallMapping : MonoBehaviour
         {
             float t = step * i;
 
-            m_SplineSampler.SampleSplineWidth(index, t, 0.04f, out p1, out p2);
+            m_SplineSampler.SampleSplineWidth(index, t, d, out p1, out p2);
             vertsP1.Add(p1);
             vertsP2.Add(p2);
         }
 
-        m_SplineSampler.SampleSplineWidth(index, 1f, 0.04f, out p1, out p2);
+        m_SplineSampler.SampleSplineWidth(index, 1f, d, out p1, out p2);
         vertsP1.Add(p1);
         vertsP2.Add(p2);
     }
@@ -142,12 +114,15 @@ public class WallMapping : MonoBehaviour
     private void BuildWall(int currentSplineIndex)
     {
         int offset = 0; float uvOffset = 0;
-        GetVerts(currentSplineIndex, out List<Vector3> m_vertsP1, out List<Vector3> m_vertsP2);
+        //GetVerts(currentSplineIndex, 0.04f, out List<Vector3> m_vertsP1, out List<Vector3> m_vertsP2);
+        //GetVerts(currentSplineIndex, 0.001f, out List<Vector3> m_vertsP3, out List<Vector3> m_vertsP4);
 
         Mesh wall = new Mesh();
         wall.subMeshCount = 3;
 
-        List<Vector3> currentVerts = new List<Vector3>();
+        List<Vector3> vertsA = new List<Vector3>();
+        List<Vector3> vertsB = new List<Vector3>();
+
         List<int> trisA = new List<int>();
         List<int> trisB = new List<int>();
         List<int> trisS = new List<int>();
@@ -163,52 +138,139 @@ public class WallMapping : MonoBehaviour
 
         for (int currentPointIndex = 1; currentPointIndex <= resolution; currentPointIndex++)
         {
-            int vertOffset = currentPointIndex;
-            Vector3 p1 = m_vertsP1[vertOffset - 1];
-            Vector3 p2 = p1 + new Vector3(0, 2, 0);
-            Vector3 p3 = m_vertsP2[vertOffset - 1];
-            Vector3 p4 = p3 + new Vector3(0, 2, 0);
-            Vector3 p5 = m_vertsP1[vertOffset];
-            Vector3 p6 = p5 + new Vector3(0, 2, 0);
-            Vector3 p7 = m_vertsP2[vertOffset];
-            Vector3 p8 = p7 + new Vector3(0, 2, 0);
+            int vertOffset = currentPointIndex; float uvDistance = 0;
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.04f, out Vector3 point1, out Vector3 point2);
+            int draws = 1;
 
-            offset = 0;
-            //offset = 8 * calculateRes(currentSplineIndex);
-            offset += 8 * (currentPointIndex - 1);
+            Vector3 h1 = Vector3.zero;
+            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
+            {
+                h1 = new Vector3(0, 1.9f, 0);
+            }
+            Vector3 p1 = point1 + h1;
+            Vector3 p2 = point1 + new Vector3(0, 2, 0);
+            Vector3 p3 = point2 + h1;
+            Vector3 p4 = point2 + new Vector3(0, 2, 0);
+            vertsA.AddRange(new List<Vector3> { p1, p2, p3, p4 });
+            currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1), new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1)});
 
-            int t1 = offset + 0;
-            int t2 = offset + 4;
-            int t3 = offset + 5;
-            int t4 = offset + 5;
-            int t5 = offset + 1;
-            int t6 = offset + 0;
+            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
+            {
+                draws += 2;
+                Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
 
-            int t7 = offset + 2;
-            int t8 = offset + 3;
-            int t9 = offset + 7;
-            int t10 = offset + 7;
-            int t11 = offset + 6;
-            int t12 = offset + 2;
+                m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point), 0.04f, out Vector3 pointA, out Vector3 pointB);
+                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, 2, 0), pointB, pointB + new Vector3(0, 2, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, 2, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, 2, 0) });
 
-            int t13 = offset + 1;
-            int t14 = offset + 5;
-            int t15 = offset + 7;
-            int t16 = offset + 7;
-            int t17 = offset + 3;
-            int t18 = offset + 1;
+                uvDistance = uvOffset + Vector3.Distance(pointA, point1);
+                currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1),
+                new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1)});
+            }
 
-            currentVerts.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
-            trisA.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
-            trisA.AddRange(new List<int> { t6, t5, t4, t3, t2, t1 });
-            trisB.AddRange(new List<int> { t7, t8, t9, t10, t11, t12 });
-            trisB.AddRange(new List<int> { t12, t11, t10, t9, t8, t7 });
-            trisS.AddRange(new List<int> { t13, t14, t15, t16, t17, t18 });
+            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] 
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution) != -1)
+            {
+                draws += 2;
+                Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex]
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution);
 
-            float distance = Vector3.Distance(p1, p5);
-            float uvDistance = uvOffset + distance;
-            currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, 0), new Vector2(uvOffset, 1), new Vector2(uvOffset, 0), new Vector2(uvOffset, 1),
-                    new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)});
+                m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length)), 0.04f, out Vector3 pointA, out Vector3 pointB);
+                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, 2, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, 2, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, 2, 0), pointB, pointB + new Vector3(0, 2, 0) });
+
+                uvDistance = uvOffset + Vector3.Distance(pointA, point1);
+                currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1),
+                new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)}); ;
+            }
+
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.04f, out Vector3 point3, out Vector3 point4);
+            float distance = Vector3.Distance(point3, point1);
+            uvDistance = uvOffset + distance;
+
+            Vector3 h2 = Vector3.zero;
+            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
+            && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution) != -1)
+            {
+                h2 = new Vector3(0, 1.9f, 0);
+            }
+            Vector3 p5 = point3 + h2;
+            Vector3 p6 = point3 + new Vector3(0, 2, 0);
+            Vector3 p7 = point4 + h2;
+            Vector3 p8 = point4 + new Vector3(0, 2, 0);
+            vertsA.AddRange(new List<Vector3> { p5, p6, p7, p8 });
+            currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1), new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1) });
+
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.001f, out Vector3 p9, out Vector3 p11);
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.001f, out Vector3 p13, out Vector3 p15);
+            Vector3 p10 = p9 + new Vector3(0, 2, 0);
+            Vector3 p12 = p11 + new Vector3(0, 2, 0);
+            Vector3 p14 = p13 + new Vector3(0, 2, 0);
+            Vector3 p16 = p15 + new Vector3(0, 2, 0);
+            vertsB.AddRange(new List<Vector3> { p9, p10, p11, p12, p13, p14, p15, p16 });
+
+            for (int i = 0; i < draws; i++)
+            {
+                int t1 = offset + 0;
+                int t2 = offset + 4;
+                int t3 = offset + 5;
+                int t4 = offset + 5;
+                int t5 = offset + 1;
+                int t6 = offset + 0;
+
+                int t7 = offset + 2;
+                int t8 = offset + 3;
+                int t9 = offset + 7;
+                int t10 = offset + 7;
+                int t11 = offset + 6;
+                int t12 = offset + 2;
+
+                int t13 = offset + 1;
+                int t14 = offset + 5;
+                int t15 = offset + 7;
+                int t16 = offset + 7;
+                int t17 = offset + 3;
+                int t18 = offset + 1;
+
+                offset += 4;
+
+                trisA.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                trisA.AddRange(new List<int> { t6, t5, t4, t3, t2, t1 });
+                trisB.AddRange(new List<int> { t7, t8, t9, t10, t11, t12 });
+                trisB.AddRange(new List<int> { t12, t11, t10, t9, t8, t7 });
+                trisS.AddRange(new List<int> { t13, t14, t15, t16, t17, t18 });
+                trisS.AddRange(new List<int> { t18, t17, t16, t15, t14, t13 });
+            }
+            offset += 4;
+
+            int c1 = (8 * (currentPointIndex - 1)) + 0;
+            int c2 = (8 * (currentPointIndex - 1)) + 4;
+            int c3 = (8 * (currentPointIndex - 1)) + 5;
+            int c4 = (8 * (currentPointIndex - 1)) + 5;
+            int c5 = (8 * (currentPointIndex - 1)) + 1;
+            int c6 = (8 * (currentPointIndex - 1)) + 0;
+
+            int c7 = (8 * (currentPointIndex - 1)) + 2;
+            int c8 = (8 * (currentPointIndex - 1)) + 3;
+            int c9 = (8 * (currentPointIndex - 1)) + 7;
+            int c10 = (8 * (currentPointIndex - 1)) + 7;
+            int c11 = (8 * (currentPointIndex - 1)) + 6;
+            int c12 = (8 * (currentPointIndex - 1)) + 2;
+
+            int c13 = (8 * (currentPointIndex - 1)) + 1;
+            int c14 = (8 * (currentPointIndex - 1)) + 5;
+            int c15 = (8 * (currentPointIndex - 1)) + 7;
+            int c16 = (8 * (currentPointIndex - 1)) + 7;
+            int c17 = (8 * (currentPointIndex - 1)) + 3;
+            int c18 = (8 * (currentPointIndex - 1)) + 1;
+            trisC.AddRange(new List<int> { c1, c2, c3, c4, c5, c6 });
+            trisC.AddRange(new List<int> { c7, c8, c9, c10, c11, c12 });
+            trisC.AddRange(new List<int> { c13, c14, c15, c16, c17, c18 });
 
             uvOffset += distance;
         }
@@ -229,31 +291,15 @@ public class WallMapping : MonoBehaviour
 
         trisS.AddRange(new List<int> { t19, t20, t21, t22, t23, t24 });
         trisS.AddRange(new List<int> { t25, t26, t27, t28, t29, t30 });
+        trisC.AddRange(new List<int> { t19, t20, t21, t22, t23, t24 });
+        trisC.AddRange(new List<int> { t25, t26, t27, t28, t29, t30 });
 
-        for (int i = 0; i < trisA.Count; i++)
-        {
-            trisC.Add(trisA[i] /*- (8 * calculateRes(currentSplineIndex))*/);
-        }
-        for (int i = 0; i < trisB.Count; i++)
-        {
-            trisC.Add(trisB[i] /*- (8 * calculateRes(currentSplineIndex))*/);
-        }
-        for (int i = 0; i < trisS.Count; i++)
-        {
-            trisC.Add(trisS[i] /*- (8 * calculateRes(currentSplineIndex))*/);
-        }
-
-        //verts.AddRange(currentVerts);
-        wall.SetVertices(currentVerts);
+        wall.SetVertices(vertsA);
         wall.SetTriangles(trisS, 0);
         wall.SetTriangles(trisA, 1);
         wall.SetTriangles(trisB, 2);
 
-        //tris.Add(trisA);
-        //tris.Add(trisB);
-        //tris[0].AddRange(trisS);
-
-        c.SetVertices(currentVerts);
+        c.SetVertices(vertsB);
         c.SetTriangles(trisC, 0);
         walls[currentSplineIndex].collider.sharedMesh = c;
 
@@ -508,7 +554,6 @@ public class WallMapping : MonoBehaviour
         List<Vector2> uvs = new(); List<Vector2> uvs2 = new();
         Mesh mesh = new Mesh(); Mesh ceilingMesh = new Mesh();
         Mesh colliderMesh = new Mesh();
-        int offset = 0;
 
         float angle = 0;
 
@@ -1374,6 +1419,47 @@ public class WallMapping : MonoBehaviour
         return selectedWall;
     }
 
+    private Wall GetNearestWall(Vector3 point, float maxDistance, out Vector3 nearest, out float t)
+    {
+        float minDistance = Mathf.Infinity; nearest = Vector3.zero; t = -1;
+        Wall selectedWall = null;
+
+        for (int i = 0; i < walls.Count; i++)
+        {
+            Wall wall = walls[i];
+            Vector3 np = GetNearestPoint(wall.points[0], wall.points[^1], point, out float thisT);
+            float thisDistance = Vector3.SqrMagnitude(point - np);
+
+            if (thisDistance < minDistance && thisDistance < maxDistance)
+            {
+                selectedWall = wall;
+                minDistance = thisDistance;
+                nearest = np;
+                t = thisT;
+            }
+            else if (thisDistance == minDistance && thisDistance < maxDistance)
+            {
+                Vector3 dirA = Vector3.Cross(wall.points[^1] - wall.points[0], Vector3.up).normalized;
+                //m_SplineSampler.SampleSplinePoint(selectedWall.wall, point, selectedWall.resolution, out Vector3 np2, out float t2);
+                Vector3 np2 = GetNearestPoint(selectedWall.points[0], selectedWall.points[^1], point);
+                Vector3 dirB = Vector3.Cross(selectedWall.points[^1] - selectedWall.points[0], Vector3.up).normalized;
+
+                float thisAngle = Vector3.Angle(dirA, point - np);
+                float nearAngle = Vector3.Angle(dirB, point - np2);
+
+                if (thisAngle < nearAngle)
+                {
+                    selectedWall = wall;
+                    minDistance = thisDistance;
+                    nearest = np;
+                    t = thisT;
+                }
+            }
+        }
+
+        return selectedWall;
+    }
+
     private static Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point)
     {
         var wander = point - start;
@@ -1388,6 +1474,22 @@ public class WallMapping : MonoBehaviour
         Vector3 nearest = start + t * span;
         return nearest;
     }
+
+    private static Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point, out float t)
+    {
+        var wander = point - start;
+        var span = end - start;
+
+        // Compute how far along the line is the closest approach to our point.
+        t = Vector3.Dot(wander, span) / span.sqrMagnitude;
+
+        // Restrict this point to within the line segment from start to end.
+        t = Mathf.Clamp01(t);
+
+        Vector3 nearest = start + t * span;
+        return nearest;
+    }
+
     private void CleanRooms()
     {
         List<Room> deleteRooms = new();
@@ -2391,6 +2493,65 @@ public class WallMapping : MonoBehaviour
 
     }
 
+    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall)
+    {
+        GameObject newObject = Instantiate(prefab);
+        newObject.transform.position = point;
+        newObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        GameObject previewSelector = Instantiate(selectorObject);
+        previewSelector.transform.SetParent(newObject.transform.transform);
+        previewSelector.transform.name = "Selector";
+        previewSelector.transform.position = new Vector3(point.x + 0.05f, point.y + 0.01f, point.z + 0.05f);
+        previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        doors.Add(new Door(newObject, point, rotation, length, ID, targetWall));
+        newObject.transform.SetParent(this.transform);
+
+        BuildWall(walls.IndexOf(targetWall));
+    }
+
+    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, Renderer[] renderers)
+    {
+        door.prefab.transform.position = point;
+        door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        GameObject previewSelector = door.prefab.transform.Find("Selector").gameObject;
+        previewSelector.transform.position = new Vector3(point.x + 0.05f, point.y + 0.01f, point.z + 0.05f);
+        previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+
+        Renderer[] m_Renderers = door.prefab.GetComponentsInChildren<Renderer>();
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Material[] materials = renderers[i].sharedMaterials;
+            m_Renderers[i].materials = materials;
+        }
+
+        door.point = point;
+        door.rotation = rotation;
+        door.length = length;
+        if (door.targetWall != targetWall)
+        {
+            int oldIndex = walls.IndexOf(door.targetWall);
+            door.targetWall = targetWall;
+            BuildWall(oldIndex);
+        }
+
+        BuildWall(walls.IndexOf(targetWall));
+    }
+
+    public void RemoveDoor(GameObject prefab)
+    {
+        int index = doors.FindIndex(item => item.prefab == prefab);
+        
+        if (index != -1)
+        {
+            int oldIndex = walls.IndexOf(doors[index].targetWall);
+            Destroy(doors[index].prefab);
+            doors.Remove(doors[index]);
+
+            BuildWall(oldIndex);
+        }
+    }
 
     private void MakeSpline(Spline spline, List<Vector3> points)
     {
@@ -2486,7 +2647,7 @@ public class WallMapping : MonoBehaviour
         BuildRoom(rooms.IndexOf(newRoom));
     }
 
-    public void SelectRoad(Vector3 position, Vector2Int size, int rotation, out Wall selectedWall, out int index, out List<Vector3> points)
+    public void SelectRoad(Vector3 position, Vector2Int size, float rotation, out Wall selectedWall, out int index, out List<Vector3> points)
     {
         Collider[] overlaps = Physics.OverlapBox(position, new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, 5, 0), LayerMask.GetMask("Selector"));
         selectedWall = null; index = -1; points = new();
@@ -2508,9 +2669,28 @@ public class WallMapping : MonoBehaviour
         }
     }
 
-    public bool CheckWallSelect(Vector3 position, Vector2Int size, int rotation)
+    public Door GetDoorSelect(Vector3 position, Vector2Int size, float rotation)
     {
-        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x + 0.05f, position.y, position.z + 0.05f), new Vector3(size.x / 2f - 0.1f, 0.5f, size.y / 2f - 0.1f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        Door door = doors.Find(door => overlapsList.Contains(door.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()));
+        return door;
+    }
+
+    public bool CheckDoorSelect(Vector3 position, Vector2Int size, float rotation)
+    {
+        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (doors.FindIndex(door => overlapsList.Contains(door.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>())) != -1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool CheckWallSelect(Vector3 position, Vector2Int size, float rotation)
+    {
+        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
         List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
         if (walls.FindIndex(wall => overlapsList.Contains(wall.collider)) != -1)
         {
@@ -2539,6 +2719,94 @@ public class WallMapping : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public bool CheckWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0)
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return true;
+            }
+            return false;
+        }
+        else return false;
+    }
+
+    public bool CheckWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door)))
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return true;
+            }
+            return false;
+        }
+        else return false;
+    }
+
+    public Wall GetWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0)
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return nearestWall;
+            }
+            return null;
+        }
+        else return null;
+    }
+
+    public Wall GetWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door)))
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return nearestWall;
+            }
+            return null;
+        }
+        else return null;
     }
 
     private void DeleteWall(Wall wall)
@@ -2671,5 +2939,26 @@ public class Room
         ceilingRenderer.sharedMaterials = newMaterials;
         */
 
+    }
+}
+
+[System.Serializable]
+public class Door
+{
+    public GameObject prefab;
+    public Vector3 point;
+    public float rotation;
+    public float length;
+    public int ID;
+    public Wall targetWall;
+
+    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall)
+    {
+        this.prefab = prefab;
+        this.point = point;
+        this.rotation = rotation;
+        this.length = length;
+        this.ID = ID;
+        this.targetWall = targetWall;
     }
 }

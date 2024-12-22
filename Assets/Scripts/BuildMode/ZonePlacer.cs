@@ -21,7 +21,7 @@ public class ZonePlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceZones(Vector3 position, Vector3 gridPos, int ID, Vector2Int size, float yOffset, int rotation)
+    public void PlaceZones(Vector3 position, Vector3 gridPos, int ID, Vector2Int size, float yOffset, float rotation)
     {
         GameObject zoneObject = Instantiate(zoneIndicator);
         zoneObject.transform.position = position;
@@ -39,7 +39,7 @@ public class ZonePlacer : MonoBehaviour
         zoneObject.transform.SetParent(this.transform);
     }
 
-    public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, int rotation)
+    public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, float rotation)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -90,7 +90,7 @@ public class ZonePlacer : MonoBehaviour
         return true;
     }
 
-    public bool CanPlaceObjectAt(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    public bool CanPlaceObjectAt(GameObject cursor, Vector3 position, Vector2Int size, float rotation)
     {
         bool ans = true;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
@@ -126,7 +126,7 @@ public class ZonePlacer : MonoBehaviour
         return true;
     }
 
-    public GameObject GetObject(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    public GameObject GetObject(GameObject cursor, Vector3 position, Vector2Int size, float rotation)
     {
         GameObject m_Object = null;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
@@ -172,7 +172,7 @@ public class ZonePlacer : MonoBehaviour
         return zoneData[index].size;
     }
 
-    internal int GetObjectRotation(GameObject prefab)
+    internal float GetObjectRotation(GameObject prefab)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -185,7 +185,7 @@ public class ZonePlacer : MonoBehaviour
 public class ZoneSaveData : PlacementData
 {
     public List<LevelData> levels { get; private set; }
-    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, int rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
     {
         this.levels = levels;
     }

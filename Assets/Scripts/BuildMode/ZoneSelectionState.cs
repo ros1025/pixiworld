@@ -16,7 +16,7 @@ public class ZoneSelectionState : IBuildingState
     private Vector3 displayPosition;
     private Vector2Int size;
     private Vector3 pos;
-    private int rotation; private int originalRotation;
+    private float rotation; private float originalRotation;
     bool edited;
     private Vector3 originalPosition;
     private Vector2Int originalSize;
@@ -74,7 +74,7 @@ public class ZoneSelectionState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         if (previewSystem.expand == true)
         {
@@ -127,7 +127,7 @@ public class ZoneSelectionState : IBuildingState
 
         return validity;
     }
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, size, (database.zonesData[gameObjectIndex].Cost * (size.x * size.y)) - (database.zonesData[gameObjectIndex].Cost * (originalSize.x * originalSize.y)), rotation);

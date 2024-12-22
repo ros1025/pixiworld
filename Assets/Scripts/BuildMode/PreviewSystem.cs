@@ -74,7 +74,7 @@ public class PreviewSystem : MonoBehaviour
         Button[] buttons = buildToolsUI.GetComponentsInChildren<Button>();
     }
 
-    public void StartMovingObjectPreview(Vector3 gridPosition, int rotation, GameObject prefab, Vector2Int size)
+    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size)
     {
         previewObject = prefab;
         previewSelector = previewObject.transform.Find("Selector").gameObject;
@@ -85,10 +85,6 @@ public class PreviewSystem : MonoBehaviour
         MoveCursor(gridPosition);
         RotateCursor(rotation);
         RotatePreview(rotation);
-        buildToolsUI.canRemove = true;
-        buildToolsUI.isFurniture = true;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = false;
         cellIndicator.SetActive(true);
     }
 
@@ -102,10 +98,6 @@ public class PreviewSystem : MonoBehaviour
         previewPos = new Vector3(cellIndicator.transform.position.x, 0, cellIndicator.transform.position.z);
         PreparePreview(previewObject);
         PrepareCursor(size);
-        buildToolsUI.canRemove = false;
-        buildToolsUI.isFurniture = true;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = false;
         cellIndicator.SetActive(true);
         MovePreview(cellIndicator.transform.position);
     }
@@ -118,15 +110,11 @@ public class PreviewSystem : MonoBehaviour
         previewSize = size;
         this.minSize = minSize;
         PrepareExpandingCursor(originPos, size);
-        buildToolsUI.canRemove = false;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = false;
         MoveCursor(originPos);
         cellIndicator.SetActive(true);
     }
 
-    public void StartMovingZones(Vector3 gridPosition, int rotation, GameObject prefab, Vector2Int size)
+    public void StartMovingZones(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size)
     {
         previewObject = prefab;
         previewSelector = prefab.transform.Find("Selector").gameObject;
@@ -137,10 +125,6 @@ public class PreviewSystem : MonoBehaviour
         MoveCursor(gridPosition);
         RotateCursor(rotation);
         RotatePreview(rotation);
-        buildToolsUI.canRemove = true;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = false;
         cellIndicator.SetActive(true);
     }
 
@@ -151,10 +135,6 @@ public class PreviewSystem : MonoBehaviour
         PrepareDynamicCursor(gridPosition);
         MoveCursor(Vector3.zero);
         RotateCursor(0);
-        buildToolsUI.canRemove = false;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = true;
-        buildToolsUI.isWall = false;
     }
 
     public void AddWalls()
@@ -164,10 +144,6 @@ public class PreviewSystem : MonoBehaviour
         PrepareDynamicCursor(Vector3.zero);
         MoveCursor(Vector3.zero);
         RotateCursor(0);
-        buildToolsUI.canRemove = false;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = true;
     }
 
     public void ModifyWalls(Wall wall)
@@ -177,10 +153,6 @@ public class PreviewSystem : MonoBehaviour
         PrepareDynamicCursor(Vector3.zero);
         MoveCursor(Vector3.zero);
         RotateCursor(0);
-        buildToolsUI.canRemove = true;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = false;
-        buildToolsUI.isWall = true;
         selectedWall = wall;
     }
 
@@ -191,10 +163,6 @@ public class PreviewSystem : MonoBehaviour
         PrepareDynamicCursor(points[0]);
         MoveCursor(Vector3.zero);
         RotateCursor(0);
-        buildToolsUI.canRemove = true;
-        buildToolsUI.isFurniture = false;
-        buildToolsUI.isRoad = true;
-        buildToolsUI.isWall = false;
         selectedRoad = road;
         for (int i = 0; i < points.Count; i++)
         {
@@ -308,7 +276,7 @@ public class PreviewSystem : MonoBehaviour
         }
     }
 
-    public void UpdatePosition(Vector3 position, bool validity, Vector2Int size, int cost, int rotation)
+    public void UpdatePosition(Vector3 position, bool validity, Vector2Int size, int cost, float rotation)
     {
         cellIndicator.SetActive(true);
         if (previewObject != null)
@@ -524,7 +492,8 @@ public class PreviewSystem : MonoBehaviour
     private void MoveCursor(Vector3 position)
     {
         cellIndicator.transform.position = new Vector3(position.x, position.y + previewYOffset, position.z);
-        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + previewYOffset, position.z + 0.05f);
+        //previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + previewYOffset, position.z + 0.05f);
+        previewSelector.transform.position = new Vector3(position.x + 0.05f, 0f, position.z + 0.05f);
         expanderParent.transform.position = new Vector3(position.x, position.y + previewYOffset * 2, position.z);
     }
 
@@ -537,14 +506,14 @@ public class PreviewSystem : MonoBehaviour
         );
     }
 
-    private void RotateCursor(int rotation)
+    private void RotateCursor(float rotation)
     {
         cellIndicator.transform.rotation = Quaternion.Euler(0, rotation, 0);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         expanderParent.transform.rotation = Quaternion.Euler(0, rotation, 0);
     }
 
-    private void RotatePreview(int rotation)
+    private void RotatePreview(float rotation)
     {
         previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
     }

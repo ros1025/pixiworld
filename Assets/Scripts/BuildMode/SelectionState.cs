@@ -14,7 +14,7 @@ public class SelectionState : IBuildingState
     InputManager inputManager;
     SoundFeedback soundFeedback;
     private Vector3 displayPosition;
-    private int rotation; private int originalRotation;
+    private float rotation; private float originalRotation;
     bool edited;
     private Vector3 originalPosition;
 
@@ -65,7 +65,7 @@ public class SelectionState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -114,7 +114,7 @@ public class SelectionState : IBuildingState
 
         return validity;
     }
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);

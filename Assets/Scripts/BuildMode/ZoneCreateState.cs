@@ -15,7 +15,7 @@ public class ZoneCreateState : IBuildingState
     private Vector2Int size;
     private Vector3 pos;
     private Vector3 displayPosition; 
-    int rotation;
+    float rotation;
 
     public ZoneCreateState(Vector3 gridPosition,
                            int iD,
@@ -53,7 +53,7 @@ public class ZoneCreateState : IBuildingState
         previewSystem.StopShowingPreview();
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         if (previewSystem.expand == true)
         {
@@ -105,7 +105,7 @@ public class ZoneCreateState : IBuildingState
         return validity;
     }
 
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 

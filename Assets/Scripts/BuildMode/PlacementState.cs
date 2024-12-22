@@ -12,7 +12,7 @@ public class PlacementState : IBuildingState
     ObjectPlacer objectPlacer;
     SoundFeedback soundFeedback;
     private Vector3 displayPosition;
-    private int rotation;
+    private float rotation;
 
     public PlacementState(Vector3 gridPosition,
                           int iD,
@@ -49,7 +49,7 @@ public class PlacementState : IBuildingState
         previewSystem.StopShowingPreview();
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
@@ -96,7 +96,7 @@ public class PlacementState : IBuildingState
         return validity;
     }
 
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 

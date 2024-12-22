@@ -13,6 +13,4 @@ MonoBehaviour:
   m_Name: Zones Database SO
   m_EditorClassIdentifier: 
   zonesData:
-  - <Name>k__BackingField: House
-    <ID>k__BackingField: 0
-    <Cost>k__BackingField: 10
+  - {fileID: 11400000, guid: cc414ef927c07e14fbc40f3aee524c09, type: 2}

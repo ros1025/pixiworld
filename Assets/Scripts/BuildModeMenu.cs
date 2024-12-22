@@ -19,6 +19,8 @@ public class BuildModeMenu : MonoBehaviour
     [SerializeField]
     private RoadsDatabaseSO roadsData;
     [SerializeField]
+    private DoorDatabaseSO doorsData;
+    [SerializeField]
     private ObjectCategoriesSO objectCategories;
     [SerializeField]
     private ObjectCategoriesSO objectMasterCategories;
@@ -78,6 +80,8 @@ public class BuildModeMenu : MonoBehaviour
             ZoneCategories();
         }
         AddCategory("Walls", "Walls", WallCreate);
+        AddCategory("Doors", "Doors", DoorCategories);
+
 
         if (!placementSystem.inMapMode)
         {
@@ -168,6 +172,25 @@ public class BuildModeMenu : MonoBehaviour
         button.RegisterCallback<ClickEvent>(PlaceWall);
     }
 
+    private void DoorCategories(ClickEvent evt)
+    {
+        DoorCategories();
+    }
+
+    private void DoorCategories()
+    {
+        items.Clear();
+        foreach (DoorsData door in doorsData.doorsData)
+        {
+            Button button = new Button();
+            button.name = door.Name;
+            button.text = door.Name;
+            button.AddToClassList("viewport-button");
+            items.Add(button);
+            button.RegisterCallback<ClickEvent, int>(PlaceDoor, door.ID);
+        }
+    }
+
     private void ShowCategoriesOnClick(ClickEvent evt, int type)
     {
         ShowCategories(type);
@@ -201,6 +224,11 @@ public class BuildModeMenu : MonoBehaviour
     private void PlaceRoad(ClickEvent evt, int iD)
     {
         placementSystem.CreateRoad(iD);
+    }
+
+    private void PlaceDoor(ClickEvent evt, int iD)
+    {
+        placementSystem.CreateDoor(iD);
     }
 
     private void PlaceWall(ClickEvent evt)

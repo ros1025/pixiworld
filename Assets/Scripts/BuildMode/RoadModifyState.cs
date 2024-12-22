@@ -78,7 +78,7 @@ public class RoadModifyState : IBuildingState
         }
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         if (previewSystem.expand == true)
         {
@@ -168,7 +168,7 @@ public class RoadModifyState : IBuildingState
         return true;
     }
 
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 

@@ -1578,7 +1578,7 @@ public class RoadMapping : MonoBehaviour
         AddJunction(intersection, collider.GetComponent<MeshCollider>());
     }
 
-    public void SelectRoad(Vector3 position, Vector2Int size, int rotation, out Roads selectedRoad, out int index, out int width, out int iD, out List<Vector3> points)
+    public void SelectRoad(Vector3 position, Vector2Int size, float rotation, out Roads selectedRoad, out int index, out int width, out int iD, out List<Vector3> points)
     {
         Collider[] overlaps = Physics.OverlapBox(position, new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, 5, 0), LayerMask.GetMask("Selector"));
         selectedRoad = null; index = -1; width = 0; iD = -1; points = new();
@@ -1628,7 +1628,7 @@ public class RoadMapping : MonoBehaviour
         MakeRoad();
     }
 
-    public bool CheckRoadSelect(Vector3 position, Vector2Int size, int rotation)
+    public bool CheckRoadSelect(Vector3 position, Vector2Int size, float rotation)
     {
         Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x + 0.05f, position.y, position.z + 0.05f), new Vector3(size.x/2f - 0.1f, 0.5f, size.y/2f - 0.1f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector") );
         List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);

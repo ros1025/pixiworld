@@ -223,11 +223,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walls: []
   rooms: []
+  doors: []
   intersections: []
   wallParent: {fileID: 3830770506805639161}
   floorParent: {fileID: 416556856443955168}
   ceilParent: {fileID: 4874773453838716104}
-  gizmoPointer: {fileID: 0}
+  selectorObject: {fileID: 3706936160302216349, guid: ba3e99b26bb2c5c44ad3733a8b360744, type: 3}
   m_SplineSampler: {fileID: 8013871715236534331}
   m_SplineContainer: {fileID: 4994912015868980402}
   defaultWallMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
@@ -587,6 +588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0771d76d01d2dec499ce8b0c3e758a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  furnitureData: []
   zoneIndicator: {fileID: 0}
   selectorObject: {fileID: 3706936160302216349, guid: ba3e99b26bb2c5c44ad3733a8b360744, type: 3}
   placementSystem: {fileID: 0}

@@ -15,6 +15,8 @@ public class PlacementSystem : MonoBehaviour
     [SerializeField] private ObjectsDatabaseSO database;
     [SerializeField] private ZonesDatabaseSO databaseZones;
     [SerializeField] private RoadsDatabaseSO databaseRoads;
+    [SerializeField] private DoorDatabaseSO databaseDoors;
+
 
     private GameObject gridVisualization;
 
@@ -37,12 +39,21 @@ public class PlacementSystem : MonoBehaviour
     private Vector3 selectedPosition = Vector3.zero;
     [HideInInspector] public Vector3 screenSelectPosition = Vector3Int.zero;
     private Vector3 pointerPosition;
-    private int rotation = 0;
+    private float rotation = 0;
 
     private ObjectPlacer objectPlacer;
     private ZonePlacer zonePlacer;
     private RoadMapping roads;
     private WallMapping walls;
+
+    public int itemMode;
+    public static readonly int Object = 0;
+    public static readonly int Wall = 1;
+    public static readonly int Zone = 2;
+    public static readonly int Road = 3;
+    public static readonly int Door = 4;
+
+    public bool isCreate;
 
     [SerializeField]
     private CameraController cameraController;
@@ -61,6 +72,7 @@ public class PlacementSystem : MonoBehaviour
         roads = roadsDBObject;
         walls = wallsDBObject;
         inMapMode = true;
+        preview.gridSnap = true;
     }
 
     public void EnterBuildMode()
@@ -75,6 +87,7 @@ public class PlacementSystem : MonoBehaviour
         cameraController.TopDownView();
         timeManager.StopTime();
         cameraController.yawAdjustable = false;
+        itemMode = -1;
     }
 
     public void ExitBuildMode()
@@ -89,6 +102,7 @@ public class PlacementSystem : MonoBehaviour
         cameraController.PerspectiveView();
         timeManager.ResumeTime();
         cameraController.yawAdjustable = true;
+        itemMode = -1;
     }
 
     public void StartPlacement(int ID)
@@ -97,6 +111,8 @@ public class PlacementSystem : MonoBehaviour
         gridVisualization.SetActive(true);
         GetGridPosition();
         buildToolsUI.Call();
+        itemMode = Object;
+        isCreate = true;
         buildingState = new PlacementState(gridPosition,
                                            ID,
                                            grid,
@@ -118,6 +134,8 @@ public class PlacementSystem : MonoBehaviour
         gridVisualization.SetActive(true);
         GetGridPosition();
         buildToolsUI.Call();
+        itemMode = Zone;
+        isCreate = true;
         buildingState = new ZoneCreateState(gridPosition,
                                             ID,
                                             grid,
@@ -133,12 +151,38 @@ public class PlacementSystem : MonoBehaviour
         inputManager.OnExit += StopPlacement;
     }
 
+    public void CreateDoor(int ID)
+    {
+        buildModeUI.isActive(false);
+        gridVisualization.SetActive(true);
+        GetGridPosition();
+        buildToolsUI.Call();
+        itemMode = Door;
+        isCreate = true;
+        buildingState = new DoorCreateState(gridPosition,
+                                            ID,
+                                            grid,
+                                            preview,
+                                            this,
+                                            databaseDoors,
+                                            walls,
+                                            soundFeedback);
+        buildToolsUI.Call();
+        inputManager.ClearActions();
+        inputManager.OnHold += TriggerUpdate;
+        inputManager.OnAction += PlaceStructure;
+        inputManager.OnExit += StopPlacement;
+    }
+
+
     public void CreateRoad(int ID)
     {
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
         buildToolsUI.Call();
+        itemMode = Road;
+        isCreate = true;
         buildingState = new RoadCreateState(gridPosition,
                                             ID,
                                             grid,
@@ -160,6 +204,8 @@ public class PlacementSystem : MonoBehaviour
         gridVisualization.SetActive(true);
         GetGridPosition();
         buildToolsUI.Call();
+        itemMode = Wall;
+        isCreate = true;
         buildingState = new WallCreateState(grid,
                                             walls,
                                             preview,
@@ -230,6 +276,20 @@ public class PlacementSystem : MonoBehaviour
         }
     }
 
+    public void RemoveDoor(GameObject prefab)
+    {
+        if (walls == null)
+        {
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
+        }
+        else
+        {
+            soundFeedback.PlaySound(SoundType.Remove);
+            walls.RemoveDoor(prefab);
+            StopPlacement();
+        }
+    }
+
     public void SelectObject()
     {
         if (inputManager.IsPointerOverUI())
@@ -241,6 +301,8 @@ public class PlacementSystem : MonoBehaviour
             buildModeUI.isActive(false);
             GetGridPosition();
             buildToolsUI.Call();
+            itemMode = Object;
+            isCreate = false;
             buildingState = new SelectionState(gridPosition,
                                        grid,
                                        preview,
@@ -262,6 +324,8 @@ public class PlacementSystem : MonoBehaviour
             buildModeUI.isActive(false);
             GetGridPosition();
             buildToolsUI.Call();
+            itemMode = Zone;
+            isCreate = false;
             buildingState = new ZoneSelectionState(gridPosition,
                            grid,
                            preview,
@@ -283,6 +347,8 @@ public class PlacementSystem : MonoBehaviour
             buildModeUI.isActive(false);
             GetGridPosition();
             buildToolsUI.Call();
+            itemMode = Road;
+            isCreate = false;
             buildingState = new RoadModifyState(gridPosition,
                            grid,
                            preview,
@@ -304,6 +370,8 @@ public class PlacementSystem : MonoBehaviour
             buildModeUI.isActive(false);
             GetGridPosition();
             buildToolsUI.Call();
+            itemMode = Wall;
+            isCreate = false;
             buildingState = new WallModifyState(gridPosition,
                 grid,
                 walls,
@@ -314,6 +382,29 @@ public class PlacementSystem : MonoBehaviour
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
+        else if (isDoor())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            buildToolsUI.Call();
+            itemMode = Door;
+            isCreate = false;
+            buildingState = new DoorModifyState(gridPosition,
+                grid,
+                preview,
+                this,
+                databaseDoors,
+                walls,
+                inputManager,
+                soundFeedback);
+            buildToolsUI.Call();
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
@@ -414,7 +505,7 @@ public class PlacementSystem : MonoBehaviour
             return true;
     }
 
-    public bool CanPlaceOnArea(Vector3 pos, Vector2Int size, int rotation)
+    public bool CanPlaceOnArea(Vector3 pos, Vector2Int size, float rotation)
     {
         if (roads != null && roads.CheckRoadSelect(pos + new Vector3(size.x / 2f, 0, size.y / 2f), size, rotation))
             return false;
@@ -453,6 +544,14 @@ public class PlacementSystem : MonoBehaviour
     private bool isWall()
     {
         if (walls != null && walls.CheckWallSelect(inputManager))
+            return true;
+        else
+            return false;
+    }
+
+    private bool isDoor()
+    {
+        if (walls != null && walls.CheckDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
             return true;
         else
             return false;
@@ -515,20 +614,21 @@ public class PlacementSystem : MonoBehaviour
         selectedPosition = Vector3Int.zero;
         buildingState = null;
         rotation = 0;
+        itemMode = -1;
     }
 
     private void GetGridPosition()
     {
         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
         pointerPosition = inputManager.GetMousePosition();
-        if (preview.gridSnap)
+        if (preview.gridSnap || itemMode == Wall)
         {
             gridPosition = grid.CellToLocal(grid.WorldToCell(mousePosition));
         }
         else gridPosition = grid.WorldToLocal(mousePosition);
     }
 
-    public void SetRotation(int rotation)
+    public void SetRotation(float rotation)
     {
         this.rotation = rotation;
     }
