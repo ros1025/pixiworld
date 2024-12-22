@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu]
+[CreateAssetMenu(fileName = "RoadsDatabaseSO", menuName = "Scriptable Objects/RoadsDatabaseSO")]
 public class RoadsDatabaseSO : ScriptableObject
 {
     public List<RoadsData> roadsData;
 }
 
-[Serializable]
-public class RoadsData
+[CreateAssetMenu(fileName = "RoadsData", menuName = "Scriptable Objects/RoadsData")]
+public class RoadsData : ScriptableObject
 {
     [field: SerializeField]
     public string Name { get; private set; }

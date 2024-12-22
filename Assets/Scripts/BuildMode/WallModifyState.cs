@@ -55,7 +55,7 @@ public class WallModifyState : IBuildingState
         previewSystem.ClearPointer();
     }
 
-    public void OnModify(Vector3 gridPosition, int rotation = 0)
+    public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
@@ -128,7 +128,7 @@ public class WallModifyState : IBuildingState
     }
 
 
-    public void UpdateState(Vector3 gridPosition, int rotation = 0)
+    public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 

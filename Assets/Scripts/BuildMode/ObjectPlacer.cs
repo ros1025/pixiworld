@@ -20,7 +20,7 @@ public class ObjectPlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, int rotation)
+    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = position;
@@ -35,7 +35,7 @@ public class ObjectPlacer : MonoBehaviour
         newObject.transform.SetParent(this.transform);
     }
 
-    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, int rotation, Renderer[] renderers)
+    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, Renderer[] renderers)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -92,7 +92,7 @@ public class ObjectPlacer : MonoBehaviour
         return true;
     }
 
-    public bool CanPlaceObjectAt(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    public bool CanPlaceObjectAt(GameObject cursor, Vector3 position, Vector2Int size, float rotation)
     {
         bool ans = true;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
@@ -128,7 +128,7 @@ public class ObjectPlacer : MonoBehaviour
         return true;
     }
 
-    public GameObject GetObject(GameObject cursor, Vector3 position, Vector2Int size, int rotation)
+    public GameObject GetObject(GameObject cursor, Vector3 position, Vector2Int size, float rotation)
     {
         GameObject m_Object = null;
         GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
@@ -174,7 +174,7 @@ public class ObjectPlacer : MonoBehaviour
         return furnitureData[index].size;
     }
 
-    internal int GetObjectRotation(GameObject prefab)
+    internal float GetObjectRotation(GameObject prefab)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -186,7 +186,7 @@ public class ObjectPlacer : MonoBehaviour
 [Serializable]
 public class ObjectSaveData : PlacementData
 {
-    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, int rotation, Vector2Int size, int iD) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD) : base(prefab, occupiedPosition, rotation, size, iD)
     {
 
     }

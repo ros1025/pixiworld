@@ -21,11 +21,7 @@ public class PreviewTools : MonoBehaviour
     Button gridSnap; Button customTexture;
     Label costPrice; Label size;
 
-    public bool canRemove; 
     public bool canPlace;
-    public bool isFurniture;
-    public bool isRoad;
-    public bool isWall;
 
     public void Call()
     {
@@ -44,30 +40,28 @@ public class PreviewTools : MonoBehaviour
         size = controls.Q<Label>("Size");
 
         placeButton.SetEnabled(canPlace);
-        sellButton.SetEnabled(canRemove);
-        if (isFurniture)
-            inventoryButton.SetEnabled(canRemove);
+        sellButton.SetEnabled(!placementSystem.isCreate);
+        if (placementSystem.itemMode == PlacementSystem.Object)
+            inventoryButton.SetEnabled(!placementSystem.isCreate);
         else inventoryButton.SetEnabled(false);
 
         placeButton.RegisterCallback<ClickEvent>(InvokeAction);
         cancelButton.RegisterCallback<ClickEvent>(InvokeExit);
-        if (isRoad)
+
+        if (placementSystem.itemMode == PlacementSystem.Road)
             sellButton.RegisterCallback<ClickEvent, Roads>(RemoveRoad, previewSystem.selectedRoad);
-        else if (isWall)
+        else if (placementSystem.itemMode == PlacementSystem.Wall)
             sellButton.RegisterCallback<ClickEvent, Wall>(RemoveWall, previewSystem.selectedWall);
-        else if (isFurniture)
+        else if (placementSystem.itemMode == PlacementSystem.Object)
             sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
-        else sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
-        gridSnap.clicked += () => {
-            if (!previewSystem.gridSnap)
-            {
-                previewSystem.gridSnap = true;
-            }
-            else
-            {
-                previewSystem.gridSnap = false;
-            }
-        };
+        else if (placementSystem.itemMode == PlacementSystem.Zone)
+            sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
+        else if (placementSystem.itemMode == PlacementSystem.Door)
+            sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveDoor, previewSystem.previewObject);
+        else sellButton.SetEnabled(false);
+
+        if (placementSystem.itemMode != PlacementSystem.Wall)
+            gridSnap.clicked += GridSnap;
 
         AccountForSafeArea();
     }
@@ -97,6 +91,11 @@ public class PreviewTools : MonoBehaviour
         placementSystem.RemoveWall(wall);
     }
 
+    public void RemoveDoor(ClickEvent evt, GameObject prefab)
+    {
+        placementSystem.RemoveDoor(prefab);
+    }
+
     private void InvokeAction(ClickEvent evt)
     {
         inputManager.InvokeAction();
@@ -111,6 +110,18 @@ public class PreviewTools : MonoBehaviour
     {
         costPrice.text = $"${cost}";
         this.size.text = $"{size.x}x{size.y}";
+    }
+
+    public void GridSnap()
+    {
+        if (!previewSystem.gridSnap)
+        {
+            previewSystem.gridSnap = true;
+        }
+        else
+        {
+            previewSystem.gridSnap = false;
+        }
     }
 
     private void AccountForSafeArea()
