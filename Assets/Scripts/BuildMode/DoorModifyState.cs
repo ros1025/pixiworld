@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DoorModifyState : IBuildingState
 {
@@ -16,6 +17,7 @@ public class DoorModifyState : IBuildingState
     private Vector3 displayPosition;
     private Vector3 position; private Vector3 originalPosition;
     private float rotation; private float originalRotation;
+    List<Material> materials;
 
     public DoorModifyState(Vector3 gridPosition,
                           Grid grid,
@@ -41,13 +43,15 @@ public class DoorModifyState : IBuildingState
             edited = false;
             originalPosition = door.point;
             originalRotation = door.rotation;
+            materials = door.materials;
             rotation = originalRotation;
             selectedDoor = door;
             previewSystem.StartMovingObjectPreview(
             grid.LocalToWorld(originalPosition),
             originalRotation,
             door.prefab,
-            new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1)
+            new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1),
+            materials
             );
         }
         else return;
@@ -58,9 +62,8 @@ public class DoorModifyState : IBuildingState
         previewSystem.StopMovingObject();
         if (edited == false)
         {
-            Renderer[] renderers = database.doorsData[selectedObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, selectedDoor.targetWall, renderers);
+            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, selectedDoor.targetWall, selectedDoor.materials);
         }
     }
 
@@ -90,7 +93,7 @@ public class DoorModifyState : IBuildingState
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
 
-        wallMapping.MoveWindows(selectedDoor, position, rotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, targetWall, renderers);
+        wallMapping.MoveWindows(selectedDoor, position, rotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, targetWall, materials);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;

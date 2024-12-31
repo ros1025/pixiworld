@@ -52,6 +52,8 @@
     -unity-font-style: normal;
     background-color: rgb(202, 202, 202);
     font-size: 22px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    letter-spacing: -5px;
 }
 
 .viewport-button:active {
@@ -79,6 +81,8 @@
     -unity-font-style: normal;
     background-color: rgb(168, 168, 168);
     font-size: 22px;
+    letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
 }
 
 .unity-scroller {
@@ -136,6 +140,7 @@
     border-right-color: rgb(185, 36, 36);
     border-top-color: rgb(185, 36, 36);
     border-bottom-color: rgb(185, 36, 36);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 #CancelButton:hover {
@@ -158,6 +163,7 @@
     border-right-color: rgb(152, 54, 54);
     border-top-color: rgb(152, 54, 54);
     border-bottom-color: rgb(152, 54, 54);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 #CancelButton:active {
@@ -180,6 +186,7 @@
     border-right-color: rgb(53, 16, 16);
     border-top-color: rgb(53, 16, 16);
     border-bottom-color: rgb(53, 16, 16);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .tools-button {
@@ -242,6 +249,8 @@
     max-height: 55px;
     min-width: 100px;
     color: rgb(255, 255, 255);
+    letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .tools-button:active {
@@ -271,6 +280,8 @@
     font-size: 24px;
     max-height: 55px;
     min-width: 100px;
+    letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .sections-button {
@@ -290,7 +301,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font-definition: initial;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
     -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
@@ -300,6 +311,7 @@
     background-color: rgb(81, 135, 162);
     font-size: 24px;
     min-width: 70px;
+    letter-spacing: -5px;
 }
 
 .sections-button:hover {
@@ -319,7 +331,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font-definition: initial;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
     -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
@@ -329,6 +341,7 @@
     background-color: rgb(111, 146, 164);
     font-size: 24px;
     min-width: 70px;
+    letter-spacing: -5px;
 }
 
 .sections-button:active {
@@ -348,7 +361,7 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font-definition: initial;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
     -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
@@ -358,4 +371,5 @@
     background-color: rgb(76, 105, 119);
     font-size: 24px;
     min-width: 70px;
+    letter-spacing: -5px;
 }

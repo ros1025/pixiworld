@@ -71,8 +71,14 @@ public class PlacementState : IBuildingState
         soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
 
+        List<Material> newMaterials = new();
+        for (int i = 0; i < previewSystem.materials.Count; i++)
+        {
+            newMaterials.Add(Material.Instantiate(previewSystem.materials[i]));
+        }
+
         objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, gridPosition,
-            displayPosition, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].ID, rotation);
+            displayPosition, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].ID, rotation, newMaterials);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), false, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
     }

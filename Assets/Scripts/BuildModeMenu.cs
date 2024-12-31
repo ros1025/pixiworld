@@ -66,7 +66,7 @@ public class BuildModeMenu : MonoBehaviour
             AddCategory(type);
         }
 
-        ShowCategories(objectMasterCategories.categories[0].id);
+        ShowCategories(objectMasterCategories.categories[0]);
     }
 
     private void SetBuilding()
@@ -105,7 +105,7 @@ public class BuildModeMenu : MonoBehaviour
         button.text = label;
         button.AddToClassList("tools-button");
         categories.Add(button);
-        button.RegisterCallback<ClickEvent, int>(ShowCategoriesOnClick, type.id);
+        button.RegisterCallback<ClickEvent, ObjectCategory>(ShowCategoriesOnClick, type);
     }
 
     private void AddCategory(string name, string label, EventCallback<ClickEvent> func)
@@ -191,15 +191,15 @@ public class BuildModeMenu : MonoBehaviour
         }
     }
 
-    private void ShowCategoriesOnClick(ClickEvent evt, int type)
+    private void ShowCategoriesOnClick(ClickEvent evt, ObjectCategory type)
     {
         ShowCategories(type);
     }
 
-    private void ShowCategories(int type)
+    private void ShowCategories(ObjectCategory category)
     {
         items.Clear();
-        List<ObjectData> itemsList = objectsData.objectsData.FindAll(data => data.objectTypeId.Contains(type));
+        List<ObjectData> itemsList = objectsData.objectsData.FindAll(data => data.objectTypeId.Contains(category));
         foreach (ObjectData item in itemsList)
         {
             Button button = new Button();

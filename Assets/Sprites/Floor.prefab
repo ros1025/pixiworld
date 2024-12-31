@@ -233,6 +233,7 @@ MonoBehaviour:
   m_SplineContainer: {fileID: 4994912015868980402}
   defaultWallMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
   defaultFloorMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
+  selectorMaterial: {fileID: -876546973899608171, guid: 7dc0b6acef942e740ae839c5fe115534, type: 3}
 --- !u!1 &3830770506805639161
 GameObject:
   m_ObjectHideFlags: 0

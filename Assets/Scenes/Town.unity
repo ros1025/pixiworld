@@ -202,6 +202,57 @@ MonoBehaviour:
   m_DefaultActionMap: builder
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &149153309
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 149153311}
+  - component: {fileID: 149153310}
+  m_Layer: 0
+  m_Name: TexturePreview
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &149153310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149153309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: 9ed2a390e54ab224ea348de72dc2a5a6, type: 2}
+  m_ParentUI: {fileID: 874038260}
+  sourceAsset: {fileID: 9197481963319205126, guid: 8019b00e2a637dc45bac200a44730cb9, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &149153311
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149153309}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6.401065, y: -55.577534, z: 2.9878504}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 874038261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &201287203
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,6 +433,8 @@ MonoBehaviour:
   inMapMode: 0
   preview: {fileID: 727195804}
   screenSelectPosition: {x: 0, y: 0, z: 0}
+  itemMode: 0
+  isCreate: 0
   cameraController: {fileID: 2027412268}
   soundFeedback: {fileID: 1732914424}
 --- !u!1 &330585543
@@ -2043,7 +2096,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 149153311}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &874038262
@@ -2059,15 +2113,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SettingsMenu: {fileID: 874038260}
+  TexturesMenu: {fileID: 149153310}
   settingsMenuObject: {fileID: 874038259}
   inputManager: {fileID: 107182440}
   previewSystem: {fileID: 727195804}
   placementSystem: {fileID: 275286407}
-  canRemove: 0
   canPlace: 0
-  isFurniture: 0
-  isRoad: 0
-  isWall: 0
 --- !u!1 &891633489
 GameObject:
   m_ObjectHideFlags: 0
@@ -2818,6 +2869,7 @@ MonoBehaviour:
   m_SplineContainer: {fileID: 1954349496}
   defaultWallMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
   defaultFloorMaterial: {fileID: 2100000, guid: dbf7498196b61924ebccf27d2c3afc99, type: 2}
+  selectorMaterial: {fileID: -876546973899608171, guid: 7dc0b6acef942e740ae839c5fe115534, type: 3}
 --- !u!1 &1914537857
 GameObject:
   m_ObjectHideFlags: 0

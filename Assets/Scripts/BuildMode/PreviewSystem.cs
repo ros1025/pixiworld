@@ -63,6 +63,8 @@ public class PreviewSystem : MonoBehaviour
     [SerializeField]
     private MeshCollider dynamicCollider;
 
+    public List<Material> materials;
+
     private Vector2Int minSize;
 
     private void Start()
@@ -70,16 +72,32 @@ public class PreviewSystem : MonoBehaviour
         previewMaterialInstance = new Material(previewMaterialPrefab);
         cellIndicator.SetActive(false);
         cellIndicatorRenderer = cellIndicator.GetComponentInChildren<Renderer>();
-
-        Button[] buttons = buildToolsUI.GetComponentsInChildren<Button>();
     }
 
-    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size)
+    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size, List<Material> materials)
     {
         previewObject = prefab;
         previewSelector = previewObject.transform.Find("Selector").gameObject;
         previewSize = size;
         previewPos = gridPosition;
+        this.materials = materials;
+
+        int index = 0;
+        for (int i = 0; i < previewObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            if (previewObject.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
+            {
+                List<Material> matList = materials.GetRange(index, previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+                Material[] mats = new Material[previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+                for (int j = 0; j < previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    mats[j] = matList[j];
+                }
+                previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+                index += previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+            }
+        }
+
         PreparePreview(prefab);
         PrepareCursor(size);
         MoveCursor(gridPosition);
@@ -99,6 +117,17 @@ public class PreviewSystem : MonoBehaviour
         PreparePreview(previewObject);
         PrepareCursor(size);
         cellIndicator.SetActive(true);
+
+        materials.Clear();
+        Renderer[] renderers = previewObject.GetComponentsInChildren<Renderer>();
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer.transform.parent.gameObject != previewSelector)
+            {
+                materials.AddRange(renderer.materials);
+            }
+        }
         MovePreview(cellIndicator.transform.position);
     }
 
@@ -253,6 +282,7 @@ public class PreviewSystem : MonoBehaviour
         dynamicMesh.mesh = null;
         dynamicCollider.sharedMesh = null;
         dynamicCursor[0].Clear();
+        materials = null;
         previewObject = null;
         previewSelector = null;
     }
@@ -264,6 +294,7 @@ public class PreviewSystem : MonoBehaviour
         foreach (GameObject expander in expanders)
             GameObject.Destroy(expander);
         expanders.Clear();
+        materials = null;
         previewObject = null;
         previewSelector = null;
     }
@@ -501,7 +532,7 @@ public class PreviewSystem : MonoBehaviour
     {
         previewObject.transform.position = new Vector3(
             position.x,
-            position.y + previewYOffset,
+            position.y,
             position.z
         );
     }

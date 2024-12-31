@@ -17,6 +17,7 @@ public class WallMapping : MonoBehaviour
     [SerializeField] private SplineContainer m_SplineContainer;
     [SerializeField] private Material defaultWallMaterial;
     [SerializeField] private Material defaultFloorMaterial;
+    [SerializeField] private Material selectorMaterial;
     //[SerializeField] private GameObject gizmos;
 
     public void MakeWalls()
@@ -897,8 +898,8 @@ public class WallMapping : MonoBehaviour
                         int t5 = offset + 4;
                         int t6 = offset + 5;
 
-                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p1, obj) < 0.1f) != -1);
-                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p3, obj) < 0.1f) != -1);
+                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p1), obj) < 0.1f) != -1);
+                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p3), obj) < 0.1f) != -1);
 
                         if (IsAngleInterior(edges, w1, w2, angle))
                         {
@@ -934,8 +935,8 @@ public class WallMapping : MonoBehaviour
                         int t5 = offset + 4;
                         int t6 = offset + 5;
 
-                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p2, obj) < 0.1f) != -1);
-                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p3, obj) < 0.1f) != -1);
+                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p2), obj) < 0.1f) != -1);
+                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p3), obj) < 0.1f) != -1);
 
                         if (IsAngleInterior(edges, w1, w2, angle))
                         {
@@ -977,8 +978,8 @@ public class WallMapping : MonoBehaviour
                         int t5 = offset + 4;
                         int t6 = offset + 5;
 
-                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p1, obj) < 0.1f) != -1);
-                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p3, obj) < 0.1f) != -1);
+                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p1), obj) < 0.1f) != -1);
+                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p3), obj) < 0.1f) != -1);
 
                         if (IsAngleInterior(edges, w1, w2, angle))
                         {
@@ -1014,8 +1015,8 @@ public class WallMapping : MonoBehaviour
                         int t5 = offset + 4;
                         int t6 = offset + 5;
 
-                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p2, obj) < 0.1f) != -1);
-                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(p3, obj) < 0.1f) != -1);
+                        int w1 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p2), obj) < 0.1f) != -1);
+                        int w2 = edges.FindIndex(item => item.FindIndex(obj => Vector3.Distance(transform.InverseTransformPoint(p3), obj) < 0.1f) != -1);
 
                         if (IsAngleInterior(edges, w1, w2, angle))
                         {
@@ -1218,31 +1219,25 @@ public class WallMapping : MonoBehaviour
 
     private bool HasRoomWithPoints(List<BezierKnot> knots)
     {
-        bool result = false;
-
         for (int i = 0; i < rooms.Count; i++)
         {
             if (rooms[i].points.Count == knots.Count)
             {
-                bool innerResult = true;
                 for (int j = 0; j < knots.Count; j++)
                 {
-                    if (rooms[i].points.FindIndex(data => Vector3.Distance(data, knots[j].Position) < 0.5f) == -1)
+                    if (rooms[i].points.FindIndex(item => item == (Vector3)knots[j].Position) == -1)
                     {
-                        innerResult = false;
                         break;
                     }
-                }
 
-                if (innerResult)
-                {
-                    result = innerResult;
-                    break;
+                    if (j == knots.Count - 1)
+                    {
+                        return true;
+                    }
                 }
             }
         }
-
-        return result;
+        return false;
     }
 
     private List<List<int>> GetDuplicatePoints(List<BezierKnot> points)
@@ -1255,13 +1250,14 @@ public class WallMapping : MonoBehaviour
             if (!skipIndex.Contains(i))
             {
                 List<int> internalList = new();
-                List<BezierKnot> duplicates = points.FindAll(data => Vector3.Distance(data.Position, points[i].Position) < 0.5f);
+                List<BezierKnot> duplicates = points.FindAll(data => (Vector3)data.Position == (Vector3)points[i].Position);
                 if (duplicates.Count > 1)
                 {
                     for (int j = 0; j < duplicates.Count; j++)
                     {
-                        //Debug.Log($"{points.IndexOf(duplicates[j])} in {(Vector3)duplicates[j].Position}");
-                        internalList.Add(points.IndexOf(duplicates[j]));
+                        if (internalList.Count > 0)
+                            internalList.Add(points.IndexOf(duplicates[j], internalList[j - 1] + 1));
+                        else internalList.Add(points.IndexOf(duplicates[j]));
                         skipIndex.Add(j);
                     }
                     d1.Add(internalList);
@@ -1339,7 +1335,22 @@ public class WallMapping : MonoBehaviour
 
         if (!SmallestAngleInIntersection(points, 1, angle))
         {
+            string str = "N:";
+            foreach (BezierKnot point in points)
+            {
+                str += $" {point.Position}";
+            }
+            Debug.Log(str);
             return false;
+        }
+        else
+        {
+            string str = "Y:";
+            foreach (BezierKnot point in points)
+            {
+                str += $" {point.Position}";
+            }
+            Debug.Log(str);
         }
 
         float length = 0;
@@ -1353,7 +1364,7 @@ public class WallMapping : MonoBehaviour
         }
 
         Spline s1 = walls.Find(item => item.points.FindIndex(obj => Vector3.Distance(obj, points[0].Position) < 0.1f) != -1 && item.points.FindIndex(obj => Vector3.Distance(obj, points[1].Position) < 0.1f) != -1).wall;
-        float minLength = DetermineMinLength(s1, points[1], points[0].Position, angle, (s1.IndexOf(points[0]) == 0 ? 1 : 0), points, new(), Vector3.Distance(points[1].Position, points[0].Position));
+        float minLength = DetermineMinLength(s1, points[1], transform.TransformPoint(points[0].Position), angle, (s1.IndexOf(points[0]) == 0 ? 1 : 0), points, new(), Vector3.Distance(points[1].Position, points[0].Position));
         if (minLength < length)
         {
             return false;
@@ -1751,18 +1762,23 @@ public class WallMapping : MonoBehaviour
     private void CreateRoom(Spline spline, BezierKnot knot, int direction, List<BezierKnot> knotList)
     {
         knotList.Add(knot);
-        List<List<int>> duples = GetDuplicatePoints(knotList);
+        string str = "Prog:";
+        foreach (BezierKnot point in knotList)
+        {
+            str += $" {(Vector3)point.Position}";
+        }
+        Debug.Log(str); List<List<int>> duples = GetDuplicatePoints(knotList);
         if (duples.Count > 0)
         {
             if (knotList.Count >= 3)
             {
+                Debug.Log("duple");
                 for (int i = 0; i < duples.Count; i++)
                 {
                     for (int j = 1; j < duples[i].Count; j++)
                     {
                         List<BezierKnot> newKnotList = knotList.GetRange(duples[i][j - 1], duples[i][j] - duples[i][j - 1]);
-                        //newKnotList = RemoveDuplicatePoints(newKnotList);
-                        //SortPoints(newKnotList);
+                        Debug.Log($"duple {duples[i][j - 1]} {duples[i][j]}");
 
                         if (!HasRoomWithPoints(newKnotList) && newKnotList.Count >= 3 && IsRoomMeshContinuous(newKnotList))
                         {
@@ -2493,37 +2509,59 @@ public class WallMapping : MonoBehaviour
 
     }
 
-    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall)
+    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
     {
         GameObject newObject = Instantiate(prefab);
-        newObject.transform.position = point;
+        newObject.transform.position = transform.TransformPoint(point);
         newObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        int index = 0;
+        for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                mats[j] = matList[j];
+            }
+            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+        }
         GameObject previewSelector = Instantiate(selectorObject);
         previewSelector.transform.SetParent(newObject.transform.transform);
         previewSelector.transform.name = "Selector";
-        previewSelector.transform.position = new Vector3(point.x + 0.05f, point.y + 0.01f, point.z + 0.05f);
+        previewSelector.transform.position = transform.TransformPoint(point) + new Vector3(0.05f, 0.01f, 0.05f);
         previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        doors.Add(new Door(newObject, point, rotation, length, ID, targetWall));
+        doors.Add(new Door(newObject, point, rotation, length, ID, targetWall, materials));
         newObject.transform.SetParent(this.transform);
 
         BuildWall(walls.IndexOf(targetWall));
     }
 
-    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, Renderer[] renderers)
+    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
     {
-        door.prefab.transform.position = point;
+        door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
         GameObject previewSelector = door.prefab.transform.Find("Selector").gameObject;
-        previewSelector.transform.position = new Vector3(point.x + 0.05f, point.y + 0.01f, point.z + 0.05f);
+        previewSelector.transform.position = transform.TransformPoint(point) + new Vector3(0.05f, 0.01f, 0.05f);
         previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        previewSelector.GetComponentInChildren<Renderer>().material = selectorMaterial;
 
-        Renderer[] m_Renderers = door.prefab.GetComponentsInChildren<Renderer>();
-        for (int i = 0; i < renderers.Length; i++)
+        int index = 0;
+        for (int i = 0; i < door.prefab.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            Material[] materials = renderers[i].sharedMaterials;
-            m_Renderers[i].materials = materials;
+            if (door.prefab.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
+            {
+                List<Material> matList = materials.GetRange(index, door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+                Material[] mats = new Material[door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+                for (int j = 0; j < door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    mats[j] = matList[j];
+                }
+                door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+                index += door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+            }
         }
 
         door.point = point;
@@ -2951,8 +2989,9 @@ public class Door
     public float length;
     public int ID;
     public Wall targetWall;
+    public List<Material> materials;
 
-    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall)
+    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
     {
         this.prefab = prefab;
         this.point = point;
@@ -2960,5 +2999,6 @@ public class Door
         this.length = length;
         this.ID = ID;
         this.targetWall = targetWall;
+        this.materials = materials;
     }
 }

@@ -20,22 +20,35 @@ public class ObjectPlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation)
+    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, List<Material> materials)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = position;
         newObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        int index = 0;
+        for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                mats[j] = matList[j];
+            }
+            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+        }
+
         GameObject previewSelector = Instantiate(selectorObject);
         previewSelector.transform.SetParent(newObject.transform.transform);
         previewSelector.transform.name = "Selector";
-        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + 0.01f, position.z + 0.05f);
+        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y, position.z + 0.05f);
         previewSelector.transform.localScale = new Vector3(size.x - 0.1f, 0.3f, size.y - 0.1f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        furnitureData.Add(new ObjectSaveData(newObject, gridPos, rotation, size, ID));
+        furnitureData.Add(new ObjectSaveData(newObject, gridPos, rotation, size, ID, materials));
         newObject.transform.SetParent(this.transform);
     }
 
-    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, Renderer[] renderers)
+    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, List<Material> materials)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -44,17 +57,28 @@ public class ObjectPlacer : MonoBehaviour
         GameObject m_Object = prefab;
         m_Object.transform.position = position;
         m_Object.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        Renderer[] m_Renderers = m_Object.GetComponentsInChildren<Renderer>();
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            Material[] materials = renderers[i].sharedMaterials;
-            m_Renderers[i].materials = materials;
-        }
+
         Vector3 scale = m_Object.transform.Find("Selector").localScale;
         scale.y = 0.3f;
         m_Object.transform.Find("Selector").localScale = scale;
-        m_Object.transform.Find("Selector").transform.position = new Vector3(position.x, position.y + 0.01f, position.z);
+        m_Object.transform.Find("Selector").transform.position = new Vector3(position.x, position.y, position.z);
         m_Object.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Renderer>().material = selectorObjectMaterial;
+
+        int matIndex = 0;
+        for (int i = 0; i < m_Object.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            if (m_Object.GetComponentsInChildren<Renderer>()[i] != m_Object.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Renderer>())
+            {
+                List<Material> matList = materials.GetRange(matIndex, m_Object.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+                Material[] mats = new Material[m_Object.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+                for (int j = 0; j < m_Object.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    mats[j] = matList[j];
+                }
+                m_Object.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+                matIndex += m_Object.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+            }
+        }
 
         data.occupiedPosition = gridPos;
         data.rotation = rotation;
@@ -181,13 +205,23 @@ public class ObjectPlacer : MonoBehaviour
             return -1;
         return furnitureData[index].rotation;
     }
+
+    internal List<Material> GetObjectRenderers(GameObject prefab)
+    {
+        int index = furnitureData.FindIndex(item => item.prefab == prefab);
+        if (index == -1)
+            return null;
+        return furnitureData[index].materials;
+    }
 }
 
 [Serializable]
 public class ObjectSaveData : PlacementData
 {
-    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD) : base(prefab, occupiedPosition, rotation, size, iD)
+    public List<Material> materials;
+    
+    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<Material> materials) : base(prefab, occupiedPosition, rotation, size, iD)
     {
-
+        this.materials = materials;
     }
 }

@@ -13,6 +13,7 @@ public class SelectionState : IBuildingState
     ObjectPlacer objectPlacer;
     InputManager inputManager;
     SoundFeedback soundFeedback;
+    List<Material> materials;
     private Vector3 displayPosition;
     private float rotation; private float originalRotation;
     bool edited;
@@ -43,13 +44,16 @@ public class SelectionState : IBuildingState
         gameObjectIndex = objectPlacer.GetObjectID(selectedObject);
         originalPosition = objectPlacer.GetObjectCoordinate(selectedObject);
         originalRotation = objectPlacer.GetObjectRotation(selectedObject);
+        materials = objectPlacer.GetObjectRenderers(selectedObject);
         rotation = originalRotation;
         placementSystem.SetRotation(originalRotation);
+        placementSystem.SetSelectedPosition(originalPosition);
         previewSystem.StartMovingObjectPreview(
             grid.LocalToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
-            database.objectsData[gameObjectIndex].Size
+            database.objectsData[gameObjectIndex].Size,
+            materials
         );
         UpdateState(originalPosition, rotation);
     }
@@ -59,9 +63,9 @@ public class SelectionState : IBuildingState
         previewSystem.StopMovingObject();
         if (edited == false)
         {
-            Renderer[] renderers = database.objectsData[gameObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
+            
             displayPosition = grid.LocalToWorld(originalPosition);
-            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, originalRotation, renderers);
+            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, originalRotation, materials);
         }
     }
 
@@ -86,9 +90,9 @@ public class SelectionState : IBuildingState
         }
         soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
-        Renderer[] renderers = database.objectsData[gameObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
 
-        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, rotation, renderers);
+        materials = previewSystem.materials;
+        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, rotation, materials);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
         originalPosition = gridPosition;

@@ -8,6 +8,8 @@ public class PreviewTools : MonoBehaviour
     [SerializeField]
     private UIDocument SettingsMenu;
     [SerializeField]
+    private UIDocument TexturesMenu;
+    [SerializeField]
     private GameObject settingsMenuObject;
     [SerializeField]
     private InputManager inputManager;
@@ -29,6 +31,9 @@ public class PreviewTools : MonoBehaviour
         root = SettingsMenu.rootVisualElement;
         controls = root.Q<VisualElement>("Controls");
 
+        TexturesMenu.rootVisualElement.ElementAt(0).visible = false;
+        TexturesMenu.rootVisualElement.SetEnabled(false);
+
         placeButton = controls.Q<Button>("PlaceButton");
         cancelButton = controls.Q<Button>("CancelButton");
         sellButton = controls.Q<Button>("SellButton");
@@ -48,22 +53,40 @@ public class PreviewTools : MonoBehaviour
         placeButton.RegisterCallback<ClickEvent>(InvokeAction);
         cancelButton.RegisterCallback<ClickEvent>(InvokeExit);
 
-        if (placementSystem.itemMode == PlacementSystem.Road)
-            sellButton.RegisterCallback<ClickEvent, Roads>(RemoveRoad, previewSystem.selectedRoad);
-        else if (placementSystem.itemMode == PlacementSystem.Wall)
-            sellButton.RegisterCallback<ClickEvent, Wall>(RemoveWall, previewSystem.selectedWall);
-        else if (placementSystem.itemMode == PlacementSystem.Object)
-            sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
-        else if (placementSystem.itemMode == PlacementSystem.Zone)
-            sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
-        else if (placementSystem.itemMode == PlacementSystem.Door)
-            sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveDoor, previewSystem.previewObject);
+        if (!placementSystem.isCreate)
+        {
+            sellButton.SetEnabled(true);
+            if (placementSystem.itemMode == PlacementSystem.Road)
+                sellButton.RegisterCallback<ClickEvent, Roads>(RemoveRoad, previewSystem.selectedRoad);
+            else if (placementSystem.itemMode == PlacementSystem.Wall)
+                sellButton.RegisterCallback<ClickEvent, Wall>(RemoveWall, previewSystem.selectedWall);
+            else if (placementSystem.itemMode == PlacementSystem.Object)
+                sellButton.RegisterCallback<ClickEvent, GameObject>(SellObject, previewSystem.previewObject);
+            else if (placementSystem.itemMode == PlacementSystem.Zone)
+                sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
+            else if (placementSystem.itemMode == PlacementSystem.Door)
+                sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveDoor, previewSystem.previewObject);
+            else sellButton.SetEnabled(false);
+        }
         else sellButton.SetEnabled(false);
 
+        if (placementSystem.itemMode == PlacementSystem.Door || placementSystem.itemMode == PlacementSystem.Object)
+        {
+            customTexture.SetEnabled(true);
+            customTexture.RegisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);
+        }
+        else customTexture.SetEnabled(false);
+
         if (placementSystem.itemMode != PlacementSystem.Wall)
-            gridSnap.clicked += GridSnap;
+            gridSnap.RegisterCallback<ClickEvent>(GridSnap);
+        else gridSnap.SetEnabled(false);
 
         AccountForSafeArea();
+    }
+
+    public void PlaceCheck()
+    {
+        placeButton.SetEnabled(canPlace);
     }
 
     public void Hide()
@@ -112,7 +135,126 @@ public class PreviewTools : MonoBehaviour
         this.size.text = $"{size.x}x{size.y}";
     }
 
-    public void GridSnap()
+    public void CustomiseTexture(GameObject obj)
+    {
+        VisualElement rootT = TexturesMenu.rootVisualElement;
+        rootT.ElementAt(0).visible = true; rootT.SetEnabled(true);
+        rootT.style.left = customTexture.layout.xMin;
+        rootT.style.top = Screen.height - (rootT.ElementAt(0).layout.height + controls.layout.height + 20);
+
+        Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
+        tCancel.UnregisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);
+        tCancel.RegisterCallback<ClickEvent>(CloseTexturePopup);
+
+        VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
+        textureList.Clear();
+
+        for (int i = 0; i < previewSystem.materials.Count; i++)
+        {
+            VisualElement e = new();
+            e.name = $"texture{i}";
+            e.AddToClassList("texture-parent");
+            textureList.Add(e);
+
+            Label label = new();
+            label.text = $"Texture {i}";
+            label.AddToClassList("texture-label");
+            e.Add(label);
+
+            Button color = new();
+            color.name = "Colour";
+            color.AddToClassList("texture-button");
+            color.style.backgroundColor = previewSystem.materials[i].color;
+            color.RegisterCallback<ClickEvent, Material>(ColorPicker, previewSystem.materials[i]);
+            e.Add(color);
+
+            Button text = new();
+            text.name = "Texture";
+            text.AddToClassList("texture-button");
+            e.Add(text);
+        }
+    }
+
+    public void SwitchBackToTextureCustomiser(ClickEvent evt)
+    {
+        CustomiseTexture(previewSystem.previewObject);
+    }
+
+    public void ColorPicker(ClickEvent evt, Material mat)
+    {
+        VisualElement rootT = TexturesMenu.rootVisualElement;
+        rootT.ElementAt(0).visible = true; rootT.SetEnabled(true);
+
+        Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
+        tCancel.UnregisterCallback<ClickEvent>(CloseTexturePopup);
+        tCancel.RegisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);
+
+        VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
+        textureList.Clear();
+
+        Color.RGBToHSV(mat.color, out float H, out float S, out float V);
+
+        VisualElement parent = new();
+        parent.name = $"Color Picker";
+        parent.AddToClassList("color-picker");
+        textureList.Add(parent);
+
+        VisualElement preview = new();
+        preview.name = $"Color Preview";
+        preview.AddToClassList("color-picker-bg");
+        preview.style.backgroundColor = mat.color;
+        parent.Add(preview);
+
+        Slider hue = new();
+        hue.name = "Hue";
+        hue.label = "Hue";
+        hue.value = H;
+        hue.lowValue = 0;
+        hue.highValue = 1;
+        hue.showInputField = true;
+        parent.Add(hue);
+
+        Slider saturation = new();
+        saturation.name = "Saturation";
+        saturation.label = "Saturation";
+        saturation.value = S;
+        saturation.lowValue = 0;
+        saturation.highValue = 1;
+        saturation.showInputField = true;
+        parent.Add(saturation);
+
+        Slider value = new();
+        value.name = "Value";
+        value.label = "Value";
+        value.value = V;
+        value.lowValue = 0;
+        value.highValue = 1;
+        value.showInputField = true;
+        parent.Add(value);
+
+        hue.RegisterValueChangedCallback(evt => SetHSV(evt.newValue, saturation.value, value.value, mat, preview));
+        saturation.RegisterValueChangedCallback(evt => SetHSV(hue.value, evt.newValue, value.value, mat, preview));
+        value.RegisterValueChangedCallback(evt => SetHSV(hue.value, saturation.value, evt.newValue, mat, preview));
+
+
+    }
+
+    public void CloseTexturePopup(ClickEvent evt)
+    {
+        VisualElement rootT = TexturesMenu.rootVisualElement;
+        VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
+        textureList.Clear();
+        rootT.ElementAt(0).visible = false; rootT.SetEnabled(false);
+    }
+
+    public void SetHSV(float H, float S, float V, Material mat, VisualElement preview)
+    {
+        Color c = Color.HSVToRGB(H, S, V);
+        mat.color = c;
+        preview.style.backgroundColor = c;
+    }
+
+    public void GridSnap(ClickEvent evt)
     {
         if (!previewSystem.gridSnap)
         {

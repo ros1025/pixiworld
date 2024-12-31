@@ -110,9 +110,10 @@ public class PlacementSystem : MonoBehaviour
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        buildToolsUI.Call();
         itemMode = Object;
         isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
         buildingState = new PlacementState(gridPosition,
                                            ID,
                                            grid,
@@ -133,9 +134,10 @@ public class PlacementSystem : MonoBehaviour
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        buildToolsUI.Call();
         itemMode = Zone;
         isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
         buildingState = new ZoneCreateState(gridPosition,
                                             ID,
                                             grid,
@@ -156,9 +158,10 @@ public class PlacementSystem : MonoBehaviour
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        buildToolsUI.Call();
         itemMode = Door;
         isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
         buildingState = new DoorCreateState(gridPosition,
                                             ID,
                                             grid,
@@ -180,9 +183,10 @@ public class PlacementSystem : MonoBehaviour
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        buildToolsUI.Call();
         itemMode = Road;
         isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
         buildingState = new RoadCreateState(gridPosition,
                                             ID,
                                             grid,
@@ -203,9 +207,10 @@ public class PlacementSystem : MonoBehaviour
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        buildToolsUI.Call();
         itemMode = Wall;
         isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
         buildingState = new WallCreateState(grid,
                                             walls,
                                             preview,
@@ -300,9 +305,10 @@ public class PlacementSystem : MonoBehaviour
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            buildToolsUI.Call();
             itemMode = Object;
             isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
             buildingState = new SelectionState(gridPosition,
                                        grid,
                                        preview,
@@ -323,9 +329,10 @@ public class PlacementSystem : MonoBehaviour
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            buildToolsUI.Call();
             itemMode = Zone;
             isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
             buildingState = new ZoneSelectionState(gridPosition,
                            grid,
                            preview,
@@ -346,9 +353,10 @@ public class PlacementSystem : MonoBehaviour
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            buildToolsUI.Call();
             itemMode = Road;
             isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
             buildingState = new RoadModifyState(gridPosition,
                            grid,
                            preview,
@@ -369,9 +377,10 @@ public class PlacementSystem : MonoBehaviour
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            buildToolsUI.Call();
             itemMode = Wall;
             isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
             buildingState = new WallModifyState(gridPosition,
                 grid,
                 walls,
@@ -391,9 +400,10 @@ public class PlacementSystem : MonoBehaviour
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            buildToolsUI.Call();
             itemMode = Door;
             isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
             buildingState = new DoorModifyState(gridPosition,
                 grid,
                 preview,
@@ -569,7 +579,7 @@ public class PlacementSystem : MonoBehaviour
         if (inputManager.IsPointerOverUI())
             return;
         cameraController.posAdjustable = true;
-        buildToolsUI.Call();
+        buildToolsUI.PlaceCheck();
         cameraController.MoveCameraToPos(preview.previewPos, preview.previewSize);
         preview.deSelect();
         inputManager.OnMoved -= PingUpdate;
@@ -631,6 +641,11 @@ public class PlacementSystem : MonoBehaviour
     public void SetRotation(float rotation)
     {
         this.rotation = rotation;
+    }
+
+    public void SetSelectedPosition(Vector3 position)
+    {
+        this.selectedPosition = position;
     }
 
     public void SwitchZone(GameObject zone, Renderer zoneRenderer, Grid grid, ObjectPlacer placer, WallMapping walls)
