@@ -282,7 +282,7 @@ public class PreviewSystem : MonoBehaviour
         dynamicMesh.mesh = null;
         dynamicCollider.sharedMesh = null;
         dynamicCursor[0].Clear();
-        materials = null;
+        materials.Clear();
         previewObject = null;
         previewSelector = null;
     }
@@ -294,7 +294,7 @@ public class PreviewSystem : MonoBehaviour
         foreach (GameObject expander in expanders)
             GameObject.Destroy(expander);
         expanders.Clear();
-        materials = null;
+        materials.Clear();
         previewObject = null;
         previewSelector = null;
     }

@@ -2,11 +2,11 @@
     <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/button.uss?fileID=7433441132597879392&amp;guid=72f57eda9e9f7274bbe1ea038305b0c1&amp;type=3#button" />
     <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: auto; width: 100%; min-height: 420px; max-height: 420px; min-width: auto; bottom: 0; position: absolute;">
         <ui:VisualElement name="TopBar" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; max-height: 70px; bottom: 340px; position: absolute;">
-            <ui:Button display-tooltip-when-elided="true" name="CancelButton" style="background-image: none; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
-                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Packages/com.unity.collab-proxy/Editor/PlasticSCM/Assets/Images/d_iconclosebutton@2x.png?fileID=2800000&amp;guid=0525793900d728a42936791a8a6de63b&amp;type=3#d_iconclosebutton@2x&quot;); height: 45px; width: 45px; left: 5px;" />
+            <ui:Button display-tooltip-when-elided="true" name="CancelButton" style="background-image: none; padding-top: 15px; padding-bottom: 15px; align-items: center; padding-left: 22.5px; padding-right: 22.5px;">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;); width: 100%; height: 100%;" />
             </ui:Button>
             <ui:VisualElement name="categories" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: 70px; width: 1825px;">
-                <ui:ScrollView mode="Horizontal" touch-scroll-type="Elastic" mouse-wheel-scroll-size="720" style="flex-direction: row; height: 75px; width: 100%;">
+                <ui:ScrollView mode="Horizontal" touch-scroll-type="Elastic" style="flex-direction: row; height: 75px; width: 100%;">
                     <ui:Button text="pl" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" style="-unity-text-align: middle-center;" />
                     <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
                     <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" class="tools-button" />
@@ -32,13 +32,21 @@
         </ui:VisualElement>
         <ui:VisualElement name="BottomBar" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; height: 340px; max-height: 340px; position: absolute; bottom: 0; width: 100%; min-width: 100%;">
             <ui:VisualElement name="sections" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); max-width: 80px; min-width: 80px; width: 80px; padding-top: 5px; margin-bottom: 0; margin-top: 0; margin-right: 0; margin-left: 0; padding-right: 0; padding-bottom: 5px; padding-left: 0;">
-                <ui:Button display-tooltip-when-elided="true" name="Furniture" class="sections-button" />
-                <ui:Button display-tooltip-when-elided="true" name="Building" class="sections-button" />
-                <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Inventory" class="sections-button" />
-                <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Search" class="sections-button" />
+                <ui:Button display-tooltip-when-elided="true" name="Furniture" class="sections-button">
+                    <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_furniture.png?fileID=2800000&amp;guid=77eaf31ceec79ec41b2b5bfb143d4d41&amp;type=3#pixiworld_furniture&quot;);" />
+                </ui:Button>
+                <ui:Button display-tooltip-when-elided="true" name="Building" class="sections-button">
+                    <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_building.png?fileID=2800000&amp;guid=809fcb9bd5b1e924dafb3d08eccae294&amp;type=3#pixiworld_building&quot;);" />
+                </ui:Button>
+                <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Inventory" class="sections-button">
+                    <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_inventory.png?fileID=2800000&amp;guid=f9c446ba9c264a54c87d14255ba73642&amp;type=3#pixiworld_inventory&quot;);" />
+                </ui:Button>
+                <ui:Button text="&#10;" display-tooltip-when-elided="true" name="Search" class="sections-button">
+                    <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_search.png?fileID=2800000&amp;guid=582efa422642bda468f493cb971aac43&amp;type=3#pixiworld_search&quot;);" />
+                </ui:Button>
             </ui:VisualElement>
             <ui:VisualElement name="items" style="background-color: rgba(193, 229, 229, 0.4); border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; border-left-color: rgb(81, 154, 162); border-right-color: rgb(81, 154, 162); border-top-color: rgb(81, 154, 162); border-bottom-color: rgb(81, 154, 162); min-height: 340px; padding-bottom: 0; width: 100%;">
-                <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" nested-interaction-kind="ForwardScrolling" name="ScrollView" mouse-wheel-scroll-size="720" style="height: 100%; min-height: auto; min-width: auto; -unity-text-align: upper-left; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
+                <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" nested-interaction-kind="ForwardScrolling" name="ScrollView" style="height: 100%; min-height: auto; min-width: auto; -unity-text-align: upper-left; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;">
                     <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" />
                     <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />
                     <ui:Button text="Button" display-tooltip-when-elided="true" class="viewport-button" style="align-items: auto;" />

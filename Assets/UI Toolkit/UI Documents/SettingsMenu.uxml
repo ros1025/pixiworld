@@ -16,7 +16,7 @@
             </ui:ScrollView>
         </ui:VisualElement>
         <ui:Button display-tooltip-when-elided="true" name="Cancel" style="right: 0; position: absolute; border-top-left-radius: 35px; border-bottom-left-radius: 35px; border-top-right-radius: 35px; border-bottom-right-radius: 35px;">
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&quot;project://database/Packages/com.unity.collab-proxy/Editor/PlasticSCM/Assets/Images/d_secondarytabclosehover@2x.png?fileID=2800000&amp;guid=9aa4348290784b2468144a97eb15d8d7&amp;type=3#d_secondarytabclosehover@2x&quot;);" />
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;);" />
         </ui:Button>
     </ui:VisualElement>
 </ui:UXML>

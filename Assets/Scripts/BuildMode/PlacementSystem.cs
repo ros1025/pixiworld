@@ -702,3 +702,11 @@ public class PlacementSystem : MonoBehaviour
         if (rotation >= 360) rotation -= 360;
     }
 }
+
+class WorldSaveData
+{
+    public List<ObjectSaveData> mapObjects;
+    public List<ZoneSaveData> zones;
+    public List<Roads> roads;
+    public List<WallMapSaveData> walls;
+}

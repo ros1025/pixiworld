@@ -78,7 +78,10 @@ public class PreviewTools : MonoBehaviour
         else customTexture.SetEnabled(false);
 
         if (placementSystem.itemMode != PlacementSystem.Wall)
+        {
             gridSnap.RegisterCallback<ClickEvent>(GridSnap);
+            RefreshGridSnapButtonIcon();
+        }
         else gridSnap.SetEnabled(false);
 
         AccountForSafeArea();
@@ -263,6 +266,26 @@ public class PreviewTools : MonoBehaviour
         else
         {
             previewSystem.gridSnap = false;
+        }
+        RefreshGridSnapButtonIcon();
+    }
+    
+
+    private void RefreshGridSnapButtonIcon()
+    {
+        Color.RGBToHSV(gridSnap.ElementAt(0).style.unityBackgroundImageTintColor.value, out float H, out float S, out float V);
+        if (!previewSystem.gridSnap)
+        {
+            
+            Color bgColor = Color.HSVToRGB(H, S, V);
+            bgColor.a = 0.5f;
+            gridSnap.ElementAt(0).style.unityBackgroundImageTintColor = bgColor;
+        }
+        else
+        {
+            Color bgColor = Color.HSVToRGB(H, S, V);
+            bgColor.a = 1f;
+            gridSnap.ElementAt(0).style.unityBackgroundImageTintColor = bgColor;
         }
     }
 

@@ -18,6 +18,7 @@ public class WallMapping : MonoBehaviour
     [SerializeField] private Material defaultWallMaterial;
     [SerializeField] private Material defaultFloorMaterial;
     [SerializeField] private Material selectorMaterial;
+    public float height;
     //[SerializeField] private GameObject gizmos;
 
     public void MakeWalls()
@@ -150,9 +151,9 @@ public class WallMapping : MonoBehaviour
                 h1 = new Vector3(0, 1.9f, 0);
             }
             Vector3 p1 = point1 + h1;
-            Vector3 p2 = point1 + new Vector3(0, 2, 0);
+            Vector3 p2 = point1 + new Vector3(0, height, 0);
             Vector3 p3 = point2 + h1;
-            Vector3 p4 = point2 + new Vector3(0, 2, 0);
+            Vector3 p4 = point2 + new Vector3(0, height, 0);
             vertsA.AddRange(new List<Vector3> { p1, p2, p3, p4 });
             currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1), new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1)});
 
@@ -164,8 +165,8 @@ public class WallMapping : MonoBehaviour
             && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
 
                 m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point), 0.04f, out Vector3 pointA, out Vector3 pointB);
-                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, 2, 0), pointB, pointB + new Vector3(0, 2, 0) });
-                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, 2, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, 2, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, height, 0), pointB, pointB + new Vector3(0, height, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, height, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, height, 0) });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
                 currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1),
@@ -182,8 +183,8 @@ public class WallMapping : MonoBehaviour
             && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution);
 
                 m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length)), 0.04f, out Vector3 pointA, out Vector3 pointB);
-                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, 2, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, 2, 0) });
-                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, 2, 0), pointB, pointB + new Vector3(0, 2, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, height, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, height, 0) });
+                vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, height, 0), pointB, pointB + new Vector3(0, height, 0) });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
                 currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1),
@@ -201,18 +202,18 @@ public class WallMapping : MonoBehaviour
                 h2 = new Vector3(0, 1.9f, 0);
             }
             Vector3 p5 = point3 + h2;
-            Vector3 p6 = point3 + new Vector3(0, 2, 0);
+            Vector3 p6 = point3 + new Vector3(0, height, 0);
             Vector3 p7 = point4 + h2;
-            Vector3 p8 = point4 + new Vector3(0, 2, 0);
+            Vector3 p8 = point4 + new Vector3(0, height, 0);
             vertsA.AddRange(new List<Vector3> { p5, p6, p7, p8 });
             currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1), new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1) });
 
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.001f, out Vector3 p9, out Vector3 p11);
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.001f, out Vector3 p13, out Vector3 p15);
-            Vector3 p10 = p9 + new Vector3(0, 2, 0);
-            Vector3 p12 = p11 + new Vector3(0, 2, 0);
-            Vector3 p14 = p13 + new Vector3(0, 2, 0);
-            Vector3 p16 = p15 + new Vector3(0, 2, 0);
+            Vector3 p10 = p9 + new Vector3(0, height, 0);
+            Vector3 p12 = p11 + new Vector3(0, height, 0);
+            Vector3 p14 = p13 + new Vector3(0, height, 0);
+            Vector3 p16 = p15 + new Vector3(0, height, 0);
             vertsB.AddRange(new List<Vector3> { p9, p10, p11, p12, p13, p14, p15, p16 });
 
             for (int i = 0; i < draws; i++)
@@ -429,7 +430,7 @@ public class WallMapping : MonoBehaviour
                 Vector3 c = (j < junctionEdges.Count - 1) ? junctionEdges[j + 1].right : junctionEdges[0].right;
 
                 vertices.AddRange(new List<Vector3> { a, b, c });
-                vertices.AddRange(new List<Vector3> { a + new Vector3(0, 2, 0), b + new Vector3(0, 2, 0), c + new Vector3(0, 2, 0) });
+                vertices.AddRange(new List<Vector3> { a + new Vector3(0, height, 0), b + new Vector3(0, height, 0), c + new Vector3(0, height, 0) });
 
                 offset = j * 6;
                 trisS.AddRange(new List<int> { offset + 0, offset + 1, offset + 2 });
@@ -453,7 +454,7 @@ public class WallMapping : MonoBehaviour
                 Vector3 a = junctionEdges[j].right;
                 Vector3 b = junctionEdges[j].left;
 
-                vertices.AddRange(new List<Vector3> { a, b, a + new Vector3(0, 2, 0), b + new Vector3(0, 2, 0) });
+                vertices.AddRange(new List<Vector3> { a, b, a + new Vector3(0, height, 0), b + new Vector3(0, height, 0) });
 
                 offset = j * 4;
                 trisA.Add(new List<int> { offset + 0, offset + 2, offset + 3, offset + 3, offset + 1, offset + 0 });
@@ -474,10 +475,10 @@ public class WallMapping : MonoBehaviour
         Vector3 p2x = center + new Vector3(-0.05f, 0, 0.05f);
         Vector3 p3x = center + new Vector3(0.05f, 0, -0.05f);
         Vector3 p4x = center + new Vector3(0.05f, 0, 0.05f);
-        Vector3 p5x = p1x + new Vector3(0, 2f, 0);
-        Vector3 p6x = p2x + new Vector3(0, 2f, 0);
-        Vector3 p7x = p3x + new Vector3(0, 2f, 0);
-        Vector3 p8x = p4x + new Vector3(0, 2f, 0);
+        Vector3 p5x = p1x + new Vector3(0, height, 0);
+        Vector3 p6x = p2x + new Vector3(0, height, 0);
+        Vector3 p7x = p3x + new Vector3(0, height, 0);
+        Vector3 p8x = p4x + new Vector3(0, height, 0);
 
         //Debug.Log($"{p1} {p2} {p3} {p4}");
 
@@ -652,7 +653,7 @@ public class WallMapping : MonoBehaviour
                 if (Vector3.Angle(dirA, targetPoint - nearest) < 90 || Vector3.Distance(targetPoint, nearest) < 0.01f)
                 {
                     localPointsList.Add(targetPoint);
-                    localPointsList2.Add(targetPoint + new Vector3(0, 2f, 0));
+                    localPointsList2.Add(targetPoint + new Vector3(0, height, 0));
 
                     if (x == minX || x == maxX || y == minY || y == maxY
                         || localPointsList.FindIndex(item => item.z == y - 0.5f) == -1 || (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y) == -1))
@@ -661,9 +662,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wall, nearest, wallPoints[roomWalls.IndexOf(wall)]);
                             edgePoints[roomWalls.IndexOf(wall)].Insert(index, targetPoint);
-                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, 2f, 0));
+                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, height, 0));
                             wallPoints[roomWalls.IndexOf(wall)].Insert(index, nearest);
-                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, height, 0));
                         }
                     }
                     if ((pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y - 0.5f) == -1))
@@ -675,9 +676,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wall, nearest, wallPoints[roomWalls.IndexOf(wall)]);
                             edgePoints[roomWalls.IndexOf(wall)].Insert(index, targetPoint);
-                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, 2f, 0));
+                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, height, 0));
                             wallPoints[roomWalls.IndexOf(wall)].Insert(index, nearest);
-                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, height, 0));
                         }
                     }
                     if ((pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y + 0.5f) == -1))
@@ -689,9 +690,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wall, nearest, wallPoints[roomWalls.IndexOf(wall)]);
                             edgePoints[roomWalls.IndexOf(wall)].Insert(index, targetPoint);
-                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, 2f, 0));
+                            edgePoints2[roomWalls.IndexOf(wall)].Insert(index, targetPoint + new Vector3(0, height, 0));
                             wallPoints[roomWalls.IndexOf(wall)].Insert(index, nearest);
-                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wall)].Insert(index, nearest + new Vector3(0, height, 0));
                         }
                     }
                 }
@@ -705,9 +706,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wallN, pointN, wallPoints[roomWalls.IndexOf(wallN)]);
                             edgePoints[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(0, 0f, -0.5f));
-                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(0, 2f, -0.5f));
+                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(0, height, -0.5f));
                             wallPoints[roomWalls.IndexOf(wallN)].Insert(index, pointN);
-                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, height, 0));
                         }
                     }
                     if (pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y) != -1)
@@ -718,9 +719,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wallN, pointN, wallPoints[roomWalls.IndexOf(wallN)]);
                             edgePoints[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 0f, 0));
-                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 2f, 0));
+                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, height, 0));
                             wallPoints[roomWalls.IndexOf(wallN)].Insert(index, pointN);
-                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, height, 0));
                         }
                     }
                     if ((pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y - 0.5f) != -1))
@@ -734,9 +735,9 @@ public class WallMapping : MonoBehaviour
                         {
                             int index = GetIndexToInsert(wallN, pointN, wallPoints[roomWalls.IndexOf(wallN)]); 
                             edgePoints[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 0, -0.5f));
-                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 2f, -0.5f));
+                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, height, -0.5f));
                             wallPoints[roomWalls.IndexOf(wallN)].Insert(index, pointN);
-                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, height, 0));
                         }
                     }
                     if ((pointsList.Count > 0 && pointsList[^1].FindIndex(item => item.z == y + 0.5f) != -1))
@@ -751,9 +752,9 @@ public class WallMapping : MonoBehaviour
 
                             int index = GetIndexToInsert(wallN, pointN, wallPoints[roomWalls.IndexOf(wallN)]); 
                             edgePoints[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 0, 0.5f));
-                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, 2f, 0.5f));
+                            edgePoints2[roomWalls.IndexOf(wallN)].Insert(index, targetPoint + new Vector3(-0.5f, height, 0.5f));
                             wallPoints[roomWalls.IndexOf(wallN)].Insert(index, pointN);
-                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, 2f, 0));
+                            wallPoints2[roomWalls.IndexOf(wallN)].Insert(index, pointN + new Vector3(0, height, 0));
                         }
                     }
                 }
@@ -770,18 +771,18 @@ public class WallMapping : MonoBehaviour
                 Vector3 targetPoint = DrawEdgePoint(edgePoints, roomWalls[j].points[0]);
 
                 edgePoints[j].Insert(0, targetPoint);
-                edgePoints2[j].Insert(0, targetPoint + new Vector3(0, 2f, 0));
+                edgePoints2[j].Insert(0, targetPoint + new Vector3(0, height, 0));
                 wallPoints[j].Insert(0, roomWalls[j].points[0]);
-                wallPoints2[j].Insert(0, roomWalls[j].points[0] + new Vector3(0, 2f, 0));
+                wallPoints2[j].Insert(0, roomWalls[j].points[0] + new Vector3(0, height, 0));
             }
             if (wallPoints[j].FindIndex(item => Vector3.Distance(item, roomWalls[j].points[^1]) < 0.1f) == -1)
             {
                 Vector3 targetPoint = DrawEdgePoint(edgePoints, roomWalls[j].points[^1]);
 
                 edgePoints[j].Add(targetPoint);
-                edgePoints2[j].Add(targetPoint + new Vector3(0, 2f, 0));
+                edgePoints2[j].Add(targetPoint + new Vector3(0, height, 0));
                 wallPoints[j].Add(roomWalls[j].points[^1]);
-                wallPoints2[j].Add(roomWalls[j].points[^1] + new Vector3(0, 2f, 0));
+                wallPoints2[j].Add(roomWalls[j].points[^1] + new Vector3(0, height, 0));
             }
             if (Vector3.Distance(roomWalls[j].points[0], rooms[i].points[j]) > 0.1f)
             {
@@ -1767,7 +1768,7 @@ public class WallMapping : MonoBehaviour
         {
             str += $" {(Vector3)point.Position}";
         }
-        Debug.Log(str); List<List<int>> duples = GetDuplicatePoints(knotList);
+        List<List<int>> duples = GetDuplicatePoints(knotList);
         if (duples.Count > 0)
         {
             if (knotList.Count >= 3)
@@ -1778,7 +1779,6 @@ public class WallMapping : MonoBehaviour
                     for (int j = 1; j < duples[i].Count; j++)
                     {
                         List<BezierKnot> newKnotList = knotList.GetRange(duples[i][j - 1], duples[i][j] - duples[i][j - 1]);
-                        Debug.Log($"duple {duples[i][j - 1]} {duples[i][j]}");
 
                         if (!HasRoomWithPoints(newKnotList) && newKnotList.Count >= 3 && IsRoomMeshContinuous(newKnotList))
                         {
@@ -2891,20 +2891,10 @@ public class WallMapping : MonoBehaviour
         ceilParent.SetActive(toggle);
     }
 
-    /*
-    private void DrawGizmos(List<Vector3> points)
+    public WallMapSaveData GetWallMapSaveData()
     {
-        Color color = Random.ColorHSV();
-        
-        for (int i = 0; i < points.Count; i++)
-        {
-            GameObject item = Instantiate(gizmos);
-            item.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            item.transform.position = points[i];
-            item.GetComponent<Renderer>().material.color = color;
-        }
+        return new WallMapSaveData(walls, intersections, rooms, doors);
     }
-    */
 }
 
 [System.Serializable]
@@ -3000,5 +2990,22 @@ public class Door
         this.ID = ID;
         this.targetWall = targetWall;
         this.materials = materials;
+    }
+}
+
+[System.Serializable]
+public class WallMapSaveData
+{
+    public List<Wall> walls;
+    public List<Intersection> intersections;
+    public List<Room> rooms;
+    public List<Door> doors;
+
+    public WallMapSaveData(List<Wall> walls, List<Intersection> intersections, List<Room> rooms, List<Door> doors)
+    {
+        this.walls = walls;
+        this.intersections = intersections;
+        this.rooms = rooms;
+        this.doors = doors;
     }
 }

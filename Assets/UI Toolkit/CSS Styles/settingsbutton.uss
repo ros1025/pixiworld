@@ -393,6 +393,10 @@
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
 }
 
 #Cancel:hover {
@@ -403,6 +407,10 @@
     border-top-right-radius: 30px;
     border-bottom-right-radius: 30px;
     background-color: rgb(185, 71, 71);
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
 }
 
 #Cancel:active {
@@ -417,6 +425,10 @@
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
 }
 
 #unity-checkmark {

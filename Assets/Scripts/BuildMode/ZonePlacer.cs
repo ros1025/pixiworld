@@ -35,7 +35,7 @@ public class ZonePlacer : MonoBehaviour
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
         zoneComponent.InstantiateNew(placementSystem, ID, size);
-        zoneData.Add(new ZoneSaveData(zoneObject, gridPos, rotation, size, ID, zoneComponent.floors));
+        zoneData.Add(new ZoneSaveData(zoneObject, gridPos, rotation, size, ID, zoneComponent.GetLevelSaveData()));
         zoneObject.transform.SetParent(this.transform);
     }
 
@@ -184,8 +184,8 @@ public class ZonePlacer : MonoBehaviour
 [Serializable]
 public class ZoneSaveData : PlacementData
 {
-    public List<LevelData> levels { get; private set; }
-    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<LevelData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
+    public List<LevelSaveData> levels { get; private set; }
+    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<LevelSaveData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
     {
         this.levels = levels;
     }

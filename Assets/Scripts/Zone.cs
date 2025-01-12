@@ -224,6 +224,17 @@ public class Zone : MonoBehaviour
             AddLevelAbove();
         }
     }
+
+    public List<LevelSaveData> GetLevelSaveData()
+    {
+        List<LevelSaveData> save = new();
+        for (int i = 0; i < floors.Count; i++)
+        {
+            LevelSaveData levelSaveData = new(floors[i].objectPlacer.furnitureData, floors[i].walls.GetWallMapSaveData(), floors[i].height);
+            save.Add(levelSaveData);
+        }
+        return save;
+    }
 }
 
 [System.Serializable]
@@ -246,6 +257,21 @@ public class LevelData
         this.renderer = renderer;
         this.grid = grid;
         this.objectPlacer = objectPlacer;
+        this.walls = walls;
+        this.height = height;
+    }
+}
+
+[System.Serializable]
+public class LevelSaveData
+{
+    public List<ObjectSaveData> objects;
+    public WallMapSaveData walls;
+    public float height;
+
+    public LevelSaveData(List<ObjectSaveData> objects, WallMapSaveData walls, float height)
+    {
+        this.objects = objects;
         this.walls = walls;
         this.height = height;
     }
