@@ -6,14 +6,16 @@
 - [x] Camera Controls (excluding Touch Controls)
 - [x] Time Controller (modifications TBD)
 - [x] Build Mode Controls (may be modified)
+- [x] Refining Camera Touch Controls
+- [x] Wall Placement and Room Generation
 
 ## Work In Progress
 - [ ] Textures
-- [ ] Refining Camera Touch Controls
-- [ ] Wall Placement and Room Generation
 - [ ] Character Models and Creator
 - [ ] Graphical Settings
 - [ ] Audio
+- [ ] Save/Load System
+- [ ] Undo/Redo System
 
 ## Planned Future Features
 - [ ] Events
