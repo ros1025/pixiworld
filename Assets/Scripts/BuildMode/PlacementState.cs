@@ -71,10 +71,10 @@ public class PlacementState : IBuildingState
         soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
 
-        List<Material> newMaterials = new();
+        List<MatData> newMaterials = new();
         for (int i = 0; i < previewSystem.materials.Count; i++)
         {
-            newMaterials.Add(Material.Instantiate(previewSystem.materials[i]));
+            newMaterials.Add(new MatData(previewSystem.materials[i]));
         }
 
         objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, gridPosition,

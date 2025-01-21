@@ -9,9 +9,4 @@ public class ObjectCategoriesSO : ScriptableObject
     public List<ObjectCategory> categories;
 }
 
-[CreateAssetMenu(fileName = "ObjectCategory", menuName = "Scriptable Objects/ObjectCategory")]
-public class ObjectCategory : ScriptableObject
-{
-    [field:SerializeField]
-    public string Name { get; private set; }
-}
+

@@ -39,6 +39,27 @@ public class ZonePlacer : MonoBehaviour
         zoneObject.transform.SetParent(this.transform);
     }
 
+    public void PlaceZones(ZoneSaveData zone)
+    {
+        GameObject zoneObject = Instantiate(zoneIndicator);
+        zoneObject.transform.position = zone.occupiedPosition;
+        zoneObject.transform.position = new Vector3(zone.occupiedPosition.x, zone.occupiedPosition.y, zone.occupiedPosition.z);
+        zoneObject.transform.rotation = Quaternion.Euler(0, zone.rotation, 0);
+        GameObject previewSelector = Instantiate(selectorObject);
+        previewSelector.transform.SetParent(zoneObject.transform.transform);
+        previewSelector.transform.name = "Selector";
+        previewSelector.transform.localScale = new Vector3(zone.size.x - 0.1f, 0.3f, zone.size.y - 0.1f);
+        previewSelector.transform.position = new Vector3(zone.occupiedPosition.x + 0.05f, zone.occupiedPosition.y + 0.01f, zone.occupiedPosition.z + 0.05f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, zone.rotation, 0);
+        Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
+        zoneComponent.InstantiateNew(placementSystem, zone.ID, zone.size);
+        zone.prefab = zoneObject;
+        zoneData.Add(zone);
+        zoneObject.transform.SetParent(this.transform);
+
+        zoneComponent.LoadData(zone.levels, placementSystem);
+    }
+
     public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, float rotation)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
@@ -179,12 +200,36 @@ public class ZonePlacer : MonoBehaviour
             return -1;
         return zoneData[index].rotation;
     }
+
+    public void LoadData(List<ZoneSaveData> loadData)
+    {
+        for (int i = 0; i < zoneData.Count; i++)
+        {
+            if (!loadData.Contains(zoneData[i]))
+            {
+                RemoveZoneAt(zoneData[i].prefab);
+            }
+            else
+            {
+                ZoneSaveData saveData = loadData.Find(item => item == zoneData[i]);
+                zoneData[i].prefab.GetComponentInChildren<Zone>().LoadData(saveData.levels, placementSystem);
+            }
+        }
+
+        for (int i = 0; i < loadData.Count; i++)
+        {
+            if (!zoneData.Contains(loadData[i]))
+            {
+                PlaceZones(loadData[i]);
+            }
+        }
+    }
 }
 
 [Serializable]
 public class ZoneSaveData : PlacementData
 {
-    public List<LevelSaveData> levels { get; private set; }
+    [SerializeField] public List<LevelSaveData> levels;
     public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<LevelSaveData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
     {
         this.levels = levels;

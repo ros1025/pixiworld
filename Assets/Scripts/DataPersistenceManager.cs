@@ -5,9 +5,13 @@ using System.Linq;
 
 public class DataPersistenceManager : MonoBehaviour
 {
+    [Header("File Storage Config")]
+    [SerializeField] private string fileName;
+    
     public static DataPersistenceManager instance { get; private set; }
     private List<IDataPersistence> dataPersistenceObjects;
-    private GameData gameData;
+    private WorldSaveData gameData;
+    private FileDataHandler dataHandler;
 
     private void Awake()
     {
@@ -18,14 +22,22 @@ public class DataPersistenceManager : MonoBehaviour
         instance = this;
     }
 
+    private void Start()
+    {
+        this.dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
+        this.dataPersistenceObjects = FindAllDataPersistenceObjects();
+        LoadGame();
+    }
+
     public void NewGame()
     {
-        this.gameData = new GameData();
+        this.gameData = new WorldSaveData();
     }
 
     public void LoadGame()
     {
         //TODO - load any saved data from a file using a data handler
+        this.gameData = dataHandler.Load();
 
         //if there is no data to load, initialize a new game
         if (this.gameData == null)
@@ -49,6 +61,13 @@ public class DataPersistenceManager : MonoBehaviour
         }
 
         //Save the data to a file using a data handler
+        dataHandler.Save(gameData);
+    }
+
+
+    private void OnApplicationPause()
+    {
+        SaveGame();
     }
 
     private void OnApplicationQuit()

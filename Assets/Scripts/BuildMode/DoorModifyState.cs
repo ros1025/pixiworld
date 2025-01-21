@@ -17,7 +17,7 @@ public class DoorModifyState : IBuildingState
     private Vector3 displayPosition;
     private Vector3 position; private Vector3 originalPosition;
     private float rotation; private float originalRotation;
-    List<Material> materials;
+    List<MatData> materials;
 
     public DoorModifyState(Vector3 gridPosition,
                           Grid grid,
@@ -92,6 +92,12 @@ public class DoorModifyState : IBuildingState
         Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out position);
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+
+        materials.Clear();
+        for (int i = 0; i < previewSystem.materials.Count; i++)
+        {
+            materials.Add(previewSystem.materials[i]);
+        }
 
         wallMapping.MoveWindows(selectedDoor, position, rotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, targetWall, materials);
         originalPosition = gridPosition;

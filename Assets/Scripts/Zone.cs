@@ -8,12 +8,12 @@ public class Zone : MonoBehaviour
     [SerializeField] private UIDocument document;
     [SerializeField] private UIDocument levels;
     [SerializeField] private GameObject zonePrefab;
-    [SerializeField] public List<LevelData> floors { get; private set; }
+    [SerializeField] public List<LevelData> floors;
     [SerializeField] private int level;
     private Vector2Int size;
     private int minLevel; private int maxLevel;
     [HideInInspector] public int ID;
-    [HideInInspector] public PlacementSystem placement;
+     public PlacementSystem placement;
     [SerializeField] private Material zoneMaterial;
     VisualElement root; VisualElement lRoot;
     [SerializeField] UnityEngine.UI.Button button; 
@@ -36,6 +36,7 @@ public class Zone : MonoBehaviour
         downButton.visible = false;
         floorLabel.visible = false;
         level = 0;
+        //SwitchLevel(level);
     }
 
     public void InstantiateNew(PlacementSystem placement, int ID, Vector2Int size)
@@ -78,6 +79,7 @@ public class Zone : MonoBehaviour
         {
             floors[i].floor.SetActive(false);
         }
+        SwitchLevel(level);
     }
 
     void UpdatePosition()
@@ -139,6 +141,9 @@ public class Zone : MonoBehaviour
         LevelData level = new LevelData(maxLevel + 1, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
             newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), floors[maxLevel - minLevel].height + 2f);
         level.cursor.SetActive(false);
+
+        level.objectPlacer.SetPlacementSystem(placement);
+        level.walls.SetPlacementSystem(placement);
         floors.Add(level);
 
         level.floor.SetActive(false);
@@ -155,11 +160,59 @@ public class Zone : MonoBehaviour
         LevelData level = new LevelData(minLevel - 1, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
             newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), floors[minLevel - minLevel].height - 2f);
         level.cursor.SetActive(false);
+
+        level.objectPlacer.SetPlacementSystem(placement);
+        level.walls.SetPlacementSystem(placement);
         floors.Insert(0, level);
         minLevel -= 1;
     }
 
+    public void AddLevel(LevelSaveData data)
+    {
+        GameObject newZone = Instantiate(zonePrefab);
+        newZone.transform.position = new Vector3(transform.parent.position.x, data.height, transform.parent.position.z);
+        newZone.transform.SetParent(transform.parent);
+        newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
+        LevelData level = new LevelData(data.level, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
+            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), data.height);
+        level.cursor.SetActive(false);
+
+        if (data.level < minLevel)
+        {
+            minLevel = data.level;
+        }
+        else if (data.level > maxLevel)
+        {
+            maxLevel = data.level;
+        }
+
+        level.objectPlacer.SetPlacementSystem(placement);
+        level.walls.SetPlacementSystem(placement);
+        floors.Insert(data.level - minLevel, level);
+    }
+
+    public void RemoveLevel(int level)
+    {
+        LevelData levelObject = floors.Find(item => item.level == level);
+        Destroy(levelObject.floor);
+
+        floors.Remove(levelObject);
+        if (levelObject.level == minLevel)
+        {
+            minLevel = floors[0].level;
+        }
+        else if (levelObject.level == maxLevel)
+        {
+            maxLevel = floors[^1].level;
+        }
+    }
+
     public void SwitchLevel(ClickEvent evt, int level)
+    {
+        SwitchLevel(level);
+    }
+
+    public void SwitchLevel(int level)
     {
         if (level >= minLevel && level <= maxLevel)
         {
@@ -188,6 +241,11 @@ public class Zone : MonoBehaviour
             }
             floors[level - minLevel].cursor.SetActive(true);
         }
+    }
+
+    public LevelData GetLevel(int level)
+    {
+        return floors.Find(item => item.level == level);
     }
 
     // Update is called once per frame
@@ -230,10 +288,35 @@ public class Zone : MonoBehaviour
         List<LevelSaveData> save = new();
         for (int i = 0; i < floors.Count; i++)
         {
-            LevelSaveData levelSaveData = new(floors[i].objectPlacer.furnitureData, floors[i].walls.GetWallMapSaveData(), floors[i].height);
+            LevelSaveData levelSaveData = new(floors[i].level, floors[i].objectPlacer.furnitureData, floors[i].walls.GetWallMapSaveData(), floors[i].height);
             save.Add(levelSaveData);
         }
         return save;
+    }
+
+    public void LoadData(List<LevelSaveData> data, PlacementSystem placement)
+    {
+        this.placement = placement;
+        
+        for (int i = 0; i < floors.Count; i++)
+        {
+            if (data.FindIndex(item => item.level == floors[i].level) == -1)
+            {
+                RemoveLevel(floors[i].level);
+            }
+        }
+
+        for (int i = 0; i < data.Count; i++)
+        {
+            if (floors.FindIndex(item => item.level == data[i].level) == -1)
+            {
+                AddLevel(data[i]);
+            }
+            GetLevel(data[i].level).objectPlacer.SetPlacementSystem(placement);
+            GetLevel(data[i].level).walls.SetPlacementSystem(placement);
+            GetLevel(data[i].level).objectPlacer.LoadData(data[i].objects);
+            GetLevel(data[i].level).walls.LoadSaveData(data[i].walls);
+        }
     }
 }
 
@@ -265,12 +348,14 @@ public class LevelData
 [System.Serializable]
 public class LevelSaveData
 {
+    public int level;
     public List<ObjectSaveData> objects;
     public WallMapSaveData walls;
     public float height;
 
-    public LevelSaveData(List<ObjectSaveData> objects, WallMapSaveData walls, float height)
+    public LevelSaveData(int level, List<ObjectSaveData> objects, WallMapSaveData walls, float height)
     {
+        this.level = level;
         this.objects = objects;
         this.walls = walls;
         this.height = height;

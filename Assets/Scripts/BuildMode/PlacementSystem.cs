@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlacementSystem : MonoBehaviour
+public class PlacementSystem : MonoBehaviour, IDataPersistence
 {
     [SerializeField] private InputManager inputManager;
     [SerializeField] private TimeManager timeManager;
@@ -582,6 +582,7 @@ public class PlacementSystem : MonoBehaviour
         buildToolsUI.PlaceCheck();
         cameraController.MoveCameraToPos(preview.previewPos, preview.previewSize);
         preview.deSelect();
+        DataPersistenceManager.instance.SaveGame();
         inputManager.OnMoved -= PingUpdate;
         inputManager.OnRelease -= ConfirmPlacement;
         inputManager.ClearRightClickAction();
@@ -695,18 +696,38 @@ public class PlacementSystem : MonoBehaviour
         return objectPlacer;
     }
 
+    public GameObject GetObjectPrefab(int iD)
+    {
+        ObjectData data = database.objectsData.Find(item => item.ID == iD);
+        return data.Prefab;
+    }
+
+    public GameObject GetDoorPrefab(int iD)
+    {
+        DoorsData data = databaseDoors.doorsData.Find(item => item.ID == iD);
+        return data.Prefab;
+    }
+
     private void Update()
     {
         GetGridPosition();
         screenSelectPosition = cameraController.GetScreenPos(preview.previewPos);
         if (rotation >= 360) rotation -= 360;
     }
-}
 
-class WorldSaveData
-{
-    public List<ObjectSaveData> mapObjects;
-    public List<ZoneSaveData> zones;
-    public List<Roads> roads;
-    public List<WallMapSaveData> walls;
+    public void SaveData(WorldSaveData data)
+    {
+        data.mapObjects = mainObjectDB.furnitureData;
+        data.zones = mainZoneDB.zoneData;
+        data.roads = roadsDBObject.GetRoadMapSaveData();
+        data.mapWalls = wallsDBObject.GetWallMapSaveData();
+     }
+
+    public void LoadData(WorldSaveData data)
+    {
+        mainObjectDB.LoadData(data.mapObjects);
+        mainZoneDB.LoadData(data.zones);
+        roadsDBObject.LoadSaveData(data.roads);
+        wallsDBObject.LoadSaveData(data.mapWalls);
+    }
 }

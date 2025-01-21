@@ -4,7 +4,6 @@ using UnityEngine.Splines;
 
 public class WallMapping : MonoBehaviour
 {
-    private int times;
     public List<Wall> walls;
     public List<Room> rooms;
     public List<Door> doors;
@@ -18,6 +17,7 @@ public class WallMapping : MonoBehaviour
     [SerializeField] private Material defaultWallMaterial;
     [SerializeField] private Material defaultFloorMaterial;
     [SerializeField] private Material selectorMaterial;
+    [SerializeField] private PlacementSystem placementSystem;
     public float height;
     //[SerializeField] private GameObject gizmos;
 
@@ -1336,22 +1336,7 @@ public class WallMapping : MonoBehaviour
 
         if (!SmallestAngleInIntersection(points, 1, angle))
         {
-            string str = "N:";
-            foreach (BezierKnot point in points)
-            {
-                str += $" {point.Position}";
-            }
-            Debug.Log(str);
             return false;
-        }
-        else
-        {
-            string str = "Y:";
-            foreach (BezierKnot point in points)
-            {
-                str += $" {point.Position}";
-            }
-            Debug.Log(str);
         }
 
         float length = 0;
@@ -1591,6 +1576,11 @@ public class WallMapping : MonoBehaviour
                 thisAngle -= 360;
             }
 
+            if (intersection == null)
+            {
+                return false;
+            }
+
             foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
             {
                 BezierKnot nextKnot = junction.knotIndex == 0 ? junction.spline.Next(junction.knotIndex) : junction.spline.Previous(junction.knotIndex);
@@ -1763,17 +1753,11 @@ public class WallMapping : MonoBehaviour
     private void CreateRoom(Spline spline, BezierKnot knot, int direction, List<BezierKnot> knotList)
     {
         knotList.Add(knot);
-        string str = "Prog:";
-        foreach (BezierKnot point in knotList)
-        {
-            str += $" {(Vector3)point.Position}";
-        }
         List<List<int>> duples = GetDuplicatePoints(knotList);
         if (duples.Count > 0)
         {
             if (knotList.Count >= 3)
             {
-                Debug.Log("duple");
                 for (int i = 0; i < duples.Count; i++)
                 {
                     for (int j = 1; j < duples[i].Count; j++)
@@ -2344,7 +2328,7 @@ public class WallMapping : MonoBehaviour
         {
             for (int j = 0; j < walls.Count; j++)
             {
-                if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
+                if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1 && walls[j] != wall)
                 {
                     Spline spline2 = new Spline();
                     List<Vector3> spline2Points = new();
@@ -2360,6 +2344,7 @@ public class WallMapping : MonoBehaviour
                     SplineUtility.GetNearestPoint(spline, otherSplinePoint, out thisSplinePoint, out t1, (int)((spline.GetLength() * 2)));
                     SplineUtility.GetNearestPoint(walls[j].wall, thisSplinePoint, out otherSplinePoint, out t2, walls[j].resolution);
                     SplineUtility.GetNearestPoint(spline, otherSplinePoint, out thisSplinePoint, out t1, (int)((spline.GetLength() * 2)));
+                    Debug.Log($"{thisSplinePoint} {otherSplinePoint}");
                     Vector3 intersectingSplinePoint = thisSplinePoint; //used to prioritise the existing road coordinates in the creation of an intersection
 
                     Vector3 dir1 = SplineUtility.EvaluateTangent(spline, EvaluateT(spline, intersectingSplinePoint));
@@ -2490,6 +2475,7 @@ public class WallMapping : MonoBehaviour
 
         wall.wall = spline;
         wall.points = pointsList;
+        wall.resolution = (int)(spline.GetLength() * 2);
         for (int k = 0; k < wallsList.Count; k++)
         {
             MakeIntersection(wallsList[k], knotsList[k]);
@@ -2509,7 +2495,7 @@ public class WallMapping : MonoBehaviour
 
     }
 
-    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
+    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = transform.TransformPoint(point);
@@ -2517,7 +2503,7 @@ public class WallMapping : MonoBehaviour
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+            /*List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
             Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
             for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
             {
@@ -2525,6 +2511,14 @@ public class WallMapping : MonoBehaviour
             }
             newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
             index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+            */
+
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                index++;
+            }
         }
         GameObject previewSelector = Instantiate(selectorObject);
         previewSelector.transform.SetParent(newObject.transform.transform);
@@ -2538,7 +2532,52 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(targetWall));
     }
 
-    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
+    public void BuildWindows(Door loadedDoor)
+    {
+        GameObject newObject = Instantiate(placementSystem.GetDoorPrefab(loadedDoor.ID));
+        newObject.transform.position = transform.TransformPoint(loadedDoor.point);
+        newObject.transform.rotation = Quaternion.Euler(0, loadedDoor.rotation, 0);
+        int index = 0;
+        for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            /*
+            List<Material> matList = loadedDoor.materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
+            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                mats[j] = matList[j];
+            }
+            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
+            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+            */
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = loadedDoor.materials[index].color;
+                index++;
+            }
+        }
+        GameObject previewSelector = Instantiate(selectorObject);
+        previewSelector.transform.SetParent(newObject.transform.transform);
+        previewSelector.transform.name = "Selector";
+        previewSelector.transform.position = transform.TransformPoint(loadedDoor.point) + new Vector3(0.05f, 0.01f, 0.05f);
+        previewSelector.transform.localScale = new Vector3(loadedDoor.length - 0.1f, 0.3f, 0.9f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, loadedDoor.rotation, 0);
+        doors.Add(loadedDoor);
+        newObject.transform.SetParent(this.transform);
+
+        loadedDoor.prefab = newObject;
+        if (walls.FindIndex(item => item.wall == loadedDoor.targetWall.wall) == -1)
+        {
+            if (walls.FindIndex(item => (Vector3)item.wall[0].Position == (Vector3)loadedDoor.targetWall.wall[0].Position && (Vector3)item.wall[^1].Position == (Vector3)loadedDoor.targetWall.wall[^1].Position) != -1)
+            {
+                loadedDoor.targetWall = walls.Find(item => (Vector3)item.wall[0].Position == (Vector3)loadedDoor.targetWall.wall[0].Position && (Vector3)item.wall[^1].Position == (Vector3)loadedDoor.targetWall.wall[^1].Position);
+            }
+        }
+        BuildWall(walls.IndexOf(loadedDoor.targetWall));
+    }
+
+    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
     {
         door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -2553,6 +2592,7 @@ public class WallMapping : MonoBehaviour
         {
             if (door.prefab.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
             {
+                /*
                 List<Material> matList = materials.GetRange(index, door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
                 Material[] mats = new Material[door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
                 for (int j = 0; j < door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
@@ -2561,12 +2601,20 @@ public class WallMapping : MonoBehaviour
                 }
                 door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
                 index += door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+                */
+
+                for (int j = 0; j < door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                    index++;
+                }
             }
         }
 
         door.point = point;
         door.rotation = rotation;
         door.length = length;
+        door.materials = materials;
         if (door.targetWall != targetWall)
         {
             int oldIndex = walls.IndexOf(door.targetWall);
@@ -2633,8 +2681,17 @@ public class WallMapping : MonoBehaviour
     private void MakeIntersection(List<Spline> splines, List<BezierKnot> knots)
     {
         Intersection intersection = new Intersection();
-        List<Spline> containerSplines = new();
-        foreach (Spline spline in m_SplineContainer.Splines) { containerSplines.Add(spline); }
+        for (int i = 0; i < splines.Count; i++)
+        {
+            if (walls.FindIndex(item => item.wall == splines[i]) == -1)
+            {
+                if (walls.FindIndex(item => (Vector3)item.wall[0].Position == (Vector3)splines[i][0].Position && (Vector3)item.wall[^1].Position == (Vector3)splines[i][^1].Position) != -1)
+                {
+                    splines[i] = walls.Find(item => (Vector3)item.wall[0].Position == (Vector3)splines[i][0].Position && (Vector3)item.wall[^1].Position == (Vector3)splines[i][^1].Position).wall;
+                }
+            }
+        }
+
         for (int c = 0; c < splines.Count; c++)
         {
             BezierKnot knot = knots[c];
@@ -2872,8 +2929,9 @@ public class WallMapping : MonoBehaviour
     public void RemoveWall(Wall wall)
     {
         DeleteWall(wall);
+        CleanRooms();
         CleanIntersections();
-        MakeWalls();
+        //MakeWalls();
     }
 
     public void SetWallsActive(bool toggle)
@@ -2894,6 +2952,54 @@ public class WallMapping : MonoBehaviour
     public WallMapSaveData GetWallMapSaveData()
     {
         return new WallMapSaveData(walls, intersections, rooms, doors);
+    }
+
+    public void LoadSaveData(WallMapSaveData data)
+    {
+        for (int i = 0; i < data.walls.Count; i++)
+        {
+            if (!walls.Contains(data.walls[i]))
+            {
+                MakeSpline(data.walls[i].wall, data.walls[i].points);
+            }
+        }
+
+        for (int i = 0; i < data.intersections.Count; i++)
+        {
+            if (!intersections.Contains(data.intersections[i]))
+            {
+                List<Spline> splines = new(); List<BezierKnot> knots = new();
+
+                for (int j = 0; j < data.intersections[i].junctions.Count; j++)
+                {
+                    splines.Add(data.intersections[i].junctions[j].spline);
+                    knots.Add(data.intersections[i].junctions[j].knot);
+                }
+
+                MakeIntersection(splines, knots);
+            }
+        }
+
+        for (int i = 0; i < data.rooms.Count; i++)
+        {
+            if (!rooms.Contains(data.rooms[i]))
+            {
+                MakeRoom(data.rooms[i].knotList);
+            }
+        }
+
+        for (int i = 0; i < data.doors.Count; i++)
+        {
+            if (!doors.Contains(data.doors[i]))
+            {
+                BuildWindows(data.doors[i]);
+            }
+        }
+    }
+
+    public void SetPlacementSystem(PlacementSystem system)
+    {
+        placementSystem = system;
     }
 }
 
@@ -2979,9 +3085,9 @@ public class Door
     public float length;
     public int ID;
     public Wall targetWall;
-    public List<Material> materials;
+    public List<MatData> materials;
 
-    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<Material> materials)
+    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
     {
         this.prefab = prefab;
         this.point = point;

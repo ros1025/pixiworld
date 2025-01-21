@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
 
-[ExecuteInEditMode]
 public class RoadMapping : MonoBehaviour
 {
     private List<Vector3> m_vertsP1;
@@ -1558,11 +1557,50 @@ public class RoadMapping : MonoBehaviour
         }
     }
 
+    private void MakeSpline(Roads road)
+    {
+        if (Vector3.Distance(road.points[0], road.points[^1]) > 0.01f)
+        {
+            m_SplineContainer.AddSpline(road.road);
+            GameObject c = new();
+            c.name = $"Spline{roads.Count}";
+            c.transform.SetParent(this.transform);
+            c.AddComponent<MeshCollider>();
+            c.layer = LayerMask.NameToLayer("Selector");
+            road.collider = c.GetComponent<MeshCollider>();
+            roads.Add(road);
+        }
+        else
+        {
+            foreach (Intersection intersection in intersections)
+            {
+                List<Intersection.JunctionInfo> removeJunctions = new();
+                foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+                {
+                    if (junction.spline == road.road)
+                    {
+                        removeJunctions.Add(junction);
+                    }
+                }
+                foreach (Intersection.JunctionInfo junction in removeJunctions)
+                {
+                    intersection.junctions.Remove(junction);
+                }
+            }
+        }
+    }
+
     private void MakeIntersection(List<Spline> splines, List<BezierKnot> knots)
     {
         Intersection intersection = new Intersection();
-        List<Spline> containerSplines = new();
-        foreach (Spline spline in m_SplineContainer.Splines) { containerSplines.Add(spline); }
+        for (int i = 0; i < splines.Count; i++)
+        {
+            if (CheckPointsEqual(splines[i], out Spline equalSpline))
+            {
+                splines[i] = equalSpline;
+            }
+        }
+
         for (int c = 0; c < splines.Count; c++)
         {
             BezierKnot knot = knots[c];
@@ -1660,6 +1698,71 @@ public class RoadMapping : MonoBehaviour
         }
         return false;
     }
+
+    private bool CheckPointsEqual(Spline spline, out Spline equalSpline)
+    {
+        equalSpline = null;
+        if (roads.FindIndex(item => item.road == spline) == -1)
+        {
+            List<Roads> possibleRoads = roads.FindAll(item => (Vector3)item.road[0].Position == (Vector3)spline[0].Position && item.road.Count == spline.Count);
+
+            if (possibleRoads.Count > 0)
+            {
+                for (int i = 0; i < possibleRoads.Count; i++)
+                {
+                    for (int j = 1; j < spline.Count; j++)
+                    {
+                        if ((Vector3)possibleRoads[i].road[j].Position != (Vector3)spline[j].Position)
+                        {
+                            break;
+                        }
+
+                        if (j == spline.Count - 1)
+                        {
+                            equalSpline = possibleRoads[i].road;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public RoadMapSaveData GetRoadMapSaveData()
+    {
+        return new RoadMapSaveData(roads, intersections);
+    }
+
+    public void LoadSaveData(RoadMapSaveData data)
+    {
+        for (int i = 0; i < data.roads.Count; i++)
+        {
+            if (!roads.Contains(data.roads[i]))
+            {
+                MakeSpline(data.roads[i]);
+            }
+        }
+
+        for (int i = 0; i < data.intersections.Count; i++)
+        {
+            if (!intersections.Contains(data.intersections[i]))
+            {
+                List<Spline> splines = new(); List<BezierKnot> knots = new();
+
+                for (int j = 0; j < data.intersections[i].junctions.Count; j++)
+                {
+                    splines.Add(data.intersections[i].junctions[j].spline);
+                    knots.Add(data.intersections[i].junctions[j].knot);
+                }
+
+                MakeIntersection(splines, knots);
+            }
+        }
+
+        MakeRoad();
+    }
 }
 
 [System.Serializable]
@@ -1681,6 +1784,19 @@ public class Roads
         this.resolution = resolution;
         this.width = width;
         this.collider = collider;
-        iD = ID;
+        ID = iD;
+    }
+}
+
+[System.Serializable]
+public class RoadMapSaveData
+{
+    public List<Roads> roads;
+    public List<Intersection> intersections;
+
+    public RoadMapSaveData(List<Roads> roads, List<Intersection> intersections)
+    {
+        this.roads = roads;
+        this.intersections = intersections;
     }
 }

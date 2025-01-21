@@ -168,7 +168,7 @@ public class PreviewTools : MonoBehaviour
             color.name = "Colour";
             color.AddToClassList("texture-button");
             color.style.backgroundColor = previewSystem.materials[i].color;
-            color.RegisterCallback<ClickEvent, Material>(ColorPicker, previewSystem.materials[i]);
+            color.RegisterCallback<ClickEvent, MatData>(ColorPicker, previewSystem.materials[i]);
             e.Add(color);
 
             Button text = new();
@@ -183,7 +183,7 @@ public class PreviewTools : MonoBehaviour
         CustomiseTexture(previewSystem.previewObject);
     }
 
-    public void ColorPicker(ClickEvent evt, Material mat)
+    public void ColorPicker(ClickEvent evt, MatData mat)
     {
         VisualElement rootT = TexturesMenu.rootVisualElement;
         rootT.ElementAt(0).visible = true; rootT.SetEnabled(true);
@@ -250,11 +250,13 @@ public class PreviewTools : MonoBehaviour
         rootT.ElementAt(0).visible = false; rootT.SetEnabled(false);
     }
 
-    public void SetHSV(float H, float S, float V, Material mat, VisualElement preview)
+    public void SetHSV(float H, float S, float V, MatData mat, VisualElement preview)
     {
         Color c = Color.HSVToRGB(H, S, V);
         mat.color = c;
         preview.style.backgroundColor = c;
+
+        previewSystem.RefreshColors();
     }
 
     public void GridSnap(ClickEvent evt)

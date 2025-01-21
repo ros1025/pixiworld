@@ -63,7 +63,7 @@ public class PreviewSystem : MonoBehaviour
     [SerializeField]
     private MeshCollider dynamicCollider;
 
-    public List<Material> materials;
+    public List<MatData> materials;
 
     private Vector2Int minSize;
 
@@ -72,21 +72,27 @@ public class PreviewSystem : MonoBehaviour
         previewMaterialInstance = new Material(previewMaterialPrefab);
         cellIndicator.SetActive(false);
         cellIndicatorRenderer = cellIndicator.GetComponentInChildren<Renderer>();
+        //materials = new();
     }
 
-    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size, List<Material> materials)
+    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size, List<MatData> materials)
     {
         previewObject = prefab;
         previewSelector = previewObject.transform.Find("Selector").gameObject;
         previewSize = size;
         previewPos = gridPosition;
-        this.materials = materials;
+        this.materials.Clear();
+        for (int i = 0; i < materials.Count; i++)
+        {
+            this.materials.Add(new MatData(materials[i]));
+        }
 
         int index = 0;
         for (int i = 0; i < previewObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
             if (previewObject.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
             {
+                /*
                 List<Material> matList = materials.GetRange(index, previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
                 Material[] mats = new Material[previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
                 for (int j = 0; j < previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
@@ -95,6 +101,12 @@ public class PreviewSystem : MonoBehaviour
                 }
                 previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
                 index += previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
+                */
+                for (int j = 0; j < previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                    index++;
+                }
             }
         }
 
@@ -118,14 +130,21 @@ public class PreviewSystem : MonoBehaviour
         PrepareCursor(size);
         cellIndicator.SetActive(true);
 
-        materials.Clear();
+        if (materials != null && materials.Count > 0)
+        {
+            materials.Clear();
+        }
         Renderer[] renderers = previewObject.GetComponentsInChildren<Renderer>();
 
         foreach (Renderer renderer in renderers)
         {
             if (renderer.transform.parent.gameObject != previewSelector)
             {
-                materials.AddRange(renderer.materials);
+                for (int j = 0; j < renderer.sharedMaterials.Length; j++)
+                {
+                    renderer.materials[j] = Instantiate(renderer.sharedMaterials[j]);
+                    materials.Add(new MatData(renderer.sharedMaterials[j].color));
+                }
             }
         }
         MovePreview(cellIndicator.transform.position);
@@ -535,6 +554,22 @@ public class PreviewSystem : MonoBehaviour
             position.y,
             position.z
         );
+    }
+
+    public void RefreshColors()
+    {
+        int index = 0;
+        for (int i = 0; i < previewObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            if (previewObject.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
+            {
+                for (int j = 0; j < previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    previewObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                    index++;
+                }
+            }
+        }
     }
 
     private void RotateCursor(float rotation)

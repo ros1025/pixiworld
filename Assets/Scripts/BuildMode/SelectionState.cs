@@ -13,7 +13,7 @@ public class SelectionState : IBuildingState
     ObjectPlacer objectPlacer;
     InputManager inputManager;
     SoundFeedback soundFeedback;
-    List<Material> materials;
+    List<MatData> materials;
     private Vector3 displayPosition;
     private float rotation; private float originalRotation;
     bool edited;
@@ -91,7 +91,11 @@ public class SelectionState : IBuildingState
         soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
 
-        materials = previewSystem.materials;
+        materials.Clear();
+        for (int i = 0; i < previewSystem.materials.Count; i++)
+        {
+            materials.Add(previewSystem.materials[i]);
+        }
         objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, rotation, materials);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);

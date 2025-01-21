@@ -5,11 +5,11 @@ using System.Collections.Generic;
 [Serializable]
 public class PlacementData
 {
-    public GameObject prefab { get; private set; }
+    public GameObject prefab;
     public Vector3 occupiedPosition;
     public float rotation;
-    public Vector2Int size { get; private set; }
-    public int ID { get; private set; }
+    public Vector2Int size;
+    public int ID;
     //public int PlacedObjectIndex { get; private set; }
 
     public PlacementData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD)
