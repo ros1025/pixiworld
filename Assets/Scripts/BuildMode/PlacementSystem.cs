@@ -229,7 +229,6 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         {
             soundFeedback.PlaySound(SoundType.Remove);
             objectPlacer.RemoveObjectAt(prefab);
-            zonePlacer.RemoveZoneAt(prefab);
             StopPlacement();
         }
         else
@@ -240,11 +239,10 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
 
     public void RemoveZone(GameObject prefab)
     {
-        if (objectPlacer.HasKey(prefab))
+        if (zonePlacer.HasKey(prefab))
         {
             soundFeedback.PlaySound(SoundType.Remove);
             zonePlacer.RemoveZoneAt(prefab);
-            objectPlacer.RemoveObjectAt(prefab);
             StopPlacement();
         }
         else

@@ -59,7 +59,7 @@ public class ObjectPlacer : MonoBehaviour
     public void PlaceObject(ObjectSaveData objectData)
     {
         GameObject newObject = Instantiate(placementSystem.GetObjectPrefab(objectData.ID));
-        newObject.transform.position = objectData.occupiedPosition;
+        newObject.transform.position = transform.TransformPoint(objectData.occupiedPosition);
         newObject.transform.rotation = Quaternion.Euler(0, objectData.rotation, 0);
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)

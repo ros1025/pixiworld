@@ -1,0 +1,23 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/startmenu.uss?fileID=7433441132597879392&amp;guid=c9ac8cb6a56d4394485e253c214a9e3f&amp;type=3#startmenu" />
+    <engine:VisualElement style="flex-grow: 1;">
+        <engine:VisualElement name="MainBar" style="flex-grow: 1; max-width: 40%; align-self: flex-end; width: 40%; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; align-items: center; justify-content: center;">
+            <engine:Button name="ResumeGame" class="menu-button">
+                <engine:VisualElement name="VisualElement" class="menu-image" />
+                <engine:Label text="Resume Game" class="menu-text" />
+            </engine:Button>
+            <engine:Button name="NewGame" class="menu-button">
+                <engine:VisualElement name="VisualElement" class="menu-image" />
+                <engine:Label text="New Game" class="menu-text" />
+            </engine:Button>
+            <engine:Button name="LoadGame" class="menu-button">
+                <engine:VisualElement name="VisualElement" class="menu-image" />
+                <engine:Label text="Load Game" class="menu-text" />
+            </engine:Button>
+            <engine:Button name="Settings" class="menu-button">
+                <engine:VisualElement name="VisualElement" class="menu-image" />
+                <engine:Label text="Settings" class="menu-text" />
+            </engine:Button>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

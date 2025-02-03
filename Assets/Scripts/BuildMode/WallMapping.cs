@@ -128,6 +128,9 @@ public class WallMapping : MonoBehaviour
         List<int> trisA = new List<int>();
         List<int> trisB = new List<int>();
         List<int> trisS = new List<int>();
+
+        List<Vector3> normalsA = new();
+
         List<Vector2> currentUVs = new List<Vector2>();
 
         Mesh c = new Mesh();
@@ -142,7 +145,13 @@ public class WallMapping : MonoBehaviour
         {
             int vertOffset = currentPointIndex; float uvDistance = 0;
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.04f, out Vector3 point1, out Vector3 point2);
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.04f, out Vector3 point3, out Vector3 point4);
+            float distance = Vector3.Distance(point3, point1);
+            uvDistance = uvOffset + distance;
             int draws = 1;
+
+            Vector3 n1 = Vector3.Cross(point3 - point1, Vector3.up).normalized;
+            Vector3 n2 = -Vector3.Cross(point4 - point2, Vector3.up).normalized;
 
             Vector3 h1 = Vector3.zero;
             if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
@@ -155,6 +164,7 @@ public class WallMapping : MonoBehaviour
             Vector3 p3 = point2 + h1;
             Vector3 p4 = point2 + new Vector3(0, height, 0);
             vertsA.AddRange(new List<Vector3> { p1, p2, p3, p4 });
+            normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
             currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1), new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1)});
 
             if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
@@ -167,6 +177,8 @@ public class WallMapping : MonoBehaviour
                 m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point), 0.04f, out Vector3 pointA, out Vector3 pointB);
                 vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, height, 0), pointB, pointB + new Vector3(0, height, 0) });
                 vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, height, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, height, 0) });
+                normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
+                normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
                 currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1),
@@ -185,15 +197,13 @@ public class WallMapping : MonoBehaviour
                 m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length)), 0.04f, out Vector3 pointA, out Vector3 pointB);
                 vertsA.AddRange(new List<Vector3> { pointA + new Vector3(0, 1.9f, 0), pointA + new Vector3(0, height, 0), pointB + new Vector3(0, 1.9f, 0), pointB + new Vector3(0, height, 0) });
                 vertsA.AddRange(new List<Vector3> { pointA, pointA + new Vector3(0, height, 0), pointB, pointB + new Vector3(0, height, 0) });
+                normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
+                normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
                 currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1),
                 new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)}); ;
             }
-
-            m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.04f, out Vector3 point3, out Vector3 point4);
-            float distance = Vector3.Distance(point3, point1);
-            uvDistance = uvOffset + distance;
 
             Vector3 h2 = Vector3.zero;
             if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
@@ -206,6 +216,7 @@ public class WallMapping : MonoBehaviour
             Vector3 p7 = point4 + h2;
             Vector3 p8 = point4 + new Vector3(0, height, 0);
             vertsA.AddRange(new List<Vector3> { p5, p6, p7, p8 });
+            normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
             currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1), new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1) });
 
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.001f, out Vector3 p9, out Vector3 p11);
@@ -300,6 +311,7 @@ public class WallMapping : MonoBehaviour
         wall.SetTriangles(trisS, 0);
         wall.SetTriangles(trisA, 1);
         wall.SetTriangles(trisB, 2);
+        wall.SetNormals(normalsA);
 
         c.SetVertices(vertsB);
         c.SetTriangles(trisC, 0);
@@ -414,6 +426,7 @@ public class WallMapping : MonoBehaviour
         List<int> trisS = new();
         List<int> trisC = new();
         List<Vector2> uvs = new();
+        List<Vector3> normals = new();
         offset = 0; uvOffset = 0;
 
         mesh.subMeshCount = 1 + junctionEdges.Count;
@@ -431,6 +444,8 @@ public class WallMapping : MonoBehaviour
 
                 vertices.AddRange(new List<Vector3> { a, b, c });
                 vertices.AddRange(new List<Vector3> { a + new Vector3(0, height, 0), b + new Vector3(0, height, 0), c + new Vector3(0, height, 0) });
+                normals.AddRange(new List<Vector3> { Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(b - c, Vector3.up).normalized, Vector3.Cross(b - c, Vector3.up).normalized });
+                normals.AddRange(new List<Vector3> { Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(b - c, Vector3.up).normalized, Vector3.Cross(b - c, Vector3.up).normalized });
 
                 offset = j * 6;
                 trisS.AddRange(new List<int> { offset + 0, offset + 1, offset + 2 });
@@ -455,6 +470,7 @@ public class WallMapping : MonoBehaviour
                 Vector3 b = junctionEdges[j].left;
 
                 vertices.AddRange(new List<Vector3> { a, b, a + new Vector3(0, height, 0), b + new Vector3(0, height, 0) });
+                normals.AddRange(new List<Vector3> { Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized });
 
                 offset = j * 4;
                 trisA.Add(new List<int> { offset + 0, offset + 2, offset + 3, offset + 3, offset + 1, offset + 0 });
@@ -533,6 +549,7 @@ public class WallMapping : MonoBehaviour
 
         mesh.SetVertices(vertices);
         mesh.SetTriangles(trisS, 0);
+        mesh.SetNormals(normals);
         for (int m = 1; m <= trisA.Count; m++)
         {
             mesh.SetTriangles(trisA[m - 1], m);
@@ -554,6 +571,7 @@ public class WallMapping : MonoBehaviour
         List<int> tris = new(); List<int> trisB = new();
         List<int> tris2 = new(); List<int> tris2B = new();
         List<Vector2> uvs = new(); List<Vector2> uvs2 = new();
+        List<Vector3> normals = new(); List<Vector3> normals2 = new();
         Mesh mesh = new Mesh(); Mesh ceilingMesh = new Mesh();
         Mesh colliderMesh = new Mesh();
 
@@ -634,6 +652,28 @@ public class WallMapping : MonoBehaviour
         {
             List<Vector3> localPointsList = new();
             List<Vector3> localPointsList2 = new();
+            /*
+            Vector3 pointMin = GetMinPoint(x, minY, maxY, angle, rooms[i].points, out Vector3 nearestA, out Wall wallA);
+            Vector3 pointMax = GetMaxPoint(x, minY, maxY, angle, rooms[i].points, out Vector3 nearestB, out Wall wallB);
+
+            if (edgePoints[roomWalls.IndexOf(wallA)].FindIndex(item => Vector3.Distance(item, pointMin) < 0.1f) == -1)
+            {
+                int index = GetIndexToInsert(wallA, pointMin, wallPoints[roomWalls.IndexOf(wallA)]);
+                edgePoints[roomWalls.IndexOf(wallA)].Insert(index, pointMin);
+                edgePoints2[roomWalls.IndexOf(wallA)].Insert(index, pointMin + new Vector3(0, height, 0));
+                wallPoints[roomWalls.IndexOf(wallA)].Insert(index, nearestA);
+                wallPoints2[roomWalls.IndexOf(wallA)].Insert(index, nearestA + new Vector3(0, height, 0));
+            }
+
+            if (edgePoints[roomWalls.IndexOf(wallB)].FindIndex(item => Vector3.Distance(item, pointMax) < 0.1f) == -1)
+            {
+                int index = GetIndexToInsert(wallB, pointMin, wallPoints[roomWalls.IndexOf(wallB)]);
+                edgePoints[roomWalls.IndexOf(wallB)].Insert(index, pointMax);
+                edgePoints2[roomWalls.IndexOf(wallB)].Insert(index, pointMax + new Vector3(0, height, 0));
+                wallPoints[roomWalls.IndexOf(wallB)].Insert(index, nearestB);
+                wallPoints2[roomWalls.IndexOf(wallB)].Insert(index, nearestB + new Vector3(0, height, 0));
+            }
+            */
 
             for (float y = minY; y <= maxY; y += 0.5f)
             {
@@ -794,19 +834,21 @@ public class WallMapping : MonoBehaviour
         }
 
 
-        BuildRoomPoints(roomWalls, 0, 0.02f, pointsList, wallPoints, edgePoints, angle, verts, tris, uvs, vertsB, trisB);
+        BuildRoomPoints(roomWalls, 0, 0.02f, pointsList, wallPoints, edgePoints, angle, verts, tris, uvs, vertsB, trisB, normals);
 
-        BuildRoomPoints(roomWalls, 0, -0.02f, pointsList2, wallPoints2, edgePoints2, angle, verts2, tris2, uvs2, verts2B, tris2B);
+        BuildRoomPoints(roomWalls, 0, -0.02f, pointsList2, wallPoints2, edgePoints2, angle, verts2, tris2, uvs2, verts2B, tris2B, normals2);
 
         mesh.subMeshCount = 1;
         mesh.SetVertices(verts);
         mesh.SetTriangles(tris, 0);
         mesh.SetUVs(0, uvs);
+        mesh.SetNormals(normals);
 
         ceilingMesh.subMeshCount = 1;
         ceilingMesh.SetVertices(verts2);
         ceilingMesh.SetTriangles(tris2, 0);
         ceilingMesh.SetUVs(0, uvs2);
+        ceilingMesh.SetNormals(normals2);
 
         colliderMesh.SetVertices(vertsB);
         colliderMesh.SetTriangles(trisB, 0);
@@ -834,7 +876,70 @@ public class WallMapping : MonoBehaviour
         }
     }
 
-    private void BuildRoomPoints(List<Wall> wallObjects, int offset, float height, List<List<Vector3>> points, List<List<Vector3>> walls, List<List<Vector3>> edges, float angle, List<Vector3> verts, List<int> tris, List<Vector2> uvs, List<Vector3> vertsB, List<int> trisB)
+    private Vector3 GetMinPoint(float x, float minY, float maxY, float angle, List<Vector3> points, out Vector3 nearest, out Wall wall)
+    {
+        float midY = (minY + maxY) / 2f;
+        Vector3 point = new Vector3(x, points[0].y, midY);
+        wall = GetNearestWall(points, point, angle, out nearest, out Vector3 tp2);
+        Vector3 dirA = Vector3.Cross(wall.points[^1] - wall.points[0], Vector3.up).normalized;
+        if (angle > 0) //reverse angle
+        {
+            dirA *= -1;
+        }
+        if (Vector3.Distance(wall.points[^1], tp2) > 0.1f)
+        {
+            dirA *= -1;
+        }
+
+        if (minY >= maxY)
+        {
+            return point;
+        }
+        else
+        {
+            if (Vector3.Angle(dirA, point - nearest) < 90 || Vector3.Distance(point, nearest) < 0.01f)
+            {
+                return GetMinPoint(x, minY, midY, angle, points, out nearest, out wall);
+            }
+            else
+            {
+                return GetMinPoint(x, midY, maxY, angle, points, out nearest, out wall);
+            }
+        }
+    }
+    private Vector3 GetMaxPoint(float x, float minY, float maxY, float angle, List<Vector3> points, out Vector3 nearest, out Wall wall)
+    {
+        float midY = (minY + maxY) / 2f;
+        Vector3 point = new Vector3(x, points[0].y, midY);
+        wall = GetNearestWall(points, point, angle, out nearest, out Vector3 tp2);
+        Vector3 dirA = Vector3.Cross(wall.points[^1] - wall.points[0], Vector3.up).normalized;
+        if (angle > 0) //reverse angle
+        {
+            dirA *= -1;
+        }
+        if (Vector3.Distance(wall.points[^1], tp2) > 0.1f)
+        {
+            dirA *= -1;
+        }
+
+        if (minY >= maxY)
+        {
+            return point;
+        }
+        else
+        {
+            if (Vector3.Angle(dirA, point - nearest) < 90 || Vector3.Distance(point, nearest) < 0.01f)
+            {
+                return GetMaxPoint(x, midY, maxY, angle, points, out nearest, out wall);
+            }
+            else
+            {
+                return GetMaxPoint(x, minY, midY, angle, points, out nearest, out wall);
+            }
+        }
+    }
+
+    private void BuildRoomPoints(List<Wall> wallObjects, int offset, float height, List<List<Vector3>> points, List<List<Vector3>> walls, List<List<Vector3>> edges, float angle, List<Vector3> verts, List<int> tris, List<Vector2> uvs, List<Vector3> vertsB, List<int> trisB, List<Vector3> normals)
     {
         for (int i = 0; i < points.Count - 1; i++)
         {
@@ -871,6 +976,7 @@ public class WallMapping : MonoBehaviour
                         vertsB.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
                         tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
                         trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
+                        normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
                         uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z), new Vector2(p2.x, p2.z),
                         new Vector2(p3.x, p3.z), new Vector2(p4.x, p4.z),
@@ -908,6 +1014,7 @@ public class WallMapping : MonoBehaviour
                             vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
                             tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
                             trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                            normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
                             uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
                         new Vector2(p3.x, p3.z - points[0][0].z), new Vector2(p5.x, p5.z - points[0][0].z),
@@ -945,6 +1052,7 @@ public class WallMapping : MonoBehaviour
                             vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
                             tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
                             trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                            normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
                             uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
                         new Vector2(p3.x, p3.z - points[0][0].z), new Vector2(p5.x, p5.z - points[0][0].z),
@@ -988,6 +1096,7 @@ public class WallMapping : MonoBehaviour
                             vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
                             tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
                             trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                            normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
                             uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
                         new Vector2(p3.x, p3.z - points[0][0].z), new Vector2(p5.x, p5.z - points[0][0].z),
@@ -1025,6 +1134,7 @@ public class WallMapping : MonoBehaviour
                             vertsB.AddRange(new List<Vector3> { p1, p2, p3, p5, p6, p7 });
                             tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
                             trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6 });
+                            normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
                             uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
                         new Vector2(p3.x, p3.z - points[0][0].z), new Vector2(p5.x, p5.z - points[0][0].z),
@@ -1050,33 +1160,35 @@ public class WallMapping : MonoBehaviour
                 Vector3 p7 = p3 + new Vector3(0, height, 0);
                 Vector3 p8 = p4 + new Vector3(0, height, 0);
 
-                //Debug.Log($"{p1} {p2} {p3} {p4}");
+                if (!(verts.Contains(p1) && verts.Contains(p2) && verts.Contains(p3) && verts.Contains(p4)))
+                {
+                    int t1 = offset + 0;
+                    int t2 = offset + 2;
+                    int t3 = offset + 3;
+                    int t4 = offset + 3;
+                    int t5 = offset + 1;
+                    int t6 = offset + 0;
 
-                int t1 = offset + 0;
-                int t2 = offset + 2;
-                int t3 = offset + 3;
-                int t4 = offset + 3;
-                int t5 = offset + 1;
-                int t6 = offset + 0;
+                    int t7 = offset + 4;
+                    int t8 = offset + 6;
+                    int t9 = offset + 7;
+                    int t10 = offset + 7;
+                    int t11 = offset + 5;
+                    int t12 = offset + 4;
 
-                int t7 = offset + 4;
-                int t8 = offset + 6;
-                int t9 = offset + 7;
-                int t10 = offset + 7;
-                int t11 = offset + 5;
-                int t12 = offset + 4;
+                    verts.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
+                    vertsB.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
+                    tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
+                    trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
+                    normals.AddRange(new List<Vector3> { Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up, Vector3.up });
 
-                verts.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
-                vertsB.AddRange(new List<Vector3> { p1, p2, p3, p4, p5, p6, p7, p8 });
-                tris.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
-                trisB.AddRange(new List<int> { t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12 });
-
-                uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
+                    uvs.AddRange(new List<Vector2> { new Vector2(p1.x, p1.z - points[0][0].z), new Vector2(p2.x, p2.z - points[0][0].z),
                 new Vector2(p3.x, p3.z - points[0][0].z), new Vector2(p4.x, p4.z - points[0][0].z),
                 new Vector2(p5.x, p5.z - points[0][0].z), new Vector2(p6.x, p6.z - points[0][0].z),
                 new Vector2(p7.x, p7.z - points[0][0].z), new Vector2(p8.x, p8.z - points[0][0].z)});
 
-                offset += 8;
+                    offset += 8;
+                }
             }
         }
      }

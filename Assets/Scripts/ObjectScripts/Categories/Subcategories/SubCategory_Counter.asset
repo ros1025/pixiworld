@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: b142a6d442ad18d41831d17cdf675776, type: 3}
   m_Name: SubCategory_Counter
   m_EditorClassIdentifier: Assembly-CSharp::ObjectCategory
   <Name>k__BackingField: Counter

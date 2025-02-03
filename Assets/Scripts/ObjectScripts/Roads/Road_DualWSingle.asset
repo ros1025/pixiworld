@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 7336cc264c72a494e8a35175dfe7b70f, type: 3}
   m_Name: Road_DualWSingle
   m_EditorClassIdentifier: Assembly-CSharp::RoadsData
   <Name>k__BackingField: Dual Way Single Road
   <ID>k__BackingField: 0
-  <Cost>k__BackingField: 100
+  <Cost>k__BackingField: 50
   <width>k__BackingField: 1
   <TwoWay>k__BackingField: 1
   <tex>k__BackingField: {fileID: 2800000, guid: 72f1ddc299ec9694d933713392331458, type: 3}

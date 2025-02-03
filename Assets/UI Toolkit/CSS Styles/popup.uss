@@ -1,0 +1,88 @@
+.background {
+    width: 700px;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    background-color: rgb(74, 60, 103);
+    padding-top: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    padding-left: 25px;
+    min-height: 400px;
+}
+
+.header {
+    font-size: 48px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20SDF.asset?fileID=11400000&guid=e50c24b38052f3749a46124a600d1ad3&type=2#Gotham Rounded Medium SDF");
+    letter-spacing: 0;
+    color: rgb(255, 255, 255);
+    margin-top: 0;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.content {
+    margin-left: 5px;
+    margin-right: 5px;
+    background-color: rgb(166, 166, 166);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-top-left-radius: 45px;
+    border-top-right-radius: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
+    flex-grow: 1;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    min-height: 150px;
+    flex-wrap: wrap;
+    white-space: pre-wrap;
+}
+
+.unity-button {
+    height: 80px;
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-bottom-left-radius: 40px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    font-size: 36px;
+    padding-top: 10px;
+    padding-right: 30px;
+    padding-bottom: 10px;
+    padding-left: 30px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    background-color: rgb(229, 229, 229);
+}
+
+.unity-button:hover {
+    background-color: rgb(204, 204, 204);
+}
+
+.unity-button:active {
+    background-color: rgb(178, 178, 178);
+}
+
+.content .unity-label {
+    font-size: 32px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}

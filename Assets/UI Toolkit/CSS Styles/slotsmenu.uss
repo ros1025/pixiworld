@@ -1,0 +1,186 @@
+#Cancel {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding-top: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    padding-left: 25px;
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 45px;
+    border-top-right-radius: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
+    background-color: rgb(224, 42, 42);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+#Cancel:hover {
+    background-color: rgb(185, 36, 36);
+}
+
+#Cancel:active {
+    background-color: rgb(123, 26, 26);
+}
+
+.content-bar {
+    width: 600px;
+    flex-grow: 1;
+    height: 850px;
+    background-color: rgba(80, 80, 80, 0.5);
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    margin-right: 10px;
+    margin-left: 10px;
+    max-width: 600px;
+    min-width: 600px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
+    letter-spacing: -5px;
+    margin-bottom: 30px;
+    align-items: center;
+    padding-top: 30px;
+    padding-right: 20px;
+    padding-bottom: 30px;
+    padding-left: 20px;
+}
+
+.content-picture {
+    flex-grow: 1;
+    height: 360px;
+    width: 100%;
+    min-height: 360px;
+    max-height: 360px;
+}
+
+.save-name {
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
+    letter-spacing: -5px;
+    font-size: 48px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    width: 540px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.save-description {
+    width: 540px;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    font-size: 28px;
+}
+
+.game-controls {
+    height: 110px;
+    min-height: 110px;
+    width: 540px;
+    min-width: 540px;
+    max-height: 110px;
+    flex-direction: row-reverse;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.game-controls .unity-button {
+    width: 90px;
+    height: 90px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 10px;
+    border-top-left-radius: 45px;
+    border-top-right-radius: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+}
+
+.game-controls .play-button {
+    background-color: rgb(73, 203, 137);
+}
+
+.game-controls .play-button:hover {
+    background-color: rgb(65, 184, 123);
+}
+
+.game-controls .play-button:active {
+    background-color: rgb(60, 161, 110);
+}
+
+.game-controls .edit-button {
+    background-color: rgb(207, 128, 50);
+}
+
+.game-controls .edit-button:hover {
+    background-color: rgb(186, 115, 46);
+}
+
+.game-controls .edit-button:active {
+    background-color: rgb(166, 101, 36);
+}
+
+.game-controls .delete-button {
+    background-color: rgb(224, 42, 42);
+}
+
+.game-controls .delete-button:hover {
+    background-color: rgb(185, 36, 36);
+}
+
+.game-controls .delete-button:active {
+    background-color: rgb(123, 26, 26);
+}
+
+.unity-base-slider__tracker {
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgba(89, 89, 89, 0.5);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.unity-base-slider__dragger {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: rgb(211, 60, 103);
+}
+
+.unity-repeat-button {
+    display: none;
+    visibility: hidden;
+}

@@ -58,6 +58,7 @@ public class ZonePlacer : MonoBehaviour
         zoneObject.transform.SetParent(this.transform);
 
         zoneComponent.LoadData(zone.levels, placementSystem);
+        zone.levels = zoneComponent.GetLevelSaveData();
     }
 
     public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, float rotation)
