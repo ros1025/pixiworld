@@ -8,13 +8,13 @@
 - [x] Build Mode Controls (may be modified)
 - [x] Refining Camera Touch Controls
 - [x] Wall Placement and Room Generation
+- [x] Save/Load System
 
 ## Work In Progress
 - [ ] Textures
 - [ ] Character Models and Creator
 - [ ] Graphical Settings
 - [ ] Audio
-- [ ] Save/Load System
 - [ ] Undo/Redo System
 
 ## Planned Future Features
