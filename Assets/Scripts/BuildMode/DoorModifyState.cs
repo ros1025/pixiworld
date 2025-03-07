@@ -36,7 +36,7 @@ public class DoorModifyState : IBuildingState
         this.soundFeedback = soundFeedback;
         this.inputManager = inputManager;
 
-        Door door = wallMapping.GetDoorSelect(gridPosition, Vector2Int.one, 0);
+        Door door = wallMapping.GetDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         selectedObjectIndex = door.ID;
         if (door != null)
         {

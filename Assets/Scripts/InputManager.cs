@@ -172,11 +172,12 @@ public class InputManager : MonoBehaviour
 
     public bool RayHitObject(GameObject hitbox)
     {
-        if (Physics.Raycast(ray, out hit, float.PositiveInfinity, selectorLayermask))
+        List<RaycastHit> hits = new();
+        hits.AddRange(RayHitAllObjects());
+
+        if (hits.FindIndex(item => item.collider.gameObject == hitbox) != -1)
         {
-            if (hit.collider.gameObject == hitbox)
-                return true;
-            return false;
+            return true;
         }
         else return false;
     }

@@ -2635,9 +2635,9 @@ public class WallMapping : MonoBehaviour
         GameObject previewSelector = Instantiate(selectorObject);
         previewSelector.transform.SetParent(newObject.transform.transform);
         previewSelector.transform.name = "Selector";
-        previewSelector.transform.position = transform.TransformPoint(point) + new Vector3(0.05f, 0.01f, 0.05f);
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
         previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
-        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        //previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         doors.Add(new Door(newObject, point, rotation, length, ID, targetWall, materials));
         newObject.transform.SetParent(this.transform);
 
@@ -2672,9 +2672,9 @@ public class WallMapping : MonoBehaviour
         GameObject previewSelector = Instantiate(selectorObject);
         previewSelector.transform.SetParent(newObject.transform.transform);
         previewSelector.transform.name = "Selector";
-        previewSelector.transform.position = transform.TransformPoint(loadedDoor.point) + new Vector3(0.05f, 0.01f, 0.05f);
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
         previewSelector.transform.localScale = new Vector3(loadedDoor.length - 0.1f, 0.3f, 0.9f);
-        previewSelector.transform.rotation = Quaternion.Euler(0, loadedDoor.rotation, 0);
+        //previewSelector.transform.rotation = Quaternion.Euler(0, loadedDoor.rotation, 0);
         doors.Add(loadedDoor);
         newObject.transform.SetParent(this.transform);
 
@@ -2694,9 +2694,9 @@ public class WallMapping : MonoBehaviour
         door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
         GameObject previewSelector = door.prefab.transform.Find("Selector").gameObject;
-        previewSelector.transform.position = transform.TransformPoint(point) + new Vector3(0.05f, 0.01f, 0.05f);
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
         previewSelector.transform.localScale = new Vector3(length - 0.1f, 0.3f, 0.9f);
-        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        //previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         previewSelector.GetComponentInChildren<Renderer>().material = selectorMaterial;
 
         int index = 0;

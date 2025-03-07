@@ -15,12 +15,12 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.9176471, g: 0.9176471, b: 0.82745105, a: 1}
+  m_FogColor: {r: 0.91372555, g: 0.9176471, b: 0.8235295, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.003
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.9176471, g: 0.9176471, b: 0.82745105, a: 1}
+  m_AmbientSkyColor: {r: 0.91372555, g: 0.9176471, b: 0.8235295, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 2
@@ -262,7 +262,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 201287205}
-  - component: {fileID: 201287204}
+  - component: {fileID: 201287207}
+  - component: {fileID: 201287208}
+  - component: {fileID: 201287206}
   m_Layer: 0
   m_Name: MainUIController
   m_TagString: Untagged
@@ -270,23 +272,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &201287204
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 201287203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cb4b20df471e2b488e47b0f82d3b079, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainMenuObject: {fileID: 1602694256}
-  settingsBarObject: {fileID: 1219381228}
-  settingsMenuObject: {fileID: 693888267}
-  placementSystem: {fileID: 275286407}
-  settingsController: {fileID: 693888268}
 --- !u!4 &201287205
 Transform:
   m_ObjectHideFlags: 0
@@ -304,6 +289,146 @@ Transform:
   - {fileID: 1219381230}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &201287206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201287203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cb4b20df471e2b488e47b0f82d3b079, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnterMainEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 201287207}
+        m_TargetAssemblyTypeName: TaskbarController, Assembly-CSharp
+        m_MethodName: SetMainMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 201287208}
+        m_TargetAssemblyTypeName: TopBarController, Assembly-CSharp
+        m_MethodName: SetMainMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  ExitMainEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 201287207}
+        m_TargetAssemblyTypeName: TaskbarController, Assembly-CSharp
+        m_MethodName: Hide
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 201287208}
+        m_TargetAssemblyTypeName: TopBarController, Assembly-CSharp
+        m_MethodName: Hide
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  EnterSettingsEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 693888267}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 693888268}
+        m_TargetAssemblyTypeName: SettingsController, Assembly-CSharp
+        m_MethodName: InvokeSettings
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  EnterBuildModeEvents:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 275286407}
+        m_TargetAssemblyTypeName: PlacementSystem, Assembly-CSharp
+        m_MethodName: EnterBuildMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &201287207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201287203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78944e7bce68051439e002c53689780d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeManager: {fileID: 827732167}
+  uiController: {fileID: 201287206}
+  MainMenu: {fileID: 1602694257}
+  placementSystem: {fileID: 275286407}
+  settingsController: {fileID: 693888268}
+--- !u!114 &201287208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201287203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1b0f4fc526369644be6e2c4ce3f689e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiController: {fileID: 201287206}
+  SettingsBar: {fileID: 1219381229}
+  settingsController: {fileID: 693888268}
 --- !u!1001 &257839317
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -511,7 +636,7 @@ Camera:
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
+  m_AllowDynamicResolution: 1
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -672,7 +797,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 1
-  m_Color: {r: 0.7197566, g: 0.7197566, b: 0.7197566, a: 1}
+  m_Color: {r: 0.7584548, g: 0.7584548, b: 0.7584548, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 32.951843
@@ -735,7 +860,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.028015314, y: 0.94332683, z: -0.32021627, w: 0.08253046}
+  m_LocalRotation: {x: 0.03317733, y: 0.9211935, z: -0.37921837, w: 0.08059404}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1007,7 +1132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SettingsMenu: {fileID: 693888269}
-  mainController: {fileID: 201287204}
+  uiController: {fileID: 201287206}
   settings: {fileID: 975606233}
   buttonImages:
   - {fileID: 2800000, guid: ca99625a2f7e7904281c7d63cb4814fe, type: 3}
@@ -1980,8 +2105,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
-  minutes: 510
-  time: {x: 8, y: 30}
+  minutes: 539
+  time: {x: 8, y: 59}
   acceleration: 1
   paused: 0
 --- !u!4 &827732168
@@ -2187,6 +2312,8 @@ MonoBehaviour:
   currentRes: 0
   displayheight: 0
   displaywidth: 0
+  refreshRate: 0
+  renderingMode: 0
 --- !u!4 &975606234
 Transform:
   m_ObjectHideFlags: 0
@@ -2942,7 +3069,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BuildMenu: {fileID: 1914537858}
-  mainController: {fileID: 201287204}
+  uiController: {fileID: 201287206}
   placementSystem: {fileID: 275286407}
   objectsData: {fileID: 11400000, guid: d98d509234850e743ab4503daa16f2e6, type: 2}
   zoneData: {fileID: 11400000, guid: 959bae3319981bd4cbbad4d0592ba15a, type: 2}
@@ -3202,9 +3329,13 @@ MonoBehaviour:
   cam: {fileID: 330585545}
   cameraObject: {fileID: 2027412265}
   targetBox: {fileID: 569444962}
-  scale: 0.1
+  posScale: 0.1
+  zoomScale: 0.1
+  yawScale: 0.1
+  rotateScale: 0.1
   cameraX: 20
   cameraY: 0
+  minDistance: 6
   yawAdjustable: 0
   posAdjustable: 0
 --- !u!114 &2027412269

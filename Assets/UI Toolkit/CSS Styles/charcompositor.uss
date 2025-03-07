@@ -1,0 +1,246 @@
+.unity-scroller .unity-base-slider__tracker {
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgba(89, 89, 89, 0.5);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.unity-scroller .unity-base-slider__dragger {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: rgb(211, 118, 60);
+}
+
+.unity-scroller .unity-repeat-button {
+    display: none;
+    visibility: hidden;
+}
+
+.category-button {
+    width: 100px;
+    height: 100px;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    padding-left: 25px;
+    background-color: rgb(236, 148, 42);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.category-button:hover {
+    background-color: rgb(195, 123, 36);
+}
+
+.category-button:active {
+    background-color: rgb(155, 101, 36);
+}
+
+.content-button {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    height: 250px;
+    width: 200px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(229, 229, 229);
+}
+
+.content-button:hover {
+    background-color: rgb(191, 191, 191);
+}
+
+.content-button:active {
+    background-color: rgb(153, 153, 153);
+}
+
+.content-group {
+    flex-grow: 1;
+    flex-direction: row;
+    width: 440px;
+}
+
+.content-group-vertical {
+    flex-grow: 1;
+    flex-direction: column;
+    width: 440px;
+}
+
+.topic-button {
+    width: 115px;
+    height: 70px;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+    border-bottom-left-radius: 35px;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 10px;
+    padding-right: 25px;
+    padding-bottom: 10px;
+    padding-left: 25px;
+    background-color: rgb(236, 148, 42);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.topic-button:hover {
+    background-color: rgb(195, 123, 36);
+}
+
+.topic-button:active {
+    background-color: rgb(155, 101, 36);
+}
+
+#Cancel {
+    width: 100px;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 10px;
+    padding-right: 25px;
+    padding-bottom: 10px;
+    padding-left: 25px;
+    height: 70px;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+    border-bottom-left-radius: 35px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(224, 42, 42);
+}
+
+#Cancel:hover {
+    background-color: rgb(185, 36, 36);
+}
+
+#Cancel:active {
+    background-color: rgb(123, 26, 26);
+}
+
+.content-group-vertical .unity-base-slider .unity-base-slider__tracker {
+    background-color: rgb(113, 58, 24);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    height: 5px;
+    border-top-left-radius: 2.5px;
+    border-top-right-radius: 2.5px;
+    border-bottom-right-radius: 2.5px;
+    border-bottom-left-radius: 2.5px;
+    top: 50%;
+}
+
+.content-group-vertical .unity-base-slider .unity-base-slider__dragger {
+    width: 20px;
+    height: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(211, 118, 60);
+    top: 50%;
+}
+
+.content-group-vertical .unity-base-field {
+    height: 50px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    letter-spacing: -5px;
+    -unity-text-align: middle-left;
+    font-size: 30px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    width: 100%;
+}
+
+.content-group-vertical .unity-base-slider .unity-text-field__input {
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    font-size: 18px;
+    height: 36px;
+    -unity-text-align: middle-center;
+}
+
+.content-group-vertical .unity-base-slider .unity-text-field {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    height: 40px;
+}
+
+.group-label {
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
+    font-size: 32px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}

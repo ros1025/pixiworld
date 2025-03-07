@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a46a4ecf7a19734ca5045be26f83a81, type: 3}
+  m_Name: ClothingCategorySO
+  m_EditorClassIdentifier: 
+  clothingCategories:
+  - name: Tops
+    subcategories:
+    - {fileID: 11400000, guid: 0b512139a1d2f8d4fab510707f4bd2da, type: 2}
+    - {fileID: 11400000, guid: 84daf7e13afaa3149bb21fd3527ddf34, type: 2}
+    - {fileID: 11400000, guid: cd3ebf70ee1da7d4594f7d77bddbf7c7, type: 2}
+  - name: Bottoms
+    subcategories:
+    - {fileID: 11400000, guid: 3bf0d940addc85148b960ac6244e0efa, type: 2}
+    - {fileID: 11400000, guid: eeb5c48866f95f6459ccb76df83759aa, type: 2}

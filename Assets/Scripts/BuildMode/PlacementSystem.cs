@@ -568,6 +568,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     private void PlaceStructure()
     {
         buildingState.OnAction(selectedPosition);
+        DataPersistenceManager.instance.SaveGame();
     }
 
     private void ConfirmPlacement()
@@ -580,7 +581,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.PlaceCheck();
         cameraController.MoveCameraToPos(preview.previewPos, preview.previewSize);
         preview.deSelect();
-        DataPersistenceManager.instance.SaveGame();
+        //DataPersistenceManager.instance.SaveGame();
         inputManager.OnMoved -= PingUpdate;
         inputManager.OnRelease -= ConfirmPlacement;
         inputManager.ClearRightClickAction();

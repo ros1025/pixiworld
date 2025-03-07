@@ -9,7 +9,7 @@ public class BuildModeMenu : MonoBehaviour
     [SerializeField]
     private UIDocument BuildMenu;
     [SerializeField]
-    private MainMenuController mainController;
+    private MainMenuController uiController;
     [SerializeField]
     private PlacementSystem placementSystem;
     [SerializeField]
@@ -94,7 +94,7 @@ public class BuildModeMenu : MonoBehaviour
         categories.Clear();
         items.Clear();
         gameObject.SetActive(false);
-        mainController.SetMainMenu();
+        uiController.EnterMainEvents.Invoke();
     }
 
     private void AddCategory(ObjectCategory type)

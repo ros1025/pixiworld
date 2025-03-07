@@ -209,6 +209,9 @@ MonoBehaviour:
   ui: {fileID: 737443085}
   gizmo: {fileID: 2163685402514507971, guid: 8507624ef62b63044a5e80a24dc85e28, type: 3}
   start: {fileID: 951884539}
+  deleteImage: {fileID: 2800000, guid: dd0a71664e546f4498abe578db80e8f3, type: 3}
+  settingsImage: {fileID: 2800000, guid: 200102f42fe7a9047ac8008caa45b3db, type: 3}
+  playimage: {fileID: 2800000, guid: 36a0957f22120e8469ad758e5f287082, type: 3}
 --- !u!114 &737443085
 MonoBehaviour:
   m_ObjectHideFlags: 0

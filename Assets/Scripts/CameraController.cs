@@ -17,10 +17,18 @@ public class CameraController : MonoBehaviour
     private CinemachinePositionComposer framingTransposer;
 
     [SerializeField]
-    private float scale = 0.1f;
+    private float posScale = 0.1f;
+    [SerializeField]
+    private float zoomScale = 0.1f;
+    [SerializeField]
+    private float yawScale = 0.1f;
+    [SerializeField]
+    private float rotateScale = 0.1f;
 
-    public float cameraX = 20; public float cameraY = 0;
+    public float cameraX = 20;  public float cameraY = 0;
+    public float minDistance = 6;
     public bool yawAdjustable; public bool posAdjustable;
+    private bool isPointerOverUI;
 
     private float previousTouchDistance;
     private float previousRotate;
@@ -37,7 +45,7 @@ public class CameraController : MonoBehaviour
         ResetTouchDefaults();
 
         system = new BuilderInputs();
-        system.Enable();
+        system.camera.Enable();
         system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<Vector2>().y);
         system.camera.move.performed += _ => OnMove(system.camera.move.ReadValue<Vector2>());
         system.camera.rotate.performed += _ => OnRotate(system.camera.rotate.ReadValue<float>());
@@ -96,7 +104,7 @@ public class CameraController : MonoBehaviour
 
             //pinch to zoom
             float deltaDistance = currentTouchDistance - previousTouchDistance;
-            AdjustCameraDistance(deltaDistance * scale);
+            AdjustCameraDistance(deltaDistance * zoomScale);
 
             previousTouchDistance = currentTouchDistance;
             AdjustCameraBox();
@@ -115,7 +123,7 @@ public class CameraController : MonoBehaviour
                 }
                 Vector2 currentTouchPosition = touch;
                 Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
-                targetBox.transform.Translate(new Vector3(-touchDelta.x * (Mathf.Pow(scale, 2)), 0, -touchDelta.y * Mathf.Pow(scale, 2)));
+                targetBox.transform.Translate(new Vector3(-touchDelta.x * (Mathf.Pow(posScale, 2)), 0, -touchDelta.y * Mathf.Pow(posScale, 2)));
 
                 previousTouchPosition = currentTouchPosition;
                 AdjustCameraBox();
@@ -145,7 +153,7 @@ public class CameraController : MonoBehaviour
     {
         if (IsPointerOverUI() == false)
         {
-            cameraY += axis * scale;
+            cameraY += axis * rotateScale;
             AdjustCameraBox();
         }
     }
@@ -156,7 +164,7 @@ public class CameraController : MonoBehaviour
         {
             if (posAdjustable == true)
             {
-                targetBox.transform.Translate(new Vector3(-delta.x * (Mathf.Pow(scale,2)), 0, -delta.y * Mathf.Pow(scale, 2)));
+                targetBox.transform.Translate(new Vector3(-delta.x * (Mathf.Pow(posScale, 2)), 0, -delta.y * Mathf.Pow(posScale, 2)));
             }
             AdjustCameraBox();
         }
@@ -170,7 +178,7 @@ public class CameraController : MonoBehaviour
             {
                 if (cameraX >= 0 && cameraX <= 90)
                 {
-                    cameraX += axis * scale;
+                    cameraX += axis * yawScale;
                 }
                 else if (cameraX < 0)
                 {
@@ -187,10 +195,10 @@ public class CameraController : MonoBehaviour
 
     private void AdjustCameraDistance(float zoomLevel)
     {
-        if (framingTransposer.CameraDistance >= 6)
-            framingTransposer.CameraDistance += zoomLevel * scale;
+        if (framingTransposer.CameraDistance >= minDistance)
+            framingTransposer.CameraDistance += zoomLevel * zoomScale;
         else
-            framingTransposer.CameraDistance = 6;
+            framingTransposer.CameraDistance = minDistance;
         AdjustCameraBox();
     }
 
@@ -217,10 +225,10 @@ public class CameraController : MonoBehaviour
 
         if (shift == -1)
             if (delta < 0)
-                targetBox.transform.Translate(new Vector3(delta * scale, 0, 0));
+                targetBox.transform.Translate(new Vector3(delta * posScale, 0, 0));
         if (shift == 1)
             if (delta > 0)
-                targetBox.transform.Translate(new Vector3(delta * scale, 0, 0));
+                targetBox.transform.Translate(new Vector3(delta * posScale, 0, 0));
         AdjustCameraBox();
     }
 
@@ -235,10 +243,10 @@ public class CameraController : MonoBehaviour
 
         if (shift == -1)
             if (delta < 0)
-                targetBox.transform.Translate(new Vector3(0, 0, delta * scale));
+                targetBox.transform.Translate(new Vector3(0, 0, delta * posScale));
         if (shift == 1)
             if (delta > 0)
-                targetBox.transform.Translate(new Vector3(0, 0, delta * scale));
+                targetBox.transform.Translate(new Vector3(0, 0, delta * posScale));
         AdjustCameraBox();
     }
 

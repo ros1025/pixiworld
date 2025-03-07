@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.AdaptivePerformance;
+using System;
 
 public class SettingsController : MonoBehaviour
 {
     [SerializeField]
     private UIDocument SettingsMenu;
     [SerializeField]
-    private MainMenuController mainController;
+    private MainMenuController uiController;
     [SerializeField]
     private ModifySettings settings;
     [SerializeField]
@@ -17,6 +18,7 @@ public class SettingsController : MonoBehaviour
 
     VisualElement root; VisualElement container; VisualElement homebar;
     Button graphicsToggle; Button audioToggle; Button progressToggle; Button exitSettings;
+
 
     public void InvokeSettings()
     {
@@ -49,7 +51,8 @@ public class SettingsController : MonoBehaviour
         settings.SetupResolutions();
         MakeIntDropdownBar("graphics_renderresolution", "Render Resolution", settings.Resolutions.IndexOf(settings.currentRes), settings.Resolutions, "p", settings.SetRenderingResolution);
 
-        List<string> PerformanceModes = new List<string> { "Performance", "Optimised", "Standard", "Battery" };
+        List<string> PerformanceModes = new();
+        PerformanceModes.AddRange(Enum.GetNames(typeof(ModifySettings.PerformanceLevels)));
         MakeDropdownBar("graphics_performancemodes", "Performance Mode", settings.DetermineCurrentPerformanceMode(), PerformanceModes, settings.SetPerformanceMode);
 
         List<string> fpsModes = new List<string> { "24", "30", "60", "90", "120", "Unlimited" };
@@ -65,7 +68,7 @@ public class SettingsController : MonoBehaviour
     {
         container.Clear();
         gameObject.SetActive(false);
-        mainController.SetMainMenu();
+        uiController.EnterMainEvents.Invoke();
     }
 
     public void ExitGame()

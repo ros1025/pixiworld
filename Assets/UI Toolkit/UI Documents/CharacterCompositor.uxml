@@ -1,0 +1,35 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/charcompositor.uss?fileID=7433441132597879392&amp;guid=88f2420414825d74eb83cd120815376a&amp;type=3#charcompositor" />
+    <engine:VisualElement picking-mode="Ignore" style="flex-grow: 1; min-width: 640px; max-width: 640px; min-height: 100%; max-height: 100%; margin-top: 0; margin-bottom: 0; position: absolute; right: 0; bottom: 0; flex-direction: column; padding-right: 20px; padding-top: 150px; padding-bottom: 80px;">
+        <engine:VisualElement name="Header" picking-mode="Ignore" style="flex-grow: 1; height: 100px; padding-top: 10px; padding-right: 0; padding-bottom: 10px; padding-left: 10px; flex-direction: row; max-height: 100px; min-height: 100px;">
+            <engine:Button name="Cancel" />
+            <engine:Button name="Clothes" class="topic-button" />
+            <engine:Button name="Themes" class="topic-button" />
+            <engine:Button name="Proportions" class="topic-button" />
+            <engine:Button name="Traits" class="topic-button" />
+        </engine:VisualElement>
+        <engine:VisualElement name="Content" style="flex-grow: 1; flex-direction: row;">
+            <engine:VisualElement name="CategoryBar" picking-mode="Ignore" style="flex-grow: 1; min-width: 120px; max-width: 120px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
+                <engine:ScrollView horizontal-scroller-visibility="Hidden" touch-scroll-type="Elastic" picking-mode="Ignore" style="height: 100%;">
+                    <engine:Button class="category-button" />
+                </engine:ScrollView>
+            </engine:VisualElement>
+            <engine:VisualElement name="ContentBar" style="flex-grow: 1; border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; background-color: rgba(188, 151, 63, 0.5); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 25px; padding-right: 10px; padding-bottom: 25px; padding-left: 25px;">
+                <engine:ScrollView horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="AlwaysVisible" touch-scroll-type="Elastic">
+                    <engine:VisualElement class="content-group">
+                        <engine:Button class="content-button" />
+                        <engine:Button class="content-button" />
+                    </engine:VisualElement>
+                    <engine:VisualElement class="content-group-vertical">
+                        <engine:Label text="Label" class="group-label" />
+                        <engine:Slider label="Slider" value="42" high-value="100" />
+                    </engine:VisualElement>
+                    <engine:VisualElement class="content-group">
+                        <engine:Button class="content-button" />
+                        <engine:Button class="content-button" />
+                    </engine:VisualElement>
+                </engine:ScrollView>
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

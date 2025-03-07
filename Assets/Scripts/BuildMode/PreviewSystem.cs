@@ -543,7 +543,7 @@ public class PreviewSystem : MonoBehaviour
     {
         cellIndicator.transform.position = new Vector3(position.x, position.y + previewYOffset, position.z);
         //previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + previewYOffset, position.z + 0.05f);
-        previewSelector.transform.position = new Vector3(position.x + 0.05f, 0f, position.z + 0.05f);
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
         expanderParent.transform.position = new Vector3(position.x, position.y + previewYOffset * 2, position.z);
     }
 

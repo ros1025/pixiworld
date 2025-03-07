@@ -31,7 +31,7 @@ public class ZonePlacer : MonoBehaviour
         previewSelector.transform.SetParent(zoneObject.transform.transform);
         previewSelector.transform.name = "Selector";
         previewSelector.transform.localScale = new Vector3(size.x - 0.1f, 0.3f, size.y - 0.1f);
-        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y + 0.01f, position.z + 0.05f);
+        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y, position.z + 0.05f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
         Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
         zoneComponent.InstantiateNew(placementSystem, ID, size);
@@ -49,7 +49,7 @@ public class ZonePlacer : MonoBehaviour
         previewSelector.transform.SetParent(zoneObject.transform.transform);
         previewSelector.transform.name = "Selector";
         previewSelector.transform.localScale = new Vector3(zone.size.x - 0.1f, 0.3f, zone.size.y - 0.1f);
-        previewSelector.transform.position = new Vector3(zone.occupiedPosition.x + 0.05f, zone.occupiedPosition.y + 0.01f, zone.occupiedPosition.z + 0.05f);
+        previewSelector.transform.position = new Vector3(zone.occupiedPosition.x + 0.05f, zone.occupiedPosition.y, zone.occupiedPosition.z + 0.05f);
         previewSelector.transform.rotation = Quaternion.Euler(0, zone.rotation, 0);
         Zone zoneComponent = zoneObject.GetComponentInChildren<Zone>();
         zoneComponent.InstantiateNew(placementSystem, zone.ID, zone.size);
@@ -71,7 +71,7 @@ public class ZonePlacer : MonoBehaviour
         m_Object.transform.position = position;
         m_Object.transform.rotation = Quaternion.Euler(0, rotation, 0);
         m_Object.transform.Find("Selector").localScale = new Vector3(size.x - 0.1f, 0.3f, size.y);
-        m_Object.transform.Find("Selector").position = new Vector3(position.x, position.y + 0.01f, position.z);
+        m_Object.transform.Find("Selector").position = new Vector3(position.x, position.y, position.z);
         m_Object.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Renderer>().material = selectorObjectMaterial;
         Zone zoneComponent = m_Object.GetComponentInChildren<Zone>();
         zoneComponent.EditPosition(ID, size);

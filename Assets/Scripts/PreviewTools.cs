@@ -141,7 +141,7 @@ public class PreviewTools : MonoBehaviour
     public void CustomiseTexture(GameObject obj)
     {
         VisualElement rootT = TexturesMenu.rootVisualElement;
-        rootT.ElementAt(0).visible = true; rootT.SetEnabled(true);
+        rootT.style.visibility = Visibility.Visible;
         rootT.style.left = customTexture.layout.xMin;
         rootT.style.top = Screen.height - (rootT.ElementAt(0).layout.height + controls.layout.height + 20);
 
@@ -186,7 +186,7 @@ public class PreviewTools : MonoBehaviour
     public void ColorPicker(ClickEvent evt, MatData mat)
     {
         VisualElement rootT = TexturesMenu.rootVisualElement;
-        rootT.ElementAt(0).visible = true; rootT.SetEnabled(true);
+        rootT.style.visibility = Visibility.Visible;
 
         Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
         tCancel.UnregisterCallback<ClickEvent>(CloseTexturePopup);
@@ -247,7 +247,7 @@ public class PreviewTools : MonoBehaviour
         VisualElement rootT = TexturesMenu.rootVisualElement;
         VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
         textureList.Clear();
-        rootT.ElementAt(0).visible = false; rootT.SetEnabled(false);
+        rootT.style.visibility = Visibility.Hidden;
     }
 
     public void SetHSV(float H, float S, float V, MatData mat, VisualElement preview)
