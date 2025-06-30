@@ -43,7 +43,22 @@ using UnityEngine.Splines;
             {
                 this.spline = spline;
                 this.knot = knot;
-                knotIndex = spline.IndexOf(knot);
+
+                knotIndex = -1;
+                if (spline.IndexOf(knot) != -1)
+                {
+                    knotIndex = spline.IndexOf(knot);
+                }
+                else
+                {
+                    for (int i = 0; i < spline.Count; i++)
+                    {
+                        if ((Vector3)spline[i].Position == (Vector3)knot.Position)
+                        {
+                            knotIndex = i;
+                        }
+                    }
+                }
             }
 
             public int GetSplineIndex(SplineContainer container)

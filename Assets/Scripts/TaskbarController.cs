@@ -32,8 +32,12 @@ public class TaskbarController : MonoBehaviour
     {
         //for MainMenu
         MainMenuRoot = MainMenu.rootVisualElement;
+
         buildButton = MainMenuRoot.Q<Button>("BuildMode");
         mapButton = MainMenuRoot.Q<Button>("MapMode");
+
+        buildButton.ClearBindings();
+        mapButton.ClearBindings();
 
         buildButton.clicked += BuildButtonPressed;
         mapButton.clicked += MapButtonPressed;
