@@ -1667,7 +1667,7 @@ public class RoadMapping : MonoBehaviour
             }
             else
             {
-                Debug.Log("No possible splines found!");
+                //Debug.Log("No possible splines found!");
                 break;
             }
         }
@@ -1813,9 +1813,9 @@ public class RoadMapping : MonoBehaviour
         {
             float t1 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleC * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign1;
             float t2 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleB * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign2;
-            Debug.Log($"{origin1}, {tangent1}, {origin2}, {tangent2}");
-            Debug.Log($"{angleA}, {angleB}, {angleC}");
-            Debug.Log($"{t1}, {t2}, {Vector3.Distance(origin1, origin2)}, {origin1 + (t1 * tangent1)}, {origin2 + (t2 * tangent2)}");
+            //Debug.Log($"{origin1}, {tangent1}, {origin2}, {tangent2}");
+            //Debug.Log($"{angleA}, {angleB}, {angleC}");
+            //Debug.Log($"{t1}, {t2}, {Vector3.Distance(origin1, origin2)}, {origin1 + (t1 * tangent1)}, {origin2 + (t2 * tangent2)}");
 
 
             if (Vector3.Distance(origin1 + (t1 * tangent1), origin2 + (t2 * tangent2)) < 0.1f)

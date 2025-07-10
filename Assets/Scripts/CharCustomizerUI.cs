@@ -92,6 +92,8 @@ public class CharCustomizerUI : MonoBehaviour
             label.AddToClassList("group-label");
             visualElement.Add(label);
         }
+
+        items.ScrollTo(items.ElementAt(0));
     }
 
     private void TriggerThemeCustomisation()
@@ -154,6 +156,8 @@ public class CharCustomizerUI : MonoBehaviour
             y.RegisterValueChangedCallback(evt => group.SetTransformerWeights(x.value, evt.newValue, z.value));
             z.RegisterValueChangedCallback(evt => group.SetTransformerWeights(x.value, y.value, evt.newValue));
         }
+
+        items.ScrollTo(items.ElementAt(0));
     }
 
     private void TriggerTraitsCustomisation()

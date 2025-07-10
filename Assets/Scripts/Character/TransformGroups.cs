@@ -10,6 +10,9 @@ public class TransformGroups
     public float weightX;
     public float weightY;
     public float weightZ;
+    private float minX;  float maxX;
+    private float minY;  float maxY;
+    private float minZ;  float maxZ;
 
     public TransformGroups(string name, List<BoneTransformer> bones)
     {
