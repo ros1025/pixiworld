@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b142a6d442ad18d41831d17cdf675776, type: 3}
   m_Name: CategoryClothes_TShirts
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: 
+  <Name>k__BackingField: T-Shirts
+  objects: []

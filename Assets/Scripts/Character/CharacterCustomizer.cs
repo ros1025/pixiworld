@@ -7,18 +7,21 @@ public class CharacterCustomizer : MonoBehaviour
     private Character currentCharacter;
     [SerializeField]
     private List<Character> characters;
+    [SerializeField]
+    private ClothingCategoryDatabaseSO categories;
 
     public void InitializeCustomiser()
     {
         List<TransformGroups> transformGroups = GetTransformGroups();
-        foreach (TransformGroups group in transformGroups)
-        {
-            group.SetDefaultPos();
-        }
     }
 
     public List<TransformGroups> GetTransformGroups()
     {
-        return currentCharacter.attributes.transformGroups;
+        return currentCharacter.GetBodyShapeKeys();
+    }
+
+    public void ChangeCharacterClothing(ClothingSO clothing)
+    {
+        currentCharacter.ChangeClothing(clothing, categories);
     }
 }

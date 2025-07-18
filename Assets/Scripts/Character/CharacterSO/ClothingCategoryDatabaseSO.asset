@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 302584d135d894f4ea7b94abb93b8e42, type: 3}
+  m_Name: ClothingCategoryDatabaseSO
+  m_EditorClassIdentifier: 
+  <clothingCategories>k__BackingField:
+  - {fileID: 11400000, guid: a44ccf23601724bf083e14092d197303, type: 2}
+  - {fileID: 11400000, guid: 1774305d60f3143b08b2b5990b356cbb, type: 2}

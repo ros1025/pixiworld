@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: SubCategory_Table
   m_EditorClassIdentifier: Assembly-CSharp::ObjectCategory
   <Name>k__BackingField: Table
+  objects:
+  - {fileID: 11400000, guid: d77815dd4a86922449e514cb44184ea7, type: 2}

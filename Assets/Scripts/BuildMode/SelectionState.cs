@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class SelectionState : IBuildingState
 {
-    private int gameObjectIndex = -1;
+    private ObjectData gameObjectIndex = null;
     private GameObject selectedObject = null;
     Grid grid;
     PreviewSystem previewSystem;
@@ -41,7 +42,7 @@ public class SelectionState : IBuildingState
         if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
         edited = false;
-        gameObjectIndex = objectPlacer.GetObjectID(selectedObject);
+        gameObjectIndex = objectPlacer.GetObjectInstance(selectedObject);
         originalPosition = objectPlacer.GetObjectCoordinate(selectedObject);
         originalRotation = objectPlacer.GetObjectRotation(selectedObject);
         materials = objectPlacer.GetObjectRenderers(selectedObject);
@@ -52,7 +53,7 @@ public class SelectionState : IBuildingState
             grid.LocalToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
-            database.objectsData[gameObjectIndex].Size,
+            gameObjectIndex.Size,
             materials
         );
         UpdateState(originalPosition, rotation);
@@ -65,7 +66,7 @@ public class SelectionState : IBuildingState
         {
             
             displayPosition = grid.LocalToWorld(originalPosition);
-            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, originalRotation, materials);
+            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, gameObjectIndex.Size, gameObjectIndex.ID, originalRotation, materials);
         }
     }
 
@@ -96,16 +97,16 @@ public class SelectionState : IBuildingState
         {
             materials.Add(previewSystem.materials[i]);
         }
-        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].ID, rotation, materials);
+        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, gameObjectIndex.Size, gameObjectIndex.ID, rotation, materials);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, gameObjectIndex.Size, gameObjectIndex.Cost, rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition, ObjectData selectedObjectIndex)
     {
         //GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ?
         //    floorData :
@@ -125,6 +126,6 @@ public class SelectionState : IBuildingState
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, database.objectsData[gameObjectIndex].Size, database.objectsData[gameObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, gameObjectIndex.Size, gameObjectIndex.Cost, rotation);
     }
 }

@@ -203,6 +203,7 @@ public class BuildModeMenu : MonoBehaviour
     {
         items.Clear();
         List<ObjectData> itemsList = objectsData.objectsData.FindAll(data => data.objectTypeId.Contains(category));
+
         foreach (ObjectData item in itemsList)
         {
             Button button = new Button();
@@ -210,13 +211,13 @@ public class BuildModeMenu : MonoBehaviour
             button.text = item.Name;
             button.AddToClassList("viewport-button");
             items.Add(button);
-            button.RegisterCallback<ClickEvent, int>(PlaceItem, item.ID);
+            button.RegisterCallback<ClickEvent, ObjectData>(PlaceItem, item);
         }
     }
 
-    private void PlaceItem(ClickEvent evt, int iD)
+    private void PlaceItem(ClickEvent evt, ObjectData objectData)
     {
-        placementSystem.StartPlacement(iD);
+        placementSystem.StartPlacement(objectData);
     }
 
     private void PlaceZone(ClickEvent evt, int iD)

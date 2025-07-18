@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9412327d66746fd4db119e7928c56dd0, type: 3}
   m_Name: Object_Bed
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: 
-  <ID>k__BackingField: 0
+  <Name>k__BackingField: Bed
+  <ID>k__BackingField: 1
   <Cost>k__BackingField: 0
   <Size>k__BackingField: {x: 1, y: 1}
   <Prefab>k__BackingField: {fileID: 0}

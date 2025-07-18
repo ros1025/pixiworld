@@ -45,4 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialiseDataWhenNull: 0
+  disableDataPersistence: 1
+  overrideProfileId: 0
+  testSelectedProfileId: 
   fileName: game.json
+  autoSaveCoroutineTime: 60
