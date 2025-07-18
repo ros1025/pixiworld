@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlacementState : IBuildingState
 {
     private int selectedObjectIndex = -1;
-    int ID;
+    ObjectData objectData;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -15,7 +15,7 @@ public class PlacementState : IBuildingState
     private float rotation;
 
     public PlacementState(Vector3 gridPosition,
-                          int iD,
+                          ObjectData objectData,
                           Grid grid,
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
@@ -23,7 +23,7 @@ public class PlacementState : IBuildingState
                           ObjectPlacer objectPlacer,
                           SoundFeedback soundFeedback)
     {
-        ID = iD;
+        this.objectData = objectData;
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
@@ -31,7 +31,7 @@ public class PlacementState : IBuildingState
         this.objectPlacer = objectPlacer;
         this.soundFeedback = soundFeedback;
 
-        selectedObjectIndex = database.objectsData.FindIndex(data => data.ID == ID);
+        selectedObjectIndex = database.objectsData.IndexOf(objectData);
         if (selectedObjectIndex > -1)
         {
             previewSystem.StartShowingPlacementPreview(
@@ -40,7 +40,7 @@ public class PlacementState : IBuildingState
             UpdateState(gridPosition);
         }
         else
-            throw new System.Exception($"No object with ID {iD}");
+            throw new System.Exception($"No object with {objectData.name}");
 
     }
 
@@ -78,7 +78,7 @@ public class PlacementState : IBuildingState
         }
 
         objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, gridPosition,
-            displayPosition, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].ID, rotation, newMaterials);
+            displayPosition, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].ID, rotation, newMaterials, objectData);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), false, database.objectsData[selectedObjectIndex].Size, database.objectsData[selectedObjectIndex].Cost, rotation);
     }

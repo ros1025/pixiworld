@@ -905,17 +905,24 @@ public class RoadMapping : MonoBehaviour
                     m_SplineSampler.SampleSplinePoint(spline, hit.point, (int)(spline.GetLength() * 2), out thisSplinePoint, out float t1);
                     m_SplineSampler.SampleSplinePoint(roadJ.road, hit.point, roadJ.resolution, out otherSplinePoint, out float t2);
 
+                    //if the roadsJ has been replaced in an earlier intersection, then find the spline it was replaced by.
                     for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
                     {
-                        if (roadsList[filterRoadList].Contains(roads[j].road) && roadsList[filterRoadList].IndexOf(roads[j].road) != roadsList.Count - 1)
+                        if (roadsList[filterRoadList].Contains(roads[j].road))
                         {
-                            Spline otherRoad = roadsList[filterRoadList][roadsList[filterRoadList].IndexOf(roads[j].road) + 1];
-                            m_SplineSampler.SampleSplinePoint(otherRoad, hit.point, (int)(otherRoad.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
-                            if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
+                            for (int k = 0; k < roadsList[filterRoadList].Count; k++)
                             {
-                                otherSplinePoint = alternativeSplinePoint;
-                                t2 = tAlt;
-                                roadJ = roads.Find(item => item.road == otherRoad);
+                                if (roadsList[filterRoadList][k] != roads[j].road)
+                                {
+                                    Spline otherRoad = roadsList[filterRoadList][roadsList[filterRoadList].IndexOf(roads[j].road) + 1];
+                                    m_SplineSampler.SampleSplinePoint(otherRoad, hit.point, (int)(otherRoad.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
+                                    if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
+                                    {
+                                        otherSplinePoint = alternativeSplinePoint;
+                                        t2 = tAlt;
+                                        roadJ = roads.Find(item => item.road == otherRoad);
+                                    }
+                                }
                             }
                         }
                     }

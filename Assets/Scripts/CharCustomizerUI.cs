@@ -13,7 +13,7 @@ public class CharCustomizerUI : MonoBehaviour
     [SerializeField]
     private ClothingDatabaseSO clothesDB;
     [SerializeField]
-    private ClothingCategorySO categoriesDB;
+    private ClothingCategoryDatabaseSO categoriesDB;
     private VisualElement root;
     private ScrollView categories;
     private ScrollView items;
@@ -59,7 +59,7 @@ public class CharCustomizerUI : MonoBehaviour
         items.Clear();
         categories.Clear();
 
-        foreach (ClothingCategory category in categoriesDB.clothingCategories)
+        foreach (ClothingCategorySO category in categoriesDB.clothingCategories)
         {
             Button catButton = new();
             catButton.name = category.name;
@@ -67,6 +67,8 @@ public class CharCustomizerUI : MonoBehaviour
             catButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterClothingChoice, category.subcategories);
             categories.Add(catButton);
         }
+
+        FilterClothingChoice(categoriesDB.clothingCategories[0].subcategories);
     }
 
 
@@ -80,20 +82,39 @@ public class CharCustomizerUI : MonoBehaviour
         items.Clear();
 
         List<ClothingSO> clothes = clothesDB.clothes.FindAll(item => item.clothingCategory.Intersect(categories).Count() > 0);
+        List<VisualElement> elements = new();
+
         foreach (ClothingSO clothing in clothes)
         {
-            VisualElement visualElement = new();
-            visualElement.name = clothing.name;
-            visualElement.AddToClassList("content-group");
-            items.Add(visualElement);
+            if (elements.Count == 0 || elements[^1].childCount >= 2)
+            {
+                VisualElement visualElement = new();
+                visualElement.name = $"Content Group {elements.Count + 1}";
+                visualElement.AddToClassList("content-group");
+                items.Add(visualElement);
+                elements.Add(visualElement);
+            }
 
-            Label label = new();
-            label.text = clothing.name;
-            label.AddToClassList("group-label");
-            visualElement.Add(label);
+            Button button = new();
+            button.name = clothing.name;
+            button.text = clothing.name;
+            button.AddToClassList("content-button");
+            elements[^1].Add(button);
+
+            button.RegisterCallback<ClickEvent>(evt => customizer.ChangeCharacterClothing(clothing));
         }
 
-        items.ScrollTo(items.ElementAt(0));
+        if (clothes.Count == 0)
+        {
+            Label label = new();
+            label.text = "No Clothing with Selected Filters! Try resetting your filters.";
+            label.AddToClassList("group-label");
+            items.Add(label);
+        }
+
+        Debug.Log(items.childCount);
+
+        items.scrollOffset = new Vector2(0, 0);
     }
 
     private void TriggerThemeCustomisation()
@@ -125,39 +146,19 @@ public class CharCustomizerUI : MonoBehaviour
             label.AddToClassList("group-label");
             visualElement.Add(label);
 
-            Slider x = new();
-            x.name = "X";
-            x.label = "X";
-            x.value = group.weightX;
-            x.lowValue = -0.01f;
-            x.highValue = 0.01f;
-            x.showInputField = false;
-            visualElement.Add(x);
+            Slider weight = new();
+            weight.name = "Weight";
+            weight.label = "Weight";
+            weight.value = group.weight;
+            weight.lowValue = 0;
+            weight.highValue = 100;
+            weight.showInputField = false;
+            visualElement.Add(weight);
 
-            Slider y = new();
-            y.name = "Y";
-            y.label = "Y";
-            y.value = group.weightY;
-            y.lowValue = -0.01f;
-            y.highValue = 0.01f;
-            y.showInputField = false;
-            visualElement.Add(y);
-
-            Slider z = new();
-            z.name = "Z";
-            z.label = "Z";
-            z.value = group.weightZ;
-            z.lowValue = -0.01f;
-            z.highValue = 0.01f;
-            z.showInputField = false;
-            visualElement.Add(z);
-
-            x.RegisterValueChangedCallback(evt => group.SetTransformerWeights(evt.newValue, y.value, z.value));
-            y.RegisterValueChangedCallback(evt => group.SetTransformerWeights(x.value, evt.newValue, z.value));
-            z.RegisterValueChangedCallback(evt => group.SetTransformerWeights(x.value, y.value, evt.newValue));
+            weight.RegisterValueChangedCallback(evt => group.SetTransformerWeights(evt.newValue));
         }
 
-        items.ScrollTo(items.ElementAt(0));
+        items.scrollOffset = new Vector2(0, 0);
     }
 
     private void TriggerTraitsCustomisation()

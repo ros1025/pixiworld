@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: Category_Bedroom
   m_EditorClassIdentifier: Assembly-CSharp::ObjectCategory
   <Name>k__BackingField: Bedroom
+  objects:
+  - {fileID: 11400000, guid: ac80e9f32c5736541902de3442014870, type: 2}

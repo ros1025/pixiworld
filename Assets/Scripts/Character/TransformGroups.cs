@@ -6,70 +6,40 @@ using System.Collections.Generic;
 public class TransformGroups
 {
     public string name;
-    public List<BoneTransformer> bones;
-    public float weightX;
-    public float weightY;
-    public float weightZ;
-    private float minX;  float maxX;
-    private float minY;  float maxY;
-    private float minZ;  float maxZ;
+    public int index;
+    public float weight;
+    public Character character;
 
-    public TransformGroups(string name, List<BoneTransformer> bones)
+    public TransformGroups(string name, int index, float weight, Character character)
     {
         this.name = name;
-        this.bones = bones;
-        weightX = 0;
-        weightY = 0;
-        weightZ = 0;
+        this.index = index;
+        this.weight = weight;
+        this.character = character;
     }
 
     public void SetDefaultPos()
     {
-        for (int i = 0; i < bones.Count; i++)
-        {
-            bones[i].SetDefaultPos();
-        }
+        weight = 0;
     }
 
-    public void SetTransformerWeights(float weightX, float weightY, float weightZ)
+    public void SetTransformerWeights(float weight)
     {
-        this.weightX = weightX;
-        this.weightY = weightY;
-        this.weightZ = weightZ;
-
+        this.weight = weight;
         AdjustWeights();
     }
 
     public void AdjustWeights()
     {
-        foreach (BoneTransformer bone in bones)
+        character.attributes.body.SetBlendShapeWeight(index, weight);
+
+        foreach (CharacterItem additionalItems in character.attributes.items)
         {
-            if (bone.isReverse)
+            int customIndex = additionalItems.renderer.sharedMesh.GetBlendShapeIndex(name);
+            if (customIndex != -1)
             {
-                bone.bone.position = bone.GetDefaultPos() + new Vector3(-weightX, weightY, weightZ);
-            }
-            else
-            {
-                bone.bone.position = bone.GetDefaultPos() + new Vector3(weightX, weightY, weightZ);
+                additionalItems.renderer.SetBlendShapeWeight(customIndex, weight);
             }
         }
-    }
-}
-
-[Serializable]
-public class BoneTransformer
-{
-    public Transform bone;
-    public bool isReverse;
-    private Vector3 defaultPos = new();
-
-    public void SetDefaultPos()
-    {
-        defaultPos = bone.position;
-    }
-
-    public Vector3 GetDefaultPos()
-    {
-        return defaultPos;
     }
 }

@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CategoryClothes_TankTop
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Tank Top
+  objects:
+  - {fileID: 0}

@@ -105,7 +105,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         itemMode = -1;
     }
 
-    public void StartPlacement(int ID)
+    public void StartPlacement(ObjectData objectData)
     {
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
@@ -115,7 +115,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.Call();
         selectedPosition = gridPosition;
         buildingState = new PlacementState(gridPosition,
-                                           ID,
+                                           objectData,
                                            grid,
                                            preview,
                                            this,

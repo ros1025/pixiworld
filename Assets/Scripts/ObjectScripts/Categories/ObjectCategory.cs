@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ObjectCategory", menuName = "Scriptable Objects/ObjectCategory")]

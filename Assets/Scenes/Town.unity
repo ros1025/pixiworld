@@ -796,7 +796,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 1
-  m_Color: {r: 0.77446795, g: 0.77446795, b: 0.77446795, a: 1}
+  m_Color: {r: 0.7931498, g: 0.7931498, b: 0.7931498, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 32.951843
@@ -859,7 +859,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.03527567, y: 0.91095096, z: -0.4032025, w: 0.07969794}
+  m_LocalRotation: {x: 0.03769307, y: 0.8982129, z: -0.43083346, w: 0.0785835}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2104,8 +2104,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
-  minutes: 551
-  time: {x: 9, y: 11}
+  minutes: 565
+  time: {x: 9, y: 25}
   acceleration: 1
   paused: 0
 --- !u!4 &827732168
@@ -3332,9 +3332,13 @@ MonoBehaviour:
   zoomScale: 0.0025
   yawScale: 0.25
   rotateScale: 0.25
+  rotateCameraMovement: 0
+  defaultZoom: 20
+  defaultPos: {x: 0, y: 0, z: 0}
   cameraX: 20
   cameraY: 0
-  minDistance: 6
+  minZoom: 6
+  maxZoom: 100
   yawAdjustable: 0
   posAdjustable: 0
 --- !u!114 &2027412269
@@ -3462,10 +3466,6 @@ PrefabInstance:
     - target: {fileID: 6318165541734854989, guid: c707dd9ff89ea8d4d96dbacd76ef87bb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8794301572159040097, guid: c707dd9ff89ea8d4d96dbacd76ef87bb, type: 3}
-      propertyPath: disableDataPersistence
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
