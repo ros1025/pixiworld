@@ -83,7 +83,6 @@ public class ModifySettings : MonoBehaviour
         if (Resolutions.IndexOf(currentRes) == -1)
             currentRes = DetermineNearestResolution(currentRes, 0, Resolutions.Count - 1);
 
-        Debug.Log(currentRes);
         ScalableBufferManager.ResizeBuffers((float)currentRes / Display.main.renderingHeight, (float)currentRes / Display.main.renderingHeight);
     }
 

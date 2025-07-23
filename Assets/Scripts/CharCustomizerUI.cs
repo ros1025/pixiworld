@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.IO;
 
 public class CharCustomizerUI : MonoBehaviour
 {
@@ -23,18 +26,19 @@ public class CharCustomizerUI : MonoBehaviour
     private Button traits;
     private Button hideButton;
 
-    private void Start()
+    private void Awake()
     {
         root = document.rootVisualElement;
-        Initialise();
+        StartCoroutine(Initialise());
     }
 
-    public void Initialise()
+    public IEnumerator Initialise()
     {
         root = document.rootVisualElement;
         root.style.visibility = Visibility.Visible;
 
-        customizer.InitializeCustomiser();
+        //customizer.InitializeCustomiser();
+        yield return new WaitUntil(() => customizer.GetCurrentCharacter() != null);
         categories = root.Q<VisualElement>("CategoryBar").Q<ScrollView>();
         items = root.Q<VisualElement>("ContentBar").Q<ScrollView>();
         clothes = root.Q<VisualElement>("Header").Q<Button>("Clothes");

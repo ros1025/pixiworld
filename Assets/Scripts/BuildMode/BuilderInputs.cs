@@ -131,7 +131,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""name"": ""OnMoved"",
                     ""type"": ""Value"",
                     ""id"": ""a7e225c2-94ad-4c8b-be78-490ded8911ff"",
-                    ""expectedControlType"": ""Delta"",
+                    ""expectedControlType"": ""Analog"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -205,7 +205,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""0de65f5a-6c9a-4013-b93b-7c4eaef0ad39"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -227,7 +227,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a6415d5b-ef35-465f-9a8e-fc9c4604cf45"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -267,17 +267,6 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""action"": ""OnRightClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""21083de9-7f96-438e-95bc-2b9bb4dc9c46"",
-                    ""path"": ""<Keyboard>/#(;)"",
-                    ""interactions"": ""Tap"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""OnRightClick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -289,7 +278,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""name"": ""zoom"",
                     ""type"": ""Value"",
                     ""id"": ""d2885748-1320-4889-ad56-0838ccfc6e42"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""expectedControlType"": ""Analog"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -356,19 +345,61 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""StopMove"",
+                    ""type"": ""Button"",
+                    ""id"": ""fac21c01-dabd-4ef9-82b2-52702794d392"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
                 {
                     ""name"": """",
                     ""id"": ""b4b46525-fbf1-4cf1-b52d-9b633fa5d755"",
-                    ""path"": ""<Mouse>/scroll"",
+                    ""path"": ""<Mouse>/scroll/y"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""zoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""e2adb581-db63-4979-a290-0e810f8ae2f0"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""zoom"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""3bc93c92-7a28-406d-831a-6f2d2d844f58"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": ""Scale(factor=50)"",
+                    ""groups"": """",
+                    ""action"": ""zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""4bc11598-93ae-4b7b-bcc1-9bdccfb8c71d"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": ""Scale(factor=50)"",
+                    ""groups"": """",
+                    ""action"": ""zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": ""MouseSystem"",
@@ -404,6 +435,17 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
+                    ""name"": """",
+                    ""id"": ""5c1f39c1-bc4f-4e76-b6dc-49221ff5f7dd"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": ""InvertVector2"",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
                     ""name"": ""MouseSystem"",
                     ""id"": ""0f2f96c7-ac92-42c7-8984-38ea9d1ea306"",
                     ""path"": ""OneModifier"",
@@ -437,6 +479,39 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
+                    ""name"": ""ControllerSystem"",
+                    ""id"": ""470396d5-4e0b-4f83-b53d-bd9acf081e96"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""rotate"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""6800dc8c-cb41-4545-a357-6e1ebb290241"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""2c3c4c0a-fe5b-4877-870d-fe3eac7a73c4"",
+                    ""path"": ""<Gamepad>/leftStick/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
                     ""name"": ""MouseSystem"",
                     ""id"": ""a20da618-115a-4612-998a-bdbc3ed4d6c1"",
                     ""path"": ""OneModifier"",
@@ -462,6 +537,39 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""name"": ""binding"",
                     ""id"": ""b2abb568-76e9-4194-bb5c-9a8d3350bf45"",
                     ""path"": ""<Mouse>/delta/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""yaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""ControllerSystem"",
+                    ""id"": ""abcb9b60-da04-466e-83c7-bf977fc9512b"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""yaw"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""6dbcf4b3-36d7-45a8-ab9d-ba9cd19fa7ae"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""yaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""be85f7eb-094e-4fdc-8fc5-cfbb00e18207"",
+                    ""path"": ""<Gamepad>/leftStick/y"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -523,6 +631,17 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Touch1_Activated"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""68b70631-37fe-4baf-8c37-1ac662756d4d"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""StopMove"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -547,6 +666,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
         m_camera_Touch0_Activated = m_camera.FindAction("Touch0_Activated", throwIfNotFound: true);
         m_camera_Touch1 = m_camera.FindAction("Touch1", throwIfNotFound: true);
         m_camera_Touch1_Activated = m_camera.FindAction("Touch1_Activated", throwIfNotFound: true);
+        m_camera_StopMove = m_camera.FindAction("StopMove", throwIfNotFound: true);
     }
 
     ~@BuilderInputs()
@@ -787,6 +907,7 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_camera_Touch0_Activated;
     private readonly InputAction m_camera_Touch1;
     private readonly InputAction m_camera_Touch1_Activated;
+    private readonly InputAction m_camera_StopMove;
     /// <summary>
     /// Provides access to input actions defined in input action map "camera".
     /// </summary>
@@ -830,6 +951,10 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "camera/Touch1_Activated".
         /// </summary>
         public InputAction @Touch1_Activated => m_Wrapper.m_camera_Touch1_Activated;
+        /// <summary>
+        /// Provides access to the underlying input action "camera/StopMove".
+        /// </summary>
+        public InputAction @StopMove => m_Wrapper.m_camera_StopMove;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -880,6 +1005,9 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
             @Touch1_Activated.started += instance.OnTouch1_Activated;
             @Touch1_Activated.performed += instance.OnTouch1_Activated;
             @Touch1_Activated.canceled += instance.OnTouch1_Activated;
+            @StopMove.started += instance.OnStopMove;
+            @StopMove.performed += instance.OnStopMove;
+            @StopMove.canceled += instance.OnStopMove;
         }
 
         /// <summary>
@@ -915,6 +1043,9 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
             @Touch1_Activated.started -= instance.OnTouch1_Activated;
             @Touch1_Activated.performed -= instance.OnTouch1_Activated;
             @Touch1_Activated.canceled -= instance.OnTouch1_Activated;
+            @StopMove.started -= instance.OnStopMove;
+            @StopMove.performed -= instance.OnStopMove;
+            @StopMove.canceled -= instance.OnStopMove;
         }
 
         /// <summary>
@@ -1061,5 +1192,12 @@ public partial class @BuilderInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTouch1_Activated(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "StopMove" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnStopMove(InputAction.CallbackContext context);
     }
 }
