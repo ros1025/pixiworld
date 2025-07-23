@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class InputManager : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class InputManager : MonoBehaviour
     public event Action OnClicked, OnMoved, OnRelease, OnHold, OnAction, OnExit, OnRightClick;
     private Ray ray; private RaycastHit hit;
 
+    private float timeSinceMoved;
+
     private void Awake()
     {
         builder = new BuilderInputs();
@@ -33,7 +36,7 @@ public class InputManager : MonoBehaviour
         builder.builder.OnClicked.canceled += OnMouseReleased;
         builder.builder.OnExit.performed += OnExit_performed;
         builder.builder.OnAction.performed += OnAction_performed;
-        builder.builder.OnMoved.performed += OnMoved_performed;
+        builder.builder.OnMoved.started += OnMoved_performed;
         builder.builder.OnRightClick.performed += OnRightClick_performed;
     }
 
@@ -73,7 +76,7 @@ public class InputManager : MonoBehaviour
 
     private void OnHold_performed(InputAction.CallbackContext obj)
     {
-        if (obj.performed && !builder.builder.OnMoved.inProgress)
+        if (obj.performed && Time.time - timeSinceMoved > 0.5f)
         {
             OnHold?.Invoke();
         }
@@ -82,6 +85,7 @@ public class InputManager : MonoBehaviour
     private void OnMoved_performed(InputAction.CallbackContext obj)
     {
         OnMoved?.Invoke();
+        timeSinceMoved = Time.time;
     }
 
     private void Update()
@@ -136,17 +140,26 @@ public class InputManager : MonoBehaviour
     public bool IsPointerOverUI()
     {
         //check mouse
-        if (EventSystem.current.IsPointerOverGameObject())
-            return true;
+        //if (EventSystem.current.IsPointerOverGameObject())
+        //    return true;
 
         //check touch
-        if (Input.touchCount > 0 && Input.touches[0].phase == UnityEngine.TouchPhase.Began)
+        //if (Input.touchCount > 0 && Input.touches[0].phase == UnityEngine.TouchPhase.Began)
+        //{
+        //    if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
+        //        return true;
+        //}
+
+        //return false;
+
+        if (!EventSystem.current)
         {
-            if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
-                return true;
+            return false;
         }
 
-        return false;
+        InputSystemUIInputModule s_Module = (InputSystemUIInputModule)EventSystem.current.currentInputModule;
+
+        return s_Module.GetLastRaycastResult(Pointer.current.deviceId).isValid;
     }
 
     public Vector3 GetMousePosition()

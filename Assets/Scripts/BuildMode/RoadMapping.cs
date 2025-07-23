@@ -461,6 +461,8 @@ public class RoadMapping : MonoBehaviour
                             newMap.Add(roadA.points[i], roadA.roadMap[roadA.points[i]].knotCluster);
                         }
 
+                        Debug.Log($"{roads.IndexOf(roadA)} {roads.IndexOf(roadB)}");
+
                         BezierKnot joinKnotA = roadA.roadMap[roadA.points[^1]].knotCluster[0]; //first intersecting knot
                         BezierKnot joinKnotB = roadB.roadMap[roadB.points[0]].knotCluster[0]; //second intersecting knot
 
@@ -551,6 +553,8 @@ public class RoadMapping : MonoBehaviour
                             newPoints.Add(roadB.points[i]);
                             newMap.Add(roadB.points[i], roadB.roadMap[roadB.points[i]].knotCluster);
                         }
+
+                        Debug.Log($"{roads.IndexOf(roadA)} {roads.IndexOf(roadB)}");
 
                         BezierKnot joinKnotA = roadB.roadMap[roadB.points[^1]].knotCluster[0]; //first intersecting knot
                         BezierKnot joinKnotB = roadA.roadMap[roadA.points[0]].knotCluster[0]; //second intersecting knot
@@ -912,9 +916,9 @@ public class RoadMapping : MonoBehaviour
                         {
                             for (int k = 0; k < roadsList[filterRoadList].Count; k++)
                             {
-                                if (roadsList[filterRoadList][k] != roads[j].road)
+                                if (roadsList[filterRoadList][k] != roads[j].road && roads.FindIndex(item => item.road == roadsList[filterRoadList][k]) != -1)
                                 {
-                                    Spline otherRoad = roadsList[filterRoadList][roadsList[filterRoadList].IndexOf(roads[j].road) + 1];
+                                    Spline otherRoad = roadsList[filterRoadList][k];
                                     m_SplineSampler.SampleSplinePoint(otherRoad, hit.point, (int)(otherRoad.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
                                     if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
                                     {
@@ -1828,6 +1832,10 @@ public class RoadMapping : MonoBehaviour
             if (Vector3.Distance(origin1 + (t1 * tangent1), origin2 + (t2 * tangent2)) < 0.1f)
             {
                 return origin1 + (t1 * tangent1);
+            }
+            else
+            {
+                return (origin1 + (t1 * tangent1) + origin2 + (t2 * tangent2)) / 2;
             }
         }
 

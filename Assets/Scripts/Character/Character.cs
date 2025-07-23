@@ -3,10 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class Character
+public class Character : MonoBehaviour
 {
-    public GameObject prefab;
+    //public GameObject prefab;
     public CharacterCompositor attributes;
+
+    void Awake()
+    {
+        if (attributes == null || !attributes.transform.IsChildOf(transform))
+        {
+            this.attributes = this.gameObject.GetComponentInChildren<CharacterCompositor>();
+        }
+    }
 
     public List<TransformGroups> GetBodyShapeKeys()
     {
@@ -28,5 +36,15 @@ public class Character
     public void ChangeClothing(ClothingSO clothing, ClothingCategoryDatabaseSO categories)
     {
         attributes.AddItem(clothing, categories);
+    }
+
+    public void HideCharacter()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void ShowCharacter()
+    {
+        gameObject.SetActive(true);
     }
 }

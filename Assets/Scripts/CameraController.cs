@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Cinemachine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class CameraController : MonoBehaviour
 {
@@ -19,11 +20,17 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float posScale = 0.1f;
     [SerializeField]
+    private float touchPosScale = 0.1f;
+    [SerializeField]
     private float zoomScale = 0.1f;
+    [SerializeField]
+    private float touchZoomScale = 0.1f;
     [SerializeField]
     private float yawScale = 0.1f;
     [SerializeField]
     private float rotateScale = 0.1f;
+    [SerializeField]
+    private float touchRotateScale = 0.1f;
     [SerializeField]
     private bool rotateCameraMovement;
     [SerializeField]
@@ -49,7 +56,7 @@ public class CameraController : MonoBehaviour
 
     private bool touch0; private bool touch1;
 
-    public void Start()
+    void Awake()
     {
         framingTransposer = cameraObject.GetComponent<CinemachinePositionComposer>();
         framingTransposer.CameraDistance = defaultZoom;
@@ -58,9 +65,14 @@ public class CameraController : MonoBehaviour
         ResetTouchDefaults();
 
         system = new BuilderInputs();
+
         system.camera.Enable();
-        system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<Vector2>().y);
-        system.camera.move.performed += _ => OnMove(system.camera.move.ReadValue<Vector2>());
+        system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<float>());
+        system.camera.move.performed += _ =>
+        {
+            if (!system.camera.StopMove.IsPressed())
+                OnMove(system.camera.move.ReadValue<Vector2>());
+        };
         system.camera.rotate.performed += _ => OnRotate(system.camera.rotate.ReadValue<float>());
         system.camera.yaw.performed += _ => OnYaw(system.camera.yaw.ReadValue<float>());
 
@@ -91,8 +103,8 @@ public class CameraController : MonoBehaviour
 
     public void AdjustCameraBox()
     {
-        cameraObject.transform.rotation = Quaternion.Euler(new Vector3(cameraX, cameraY, 0));
         targetBox.transform.rotation = Quaternion.Euler(new Vector3(0, cameraY, 0));
+        cameraObject.transform.rotation = Quaternion.Euler(new Vector3(cameraX, cameraY, 0));
     }
 
     private void OnScroll(float delta)
@@ -117,7 +129,7 @@ public class CameraController : MonoBehaviour
 
             //pinch to zoom
             float deltaDistance = currentTouchDistance - previousTouchDistance;
-            AdjustCameraDistance(deltaDistance * zoomScale);
+            AdjustCameraDistance(deltaDistance * touchZoomScale);
 
             previousTouchDistance = currentTouchDistance;
             AdjustCameraBox();
@@ -138,11 +150,11 @@ public class CameraController : MonoBehaviour
                 Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-touchDelta.x * (Mathf.Pow(posScale, 2)), 0, -touchDelta.y * Mathf.Pow(posScale, 2)));
+                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, 0, -touchDelta.y * touchPosScale));
                 }
                 else
                 {
-                    targetBox.transform.Translate(new Vector3(-touchDelta.x * (Mathf.Pow(posScale, 2)), 0, -touchDelta.y * Mathf.Pow(posScale, 2)));
+                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, 0, -touchDelta.y * touchPosScale));
                 }
 
                 previousTouchPosition = currentTouchPosition;
@@ -162,7 +174,7 @@ public class CameraController : MonoBehaviour
             }
 
             //rotate y using touch
-            cameraY += currentRotate - previousRotate;
+            cameraY += (currentRotate - previousRotate) * touchRotateScale;
 
             previousRotate = currentRotate;
             AdjustCameraBox();
@@ -186,11 +198,11 @@ public class CameraController : MonoBehaviour
             {
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * (Mathf.Pow(posScale, 2)), -delta.y * Mathf.Pow(posScale, 2)));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, -delta.y * posScale));
                 }
                 else
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * (Mathf.Pow(posScale, 2)), 0, -delta.y * Mathf.Pow(posScale, 2)));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, 0, -delta.y * posScale));
                 }
             }
             AdjustCameraBox();
@@ -331,18 +343,27 @@ public class CameraController : MonoBehaviour
 
     public bool IsPointerOverUI()
     {
-        //check mouse
-        if (EventSystem.current.IsPointerOverGameObject())
-            return true;
+        // //check mouse
+        // if (EventSystem.current.IsPointerOverGameObject())
+        //     return true;
 
-        //check touch
-        if (system.camera.Touch0_Activated.inProgress)
+        // //check touch
+        // if (system.camera.Touch0_Activated.inProgress)
+        // {
+        //     if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
+        //         return true;
+        // }
+
+        // return false;
+
+        if (!EventSystem.current)
         {
-            if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
-                return true;
+            return false;
         }
 
-        return false;
+        InputSystemUIInputModule s_Module = (InputSystemUIInputModule)EventSystem.current.currentInputModule;
+
+        return s_Module.GetLastRaycastResult(Pointer.current.deviceId).isValid;
     }
     public Vector3 GetScreenPos(Vector3 previewPos)
     {
