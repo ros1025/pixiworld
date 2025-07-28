@@ -21,7 +21,7 @@ public class ZonePlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceZones(Vector3 position, Vector3 gridPos, int ID, Vector2Int size, float yOffset, float rotation)
+    public void PlaceZones(Vector3 position, Vector3 gridPos, long ID, Vector2Int size, float yOffset, float rotation)
     {
         GameObject zoneObject = Instantiate(zoneIndicator);
         zoneObject.transform.position = position;
@@ -61,7 +61,7 @@ public class ZonePlacer : MonoBehaviour
         zone.levels = zoneComponent.GetLevelSaveData();
     }
 
-    public void MoveZoneAt(GameObject prefab, Vector3 gridPos, int ID, Vector3 position, Vector2Int size, float rotation)
+    public void MoveZoneAt(GameObject prefab, Vector3 gridPos, long ID, Vector3 position, Vector2Int size, float rotation)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -170,7 +170,7 @@ public class ZonePlacer : MonoBehaviour
         return true;
     }
 
-    internal int GetObjectID(GameObject prefab)
+    internal long GetObjectID(GameObject prefab)
     {
         int index = zoneData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -231,7 +231,7 @@ public class ZonePlacer : MonoBehaviour
 public class ZoneSaveData : PlacementData
 {
     [SerializeField] public List<LevelSaveData> levels;
-    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<LevelSaveData> levels) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ZoneSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, long ID, List<LevelSaveData> levels) : base(prefab, occupiedPosition, rotation, size, ID)
     {
         this.levels = levels;
     }

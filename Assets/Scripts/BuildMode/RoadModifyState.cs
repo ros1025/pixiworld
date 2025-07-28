@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class RoadModifyState : IBuildingState
 {
-    private int selectedObjectIndex = -1;
+    private long selectedObjectIndex = -1;
+    private RoadsData roadsDataObject = null;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -40,6 +41,9 @@ public class RoadModifyState : IBuildingState
 
         soundFeedback.PlaySound(SoundType.Click);
         roadMapping.SelectRoad(grid.LocalToWorld(gridPosition), Vector2Int.one, 0, out selectedRoad, out index, out width, out selectedObjectIndex, out List<Vector3> displayPosList);
+        roadsDataObject = database.roadsData.Find(data => data.ID == selectedObjectIndex);
+
+
         if (index == -1)
             return;
         edited = false;
@@ -50,7 +54,7 @@ public class RoadModifyState : IBuildingState
         }
         originalPosList = posList;
         CalculateLength();
-        previewSystem.ModifyRoad(displayPosList, selectedRoad, database.roadsData[selectedObjectIndex].Cost, length, width);
+        previewSystem.ModifyRoad(displayPosList, selectedRoad, roadsDataObject.Cost, length, width);
     }
 
     public void EndState()
@@ -87,13 +91,13 @@ public class RoadModifyState : IBuildingState
             {
                 posList.RemoveAt(index);
                 CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
                 CalculateLength();
-                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
             }
         }
         else
@@ -123,7 +127,7 @@ public class RoadModifyState : IBuildingState
 
     public void OnAction(Vector3 gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
         if (placementValidity == false)
         {
@@ -140,7 +144,7 @@ public class RoadModifyState : IBuildingState
             displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
-        roadMapping.ModifyRoad(selectedRoad, displayPos, database.roadsData[selectedObjectIndex].width, selectedObjectIndex);
+        roadMapping.ModifyRoad(selectedRoad, displayPos, roadsDataObject.width, selectedObjectIndex);
 
         posList.Clear();
         length = 0;
@@ -149,7 +153,7 @@ public class RoadModifyState : IBuildingState
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         for (int i = 1; i < posList.Count; i++)
         {
@@ -170,9 +174,9 @@ public class RoadModifyState : IBuildingState
 
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
     }
 }
 

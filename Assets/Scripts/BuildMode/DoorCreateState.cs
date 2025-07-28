@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 public class DoorCreateState : IBuildingState
 {
-    private int selectedObjectIndex = -1;
-    int ID;
+    //private int selectedObjectIndex = -1;
+    DoorsData doorsDataObject;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -16,7 +16,7 @@ public class DoorCreateState : IBuildingState
     private float rotation;
 
     public DoorCreateState(Vector3 gridPosition,
-                          int iD,
+                          DoorsData doorsDataObject,
                           Grid grid,
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
@@ -24,7 +24,7 @@ public class DoorCreateState : IBuildingState
                           WallMapping wallMapping,
                           SoundFeedback soundFeedback)
     {
-        ID = iD;
+        this.doorsDataObject = doorsDataObject;
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
@@ -32,16 +32,16 @@ public class DoorCreateState : IBuildingState
         this.wallMapping = wallMapping;
         this.soundFeedback = soundFeedback;
 
-        selectedObjectIndex = database.doorsData.FindIndex(data => data.ID == ID);
-        if (selectedObjectIndex > -1)
+        //selectedObjectIndex = database.doorsData.IndexOf(doorsDataObject);
+        if (database.doorsData.Contains(doorsDataObject))
         {
             previewSystem.StartShowingPlacementPreview(
-                database.doorsData[selectedObjectIndex].Prefab,
-                new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1));
+                doorsDataObject.Prefab,
+                new Vector2Int(doorsDataObject.Length, 1));
             UpdateState(gridPosition);
         }
         else
-            throw new System.Exception($"No object with ID {iD}");
+            throw new System.Exception($"No object with ID {doorsDataObject.ID}");
 
     }
 
@@ -62,7 +62,7 @@ public class DoorCreateState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
             soundFeedback.PlaySound(SoundType.wrongPlacement);
@@ -70,7 +70,7 @@ public class DoorCreateState : IBuildingState
         }
         soundFeedback.PlaySound(SoundType.Place);
 
-        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out position);
+        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
         displayPosition = grid.LocalToWorld(position);
 
         List<MatData> newMaterials = new();
@@ -80,18 +80,18 @@ public class DoorCreateState : IBuildingState
         }
 
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
-        wallMapping.BuildWindows(database.doorsData[selectedObjectIndex].Prefab, position, rotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, targetWall, newMaterials);
+        wallMapping.BuildWindows(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.ID, targetWall, newMaterials);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1), database.doorsData[selectedObjectIndex].Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(doorsDataObject.Length, 1), doorsDataObject.Cost, rotation);
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out _))
+        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _))
         {
-            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out position);
+            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
             validity = true;
         }
@@ -102,8 +102,8 @@ public class DoorCreateState : IBuildingState
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         position = gridPosition;
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1), database.doorsData[selectedObjectIndex].Cost, this.rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(doorsDataObject.Length, 1), doorsDataObject.Cost, this.rotation);
     }
 }

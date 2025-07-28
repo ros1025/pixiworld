@@ -7,7 +7,7 @@ public class ObjectData : ScriptableObject
     [field: SerializeField]
     public string Name { get; private set; }
     [field: SerializeField]
-    public int ID { get; private set; }
+    public long ID { get; private set; }
     [field: SerializeField]
     public int Cost { get; private set; }
     [field: SerializeField]

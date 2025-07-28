@@ -31,8 +31,8 @@ public class PreviewTools : MonoBehaviour
         root = SettingsMenu.rootVisualElement;
         controls = root.Q<VisualElement>("Controls");
 
-        TexturesMenu.rootVisualElement.ElementAt(0).visible = false;
-        TexturesMenu.rootVisualElement.SetEnabled(false);
+        //TexturesMenu.rootVisualElement.ElementAt(0).visible = false;
+        TexturesMenu.rootVisualElement.visible = false;
 
         placeButton = controls.Q<Button>("PlaceButton");
         cancelButton = controls.Q<Button>("CancelButton");

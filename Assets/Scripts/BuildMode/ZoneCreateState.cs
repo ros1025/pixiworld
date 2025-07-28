@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class ZoneCreateState : IBuildingState
 {
-    private int selectedObjectIndex = -1;
-    int ID;
+    ZonesData zonesDataObject = null;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -18,7 +17,7 @@ public class ZoneCreateState : IBuildingState
     float rotation;
 
     public ZoneCreateState(Vector3 gridPosition,
-                           int iD,
+                           ZonesData zonesDataObject,
                            Grid grid,
                            PreviewSystem previewSystem,
                            PlacementSystem placementSystem,
@@ -26,7 +25,7 @@ public class ZoneCreateState : IBuildingState
                            ZonePlacer zonePlacer,
                            SoundFeedback soundFeedback)
     {
-        ID = iD;
+        this.zonesDataObject = zonesDataObject;
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
@@ -35,8 +34,8 @@ public class ZoneCreateState : IBuildingState
         this.soundFeedback = soundFeedback;
         size = new Vector2Int(10, 10);
 
-        selectedObjectIndex = database.zonesData.FindIndex(data => data.ID == ID);
-        if (selectedObjectIndex > -1)
+        //selectedObjectIndex = database.zonesData.IndexOf(zonesDataObject);
+        if (database.zonesData.Contains(zonesDataObject))
         {
             pos = gridPosition;
 
@@ -45,7 +44,7 @@ public class ZoneCreateState : IBuildingState
             UpdateState(pos, 0);
         }
         else
-            throw new System.Exception($"No object with ID {iD}");
+            throw new System.Exception($"No object with ID {zonesDataObject.ID}");
     }
 
     public void EndState()
@@ -72,7 +71,7 @@ public class ZoneCreateState : IBuildingState
 
     public void OnAction(Vector3 gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
         if (placementValidity == false)
         {
@@ -85,12 +84,12 @@ public class ZoneCreateState : IBuildingState
         displayPosition = grid.LocalToWorld(pos);
         soundFeedback.PlaySound(SoundType.Place);
 
-        zonePlacer.PlaceZones(displayPosition, pos, ID, size, 0.05f, rotation);
+        zonePlacer.PlaceZones(displayPosition, pos, zonesDataObject.ID, size, 0.05f, rotation);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(pos), false, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), 0);
+        previewSystem.UpdatePosition(grid.LocalToWorld(pos), false, size, (zonesDataObject.Cost * (size.x * size.y)), 0);
     }
     
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         bool validity = false;
         
@@ -107,8 +106,8 @@ public class ZoneCreateState : IBuildingState
 
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, size, (database.zonesData[selectedObjectIndex].Cost * (size.x * size.y)), rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, size, (zonesDataObject.Cost * (size.x * size.y)), rotation);
     }
 }

@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class SelectionState : IBuildingState
 {
-    private ObjectData gameObjectIndex = null;
+    private long gameObjectIndex = -1;
     private GameObject selectedObject = null;
+    private ObjectData gameObjectData = null;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -42,10 +43,13 @@ public class SelectionState : IBuildingState
         if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
         edited = false;
-        gameObjectIndex = objectPlacer.GetObjectInstance(selectedObject);
+        gameObjectIndex = objectPlacer.GetObjectID(selectedObject);
         originalPosition = objectPlacer.GetObjectCoordinate(selectedObject);
         originalRotation = objectPlacer.GetObjectRotation(selectedObject);
         materials = objectPlacer.GetObjectRenderers(selectedObject);
+
+        gameObjectData = database.objectsData.Find(data => data.ID == gameObjectIndex);
+
         rotation = originalRotation;
         placementSystem.SetRotation(originalRotation);
         placementSystem.SetSelectedPosition(originalPosition);
@@ -53,7 +57,7 @@ public class SelectionState : IBuildingState
             grid.LocalToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
-            gameObjectIndex.Size,
+            gameObjectData.Size,
             materials
         );
         UpdateState(originalPosition, rotation);
@@ -66,7 +70,7 @@ public class SelectionState : IBuildingState
         {
             
             displayPosition = grid.LocalToWorld(originalPosition);
-            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, gameObjectIndex.Size, gameObjectIndex.ID, originalRotation, materials);
+            objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, gameObjectData.Size, gameObjectData.ID, originalRotation, materials);
         }
     }
 
@@ -83,7 +87,7 @@ public class SelectionState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         objectPlacer = placementSystem.GetCurrentObjectPlacer();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, gameObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition, gameObjectData);
         if (placementValidity == false)
         {
             soundFeedback.PlaySound(SoundType.wrongPlacement);
@@ -97,9 +101,9 @@ public class SelectionState : IBuildingState
         {
             materials.Add(previewSystem.materials[i]);
         }
-        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, gameObjectIndex.Size, gameObjectIndex.ID, rotation, materials);
+        objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, gameObjectData.Size, gameObjectData.ID, rotation, materials);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, gameObjectIndex.Size, gameObjectIndex.Cost, rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, gameObjectData.Size, gameObjectData.Cost, rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -125,7 +129,7 @@ public class SelectionState : IBuildingState
     }
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
-        bool validity = CheckPlacementValidity(gridPosition, gameObjectIndex);
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, gameObjectIndex.Size, gameObjectIndex.Cost, rotation);
+        bool validity = CheckPlacementValidity(gridPosition, gameObjectData);
+        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, gameObjectData.Size, gameObjectData.Cost, rotation);
     }
 }

@@ -129,7 +129,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         inputManager.OnExit += StopPlacement;
     }
 
-    public void CreateZone(int ID)
+    public void CreateZone(ZonesData zonesData)
     {
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
@@ -139,7 +139,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.Call();
         selectedPosition = gridPosition;
         buildingState = new ZoneCreateState(gridPosition,
-                                            ID,
+                                            zonesData,
                                             grid,
                                             preview,
                                             this,
@@ -153,7 +153,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         inputManager.OnExit += StopPlacement;
     }
 
-    public void CreateDoor(int ID)
+    public void CreateDoor(DoorsData doorsData)
     {
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
@@ -163,7 +163,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.Call();
         selectedPosition = gridPosition;
         buildingState = new DoorCreateState(gridPosition,
-                                            ID,
+                                            doorsData,
                                             grid,
                                             preview,
                                             this,
@@ -178,7 +178,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     }
 
 
-    public void CreateRoad(int ID)
+    public void CreateRoad(RoadsData roadsData)
     {
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
@@ -188,7 +188,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.Call();
         selectedPosition = gridPosition;
         buildingState = new RoadCreateState(gridPosition,
-                                            ID,
+                                            roadsData,
                                             grid,
                                             preview,
                                             this,
@@ -695,15 +695,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         return objectPlacer;
     }
 
-    public GameObject GetObjectPrefab(int iD)
+    public GameObject GetObjectPrefab(long ID)
     {
-        ObjectData data = database.objectsData.Find(item => item.ID == iD);
+        ObjectData data = database.objectsData.Find(item => item.ID == ID);
         return data.Prefab;
     }
 
-    public GameObject GetDoorPrefab(int iD)
+    public GameObject GetDoorPrefab(long ID)
     {
-        DoorsData data = databaseDoors.doorsData.Find(item => item.ID == iD);
+        DoorsData data = databaseDoors.doorsData.Find(item => item.ID == ID);
         return data.Prefab;
     }
 
