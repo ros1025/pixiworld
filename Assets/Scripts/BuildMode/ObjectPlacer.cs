@@ -20,7 +20,7 @@ public class ObjectPlacer : MonoBehaviour
     [SerializeField]
     private Material selectorObjectMaterial;
 
-    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, List<MatData> materials, ObjectData objData)
+    public void PlaceObject(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, long ID, float rotation, List<MatData> materials)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = position;
@@ -52,21 +52,15 @@ public class ObjectPlacer : MonoBehaviour
         previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y, position.z + 0.05f);
         previewSelector.transform.localScale = new Vector3(size.x - 0.1f, 0.3f, size.y - 0.1f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        furnitureData.Add(new ObjectSaveData(newObject, gridPos, rotation, size, ID, materials, objData));
+        furnitureData.Add(new ObjectSaveData(newObject, gridPos, rotation, size, ID, materials));
         newObject.transform.SetParent(this.transform);
     }
 
     public void PlaceObject(ObjectSaveData objectData)
     {
         GameObject newObject;
-        if (objectData.objData != null)
-        {
-            newObject = Instantiate(objectData.objData.Prefab);
-        }
-        else
-        {
-            newObject = Instantiate(placementSystem.GetObjectPrefab(objectData.ID));
-        }
+        newObject = Instantiate(placementSystem.GetObjectPrefab(objectData.ID));
+
         newObject.transform.position = transform.TransformPoint(objectData.occupiedPosition);
         newObject.transform.rotation = Quaternion.Euler(0, objectData.rotation, 0);
         int index = 0;
@@ -101,7 +95,7 @@ public class ObjectPlacer : MonoBehaviour
         newObject.transform.SetParent(this.transform);
     }
 
-    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, int ID, float rotation, List<MatData> materials)
+    internal void MoveObjectAt(GameObject prefab, Vector3 gridPos, Vector3 position, Vector2Int size, long ID, float rotation, List<MatData> materials)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
@@ -235,20 +229,12 @@ public class ObjectPlacer : MonoBehaviour
         return true;
     }
 
-    internal int GetObjectID(GameObject prefab)
+    internal long GetObjectID(GameObject prefab)
     {
         int index = furnitureData.FindIndex(item => item.prefab == prefab);
         if (index == -1)
             return -1;
         return furnitureData[index].ID;
-    }
-
-    internal ObjectData GetObjectInstance(GameObject prefab)
-    {
-        int index = furnitureData.FindIndex(item => item.prefab == prefab);
-        if (index == -1)
-            return null;
-        return furnitureData[index].objData;
     }
 
     internal Vector3 GetObjectCoordinate(GameObject prefab)
@@ -312,11 +298,8 @@ public class ObjectPlacer : MonoBehaviour
 public class ObjectSaveData : PlacementData
 {
     public List<MatData> materials;
-    public ObjectData objData;
-
-    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, int iD, List<MatData> materials, ObjectData objData) : base(prefab, occupiedPosition, rotation, size, iD)
+    public ObjectSaveData(GameObject prefab, Vector3 occupiedPosition, float rotation, Vector2Int size, long ID, List<MatData> materials) : base(prefab, occupiedPosition, rotation, size, ID)
     {
         this.materials = materials;
-        this.objData = objData;
     }
 }

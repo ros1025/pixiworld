@@ -136,7 +136,7 @@ public class BuildModeMenu : MonoBehaviour
             button.text = zone.Name;
             button.AddToClassList("viewport-button");
             items.Add(button);
-            button.RegisterCallback<ClickEvent, int>(PlaceZone, zone.ID);
+            button.RegisterCallback<ClickEvent, ZonesData>(PlaceZone, zone);
         }
     }
 
@@ -155,7 +155,7 @@ public class BuildModeMenu : MonoBehaviour
             button.text = road.Name;
             button.AddToClassList("viewport-button");
             items.Add(button);
-            button.RegisterCallback<ClickEvent, int>(PlaceRoad, road.ID);
+            button.RegisterCallback<ClickEvent, RoadsData>(PlaceRoad, road);
         }
     }
 
@@ -190,7 +190,7 @@ public class BuildModeMenu : MonoBehaviour
             button.text = door.Name;
             button.AddToClassList("viewport-button");
             items.Add(button);
-            button.RegisterCallback<ClickEvent, int>(PlaceDoor, door.ID);
+            button.RegisterCallback<ClickEvent, DoorsData>(PlaceDoor, door);
         }
     }
 
@@ -220,19 +220,19 @@ public class BuildModeMenu : MonoBehaviour
         placementSystem.StartPlacement(objectData);
     }
 
-    private void PlaceZone(ClickEvent evt, int iD)
+    private void PlaceZone(ClickEvent evt, ZonesData zonesData)
     {
-        placementSystem.CreateZone(iD);
+        placementSystem.CreateZone(zonesData);
     }
 
-    private void PlaceRoad(ClickEvent evt, int iD)
+    private void PlaceRoad(ClickEvent evt, RoadsData roadsData)
     {
-        placementSystem.CreateRoad(iD);
+        placementSystem.CreateRoad(roadsData);
     }
 
-    private void PlaceDoor(ClickEvent evt, int iD)
+    private void PlaceDoor(ClickEvent evt, DoorsData doorsData)
     {
-        placementSystem.CreateDoor(iD);
+        placementSystem.CreateDoor(doorsData);
     }
 
     private void PlaceWall(ClickEvent evt)

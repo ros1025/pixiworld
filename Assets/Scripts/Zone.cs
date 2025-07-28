@@ -12,7 +12,7 @@ public class Zone : MonoBehaviour
     [SerializeField] private int level;
     private Vector2Int size;
     private int minLevel; private int maxLevel;
-    [HideInInspector] public int ID;
+    [HideInInspector] public long ID;
      public PlacementSystem placement;
     [SerializeField] private Material zoneMaterial;
     VisualElement root; VisualElement lRoot;
@@ -39,7 +39,7 @@ public class Zone : MonoBehaviour
         //SwitchLevel(level);
     }
 
-    public void InstantiateNew(PlacementSystem placement, int ID, Vector2Int size)
+    public void InstantiateNew(PlacementSystem placement, long ID, Vector2Int size)
     {
         this.placement = placement;
         this.ID = ID;
@@ -58,7 +58,7 @@ public class Zone : MonoBehaviour
         level.walls.SetCeilingsActive(false);
     }
 
-    public void EditPosition(int ID, Vector2Int size)
+    public void EditPosition(long ID, Vector2Int size)
     {
         this.ID = ID;
         this.size = size;

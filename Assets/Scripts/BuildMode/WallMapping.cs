@@ -2607,7 +2607,7 @@ public class WallMapping : MonoBehaviour
 
     }
 
-    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
+    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, long ID, Wall targetWall, List<MatData> materials)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = transform.TransformPoint(point);
@@ -2689,7 +2689,7 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(loadedDoor.targetWall));
     }
 
-    public void MoveWindows(Door door, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
+    public void MoveWindows(Door door, Vector3 point, float rotation, float length, long ID, Wall targetWall, List<MatData> materials)
     {
         door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -3195,11 +3195,11 @@ public class Door
     public Vector3 point;
     public float rotation;
     public float length;
-    public int ID;
+    public long ID;
     public Wall targetWall;
     public List<MatData> materials;
 
-    public Door(GameObject prefab, Vector3 point, float rotation, float length, int ID, Wall targetWall, List<MatData> materials)
+    public Door(GameObject prefab, Vector3 point, float rotation, float length, long ID, Wall targetWall, List<MatData> materials)
     {
         this.prefab = prefab;
         this.point = point;

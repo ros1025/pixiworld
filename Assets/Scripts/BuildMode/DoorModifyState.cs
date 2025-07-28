@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class DoorModifyState : IBuildingState
 {
-    private int selectedObjectIndex = -1;
+    private long selectedObjectIndex = -1;
     private Door selectedDoor = null;
+    private DoorsData doorsDataObject = null;
     bool edited;
-    int ID;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -38,8 +38,11 @@ public class DoorModifyState : IBuildingState
 
         Door door = wallMapping.GetDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         selectedObjectIndex = door.ID;
+
         if (door != null)
         {
+            doorsDataObject = database.doorsData.Find(data => data.ID == selectedObjectIndex);
+
             edited = false;
             originalPosition = door.point;
             originalRotation = door.rotation;
@@ -50,7 +53,7 @@ public class DoorModifyState : IBuildingState
             grid.LocalToWorld(originalPosition),
             originalRotation,
             door.prefab,
-            new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1),
+            new Vector2Int(doorsDataObject.Length, 1),
             materials
             );
         }
@@ -63,7 +66,7 @@ public class DoorModifyState : IBuildingState
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, selectedDoor.targetWall, selectedDoor.materials);
+            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials);
         }
     }
 
@@ -79,7 +82,7 @@ public class DoorModifyState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
             soundFeedback.PlaySound(SoundType.wrongPlacement);
@@ -87,9 +90,9 @@ public class DoorModifyState : IBuildingState
         }
         soundFeedback.PlaySound(SoundType.Place);
 
-        Renderer[] renderers = database.doorsData[selectedObjectIndex].Prefab.GetComponentsInChildren<Renderer>();
+        Renderer[] renderers = doorsDataObject.Prefab.GetComponentsInChildren<Renderer>();
 
-        Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out position);
+        Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
 
@@ -99,20 +102,20 @@ public class DoorModifyState : IBuildingState
             materials.Add(previewSystem.materials[i]);
         }
 
-        wallMapping.MoveWindows(selectedDoor, position, rotation, database.doorsData[selectedObjectIndex].Length, database.doorsData[selectedObjectIndex].ID, targetWall, materials);
+        wallMapping.MoveWindows(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.ID, targetWall, materials);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out _))
+        if (wallMapping.CheckWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _))
         {
-            Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, database.doorsData[selectedObjectIndex].Length, out position);
+            Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
             validity = true;
         }
@@ -123,8 +126,8 @@ public class DoorModifyState : IBuildingState
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         position = gridPosition;
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(database.doorsData[selectedObjectIndex].Length, 1), database.doorsData[selectedObjectIndex].Cost, this.rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(doorsDataObject.Length, 1), doorsDataObject.Cost, this.rotation);
     }
 }

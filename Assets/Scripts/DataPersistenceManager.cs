@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System.IO;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     [Header("File Storage Config")]
     [SerializeField] private string fileName;
+    [SerializeField] private string savePathName;
 
     [Header("Auto Saving Configuration")]
     [SerializeField] private float autoSaveCoroutineTime = 60f;
@@ -40,7 +42,7 @@ public class DataPersistenceManager : MonoBehaviour
             Debug.LogWarning("Data persistence is disabled in this mode!");
         }
 
-        this.dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
+        this.dataHandler = new FileDataHandler(Path.Combine(Application.persistentDataPath, savePathName), fileName);
         InitialiseProfileId();
     }
 

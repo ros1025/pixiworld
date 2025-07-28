@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class RoadCreateState : IBuildingState
 {
-    private int selectedObjectIndex = -1;
-    int ID;
+    //private int selectedObjectIndex = -1;
+    RoadsData roadsData;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
@@ -19,7 +19,7 @@ public class RoadCreateState : IBuildingState
     float rotation;
 
     public RoadCreateState(Vector3 gridPosition,
-                           int iD,
+                           RoadsData roadsData,
                            Grid grid,
                            PreviewSystem previewSystem,
                            PlacementSystem placementSystem,
@@ -27,7 +27,7 @@ public class RoadCreateState : IBuildingState
                            RoadMapping roadMapping,
                            SoundFeedback soundFeedback)
     {
-        ID = iD;
+        this.roadsData = roadsData;
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
@@ -37,15 +37,15 @@ public class RoadCreateState : IBuildingState
 
 
         posList = new();
-        selectedObjectIndex = database.roadsData.FindIndex(data => data.ID == ID);
-        if (selectedObjectIndex > -1)
+        //selectedObjectIndex = database.roadsData.IndexOf(roadsData);
+        if (database.roadsData.Contains(roadsData))
         {
-            width = database.roadsData[selectedObjectIndex].width;
+            width = roadsData.width;
 
             previewSystem.StartCreatingRoads(grid.LocalToWorld(gridPosition));
         }
         else
-            throw new System.Exception($"No object with ID {iD}");
+            throw new System.Exception($"No object with ID {roadsData.ID}");
     }
 
     public void EndState()
@@ -74,13 +74,13 @@ public class RoadCreateState : IBuildingState
             {
                 posList.RemoveAt(index);
                 CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), roadsData.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
                 CalculateLength();
-                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition, selectedObjectIndex), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), roadsData.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
             }
         }
         else
@@ -110,7 +110,7 @@ public class RoadCreateState : IBuildingState
 
     public void OnAction(Vector3 gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
         if (placementValidity == false)
         {
@@ -127,14 +127,14 @@ public class RoadCreateState : IBuildingState
             displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
-        roadMapping.AddRoad(displayPos, database.roadsData[selectedObjectIndex].width, ID);
+        roadMapping.AddRoad(displayPos, roadsData.width, roadsData.ID);
 
         posList.Clear();
         length = 0;
         previewSystem.ClearPointer();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3 gridPosition)
     {
         for (int i = 1; i < posList.Count; i++)
         {
@@ -155,8 +155,8 @@ public class RoadCreateState : IBuildingState
 
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), database.roadsData[selectedObjectIndex].Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), roadsData.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
     }
 }

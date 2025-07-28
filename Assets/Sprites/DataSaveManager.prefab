@@ -49,4 +49,5 @@ MonoBehaviour:
   overrideProfileId: 0
   testSelectedProfileId: 
   fileName: game.json
+  savePathName: saves
   autoSaveCoroutineTime: 60
