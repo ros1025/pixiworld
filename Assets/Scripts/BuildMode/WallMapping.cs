@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -131,9 +132,10 @@ public class WallMapping : MonoBehaviour
 
         List<Vector3> normalsA = new();
 
-        List<Vector2> currentUVs = new List<Vector2>();
+        List<Vector2> uvs = new List<Vector2>();
 
         Mesh c = new Mesh();
+        List<Vector3> vertsC = new List<Vector3>();
         List<int> trisC = new List<int>();
 
         int resolution = ((int)(walls[currentSplineIndex].resolution));
@@ -141,6 +143,7 @@ public class WallMapping : MonoBehaviour
         //int splineOffset = calculateRes(currentSplineIndex);
         //splineOffset += currentSplineIndex;
 
+        ///*
         for (int currentPointIndex = 1; currentPointIndex <= resolution; currentPointIndex++)
         {
             int vertOffset = currentPointIndex; float uvDistance = 0;
@@ -153,20 +156,24 @@ public class WallMapping : MonoBehaviour
             Vector3 n1 = Vector3.Cross(point3 - point1, Vector3.up).normalized;
             Vector3 n2 = -Vector3.Cross(point4 - point2, Vector3.up).normalized;
 
+            //Start of the wall segment
             Vector3 h1 = Vector3.zero;
             if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
             && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
             {
                 h1 = new Vector3(0, 1.9f, 0);
             }
+
             Vector3 p1 = point1 + h1;
             Vector3 p2 = point1 + new Vector3(0, height, 0);
             Vector3 p3 = point2 + h1;
             Vector3 p4 = point2 + new Vector3(0, height, 0);
+
             vertsA.AddRange(new List<Vector3> { p1, p2, p3, p4 });
             normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
-            currentUVs.AddRange(new List<Vector2> { new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1), new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1)});
+            uvs.AddRange(new List<Vector2> { new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1), new Vector2(uvOffset, h1.y / 2f), new Vector2(uvOffset, 1) });
 
+            //Find doors or windows in the middle of the wall segment [STARTING]
             if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
             && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
             {
@@ -181,11 +188,12 @@ public class WallMapping : MonoBehaviour
                 normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
-                currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1),
+                uvs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1),
                 new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1)});
             }
 
-            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] 
+            //Find doors or windows in the middle of the wall segment [ENDING]
+            if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex]
             && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution
             && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution) != -1)
             {
@@ -201,7 +209,7 @@ public class WallMapping : MonoBehaviour
                 normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
 
                 uvDistance = uvOffset + Vector3.Distance(pointA, point1);
-                currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1),
+                uvs.AddRange(new List<Vector2> { new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0.95f), new Vector2(uvDistance, 1),
                 new Vector2(uvDistance, 0), new Vector2(uvDistance, 1), new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)}); ;
             }
 
@@ -217,7 +225,7 @@ public class WallMapping : MonoBehaviour
             Vector3 p8 = point4 + new Vector3(0, height, 0);
             vertsA.AddRange(new List<Vector3> { p5, p6, p7, p8 });
             normalsA.AddRange(new List<Vector3> { n1, n1, n2, n2 });
-            currentUVs.AddRange(new List<Vector2> { new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1), new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1) });
+            uvs.AddRange(new List<Vector2> { new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1), new Vector2(uvDistance, h2.y / 2f), new Vector2(uvDistance, 1) });
 
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.001f, out Vector3 p9, out Vector3 p11);
             m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.001f, out Vector3 p13, out Vector3 p15);
@@ -287,7 +295,42 @@ public class WallMapping : MonoBehaviour
 
             uvOffset += distance;
         }
+        //*/
 
+        /*
+        for (int currentPointIndex = 1; currentPointIndex <= resolution; currentPointIndex++)
+        {
+            List<Vector3> currentVertsA = new();
+            List<Vector3> currentVertsB = new();
+            List<Vector3> currentVertsC = new();
+            List<Vector2> currentUVsA = new();
+            List<Vector2> currentUVsB = new();
+
+            List<int> currentTrisA = new();
+            List<int> currentTrisB = new();
+            List<int> currentTrisC = new();
+
+            MapWallPoints(currentSplineIndex, currentPointIndex, resolution, currentVertsA, currentVertsB, currentUVsA, currentUVsB, uvOffset, out float uvDistance);
+
+            foreach (Vector3 vert in currentVertsA)
+            {
+                Debug.Log($"{currentPointIndex}: {vert}");
+            }
+
+            vertsA.AddRange(currentVertsA);
+            vertsB.AddRange(currentVertsB);
+            vertsC.AddRange(currentVertsC);
+
+            trisA.AddRange(currentTrisA);
+            trisB.AddRange(currentTrisB);
+            trisC.AddRange(currentTrisC);
+
+            uvs.AddRange(currentUVsA);
+            uvs.AddRange(currentUVsB);
+        }
+        */
+
+        ///*
         int t19 = 0;
         int t20 = 1;
         int t21 = 3;
@@ -306,19 +349,170 @@ public class WallMapping : MonoBehaviour
         trisS.AddRange(new List<int> { t25, t26, t27, t28, t29, t30 });
         trisC.AddRange(new List<int> { t19, t20, t21, t22, t23, t24 });
         trisC.AddRange(new List<int> { t25, t26, t27, t28, t29, t30 });
+        //*/
 
         wall.SetVertices(vertsA);
         wall.SetTriangles(trisS, 0);
         wall.SetTriangles(trisA, 1);
         wall.SetTriangles(trisB, 2);
         wall.SetNormals(normalsA);
+        //wall.RecalculateNormals();
 
         c.SetVertices(vertsB);
         c.SetTriangles(trisC, 0);
         walls[currentSplineIndex].collider.sharedMesh = c;
 
-        wall.SetUVs(0, currentUVs);
+        wall.SetUVs(0, uvs);
         walls[currentSplineIndex].mesh.mesh = wall;
+    }
+
+    private void MapWallPoints(int currentSplineIndex, int currentPointIndex, float resolution, List<Vector3> currentVertsA, List<Vector3> currentVertsB, List<Vector2> currentUVsA, List<Vector2> currentUVsB, float uvOffset, out float uvDistance)
+    {
+        //Get the coordinates of the wall at start
+        m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, 0.04f, out Vector3 point1, out Vector3 point2);
+        m_SplineSampler.SampleSplineWidth(currentSplineIndex, (float)(currentPointIndex) / resolution, 0.04f, out Vector3 point3, out Vector3 point4);
+        float distance = Vector3.Distance(point3, point1);
+        uvDistance = uvOffset + distance;
+
+        //Start of the wall segment
+        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
+        {
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                point1 + new Vector3(0, height, 0), point1 + new Vector3(0, 1.9f, 0)
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                point2 + new Vector3(0, height, 0), point2 + new Vector3(0, 1.9f, 0)
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvOffset, 1), new Vector2(uvOffset, 1.9f/height)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvOffset, 1), new Vector2(uvOffset, 1.9f/height)
+            });
+        }
+        else
+        {
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                point1 + new Vector3(0, height, 0), point1
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                point2 + new Vector3(0, height, 0), point2
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvOffset, 1), new Vector2(uvOffset, 0)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvOffset, 1), new Vector2(uvOffset, 0)
+            });
+        }
+
+        //Find doors or windows in the middle of the wall segment [ENDING]
+        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex]
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution) != -1)
+        {
+            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex]
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) <= (float)(currentPointIndex) / resolution);
+
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length)), 0.04f, out Vector3 pointA, out Vector3 pointB);
+            float uvLocalDistance = uvOffset + Vector3.Distance(pointA, point1);
+
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                pointA + new Vector3(0, 1.9f, 0), pointA
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                pointB + new Vector3(0, 1.9f, 0), pointB
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvLocalDistance, 1.9f/height), new Vector2(uvLocalDistance, 0)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvLocalDistance, 1.9f/height), new Vector2(uvLocalDistance, 0)
+            });
+        }
+
+        //Find doors or windows in the middle of the wall segment [STARTING]
+        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
+        {
+            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
+
+            m_SplineSampler.SampleSplineWidth(currentSplineIndex, EvaluateT(walls[currentSplineIndex].wall, door.point), 0.04f, out Vector3 pointA, out Vector3 pointB);
+            float uvLocalDistance = uvOffset + Vector3.Distance(pointA, point1);
+
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                pointA, pointA + new Vector3(0, 1.9f, 0)
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                pointB, pointB + new Vector3(0, 1.9f, 0)
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, 1.9f/height)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, 1.9f/height)
+            });
+        }
+
+        //End of the wall segment
+        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution) != -1)
+        {
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                point3 + new Vector3(0, 1.9f, 0), point3 + new Vector3(0, height, 0)
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                point4 + new Vector3(0, 1.9f, 0), point4 + new Vector3(0, height, 0)
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvDistance, 1.9f/height), new Vector2(uvDistance, 1)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvDistance, 1.9f/height), new Vector2(uvDistance, 1)
+            });
+        }
+        else
+        {
+            currentVertsA.AddRange(new List<Vector3>
+            {
+                point3, point3 + new Vector3(0, height, 0)
+            });
+            currentVertsB.AddRange(new List<Vector3>
+            {
+                point4, point4 + new Vector3(0, height, 0)
+            });
+            currentUVsA.AddRange(new List<Vector2>
+            {
+                new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)
+            });
+            currentUVsB.AddRange(new List<Vector2>
+            {
+                new Vector2(uvDistance, 0), new Vector2(uvDistance, 1)
+            });
+        }
     }
 
     private void BuildIntersection(int i)
@@ -355,7 +549,8 @@ public class WallMapping : MonoBehaviour
 
         center /= (junctionEdges.Count * 2);
 
-        splines.Sort((x, y) => {
+        splines.Sort((x, y) =>
+        {
             Vector3 xDir = junctionEdges[splines.IndexOf(x)].center - center;
             Vector3 yDir = junctionEdges[splines.IndexOf(y)].center - center;
 
@@ -376,7 +571,8 @@ public class WallMapping : MonoBehaviour
             }
         });
 
-        hand.Sort((x, y) => {
+        hand.Sort((x, y) =>
+        {
             Vector3 xDir = junctionEdges[hand.IndexOf(x)].center - center;
             Vector3 yDir = junctionEdges[hand.IndexOf(y)].center - center;
 
@@ -397,7 +593,8 @@ public class WallMapping : MonoBehaviour
             }
         });
 
-        junctionEdges.Sort((x, y) => {
+        junctionEdges.Sort((x, y) =>
+        {
             Vector3 xDir = x.center - center;
             Vector3 yDir = y.center - center;
 
