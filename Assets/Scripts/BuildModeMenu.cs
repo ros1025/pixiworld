@@ -51,13 +51,13 @@ public class BuildModeMenu : MonoBehaviour
         inventory = sections.Q<Button>("Inventory");
 
         furniture.ClearBindings();
-        furniture.clicked += SetFurniture;
+        furniture.RegisterCallback<ClickEvent>(evt => SetFurniture());
         building.ClearBindings();
-        building.clicked += SetBuilding;
+        building.RegisterCallback<ClickEvent>(evt => SetBuilding());
 
         SetFurniture();
         cancelButton.ClearBindings();
-        cancelButton.clicked += placementSystem.ExitBuildMode;
+        cancelButton.RegisterCallback<ClickEvent>(evt => placementSystem.ExitBuildMode());
     }
 
     private void SetFurniture()

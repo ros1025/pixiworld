@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.AdaptivePerformance;
+using UnityEditor.Rendering;
+using Unity.Mathematics;
 
 public class ModifySettings : MonoBehaviour
 {
-    public IAdaptivePerformance ap;
-    public IDevicePerformanceControl ctrl;
+    private IAdaptivePerformance ap;
+    private IDevicePerformanceControl ctrl;
     [SerializeField]
     public SettingsController controller;
 
@@ -16,120 +18,162 @@ public class ModifySettings : MonoBehaviour
     public int displayheight; public int displaywidth;
     public int refreshRate; public int renderingMode;
 
-    public enum PerformanceLevels
-    {
-        Performance,
-        Optimised,
-        Standard,
-        Battery
-    }
 
-    public enum FPSLevels
-    {
-        Slowest = 24,
-        Slow = 30,
-        Medium = 60,
-        High = 90,
-        VeryHigh = 120,
-        Unlimited = -1
-    }
-
-
-    private void Start()
+    void Start()
     {
         ap = Holder.Instance;
+        
         ctrl = ap.DevicePerformanceControl;
-
         ctrl.AutomaticPerformanceControl = true;
+
+        Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
     }
 
     public void SetupResolutions()
     {
-        displayheight = Display.main.renderingHeight; displaywidth = Display.main.renderingWidth;
+        Debug.Log($"{Screen.height} {Screen.height}");
+        displayheight = Screen.height; displaywidth = Screen.width;
 
         if (currentRes < 240)
         {
-            currentRes = (int)(Display.main.renderingHeight * ScalableBufferManager.heightScaleFactor);
+            currentRes = (int)(Screen.height * ScalableBufferManager.heightScaleFactor);
         }
 
         int scalerIndex = 1;
-        while (Display.main.renderingHeight / scalerIndex > 240)
+        while (Screen.height / scalerIndex > 240)
         {
-            Resolutions.Add(Display.main.renderingHeight / scalerIndex);
+            Resolutions.Add(Screen.height / scalerIndex);
             scalerIndex++;
         }
 
         List<int> standardRes = new List<int> { 2160, 1440, 1080, 720, 540, 480, 360, 240 };
         foreach (int res in standardRes)
         {
-            if (res < Display.main.renderingHeight && !Resolutions.Contains(res))
+            if (res < Screen.height && !Resolutions.Contains(res))
             {
-                for (int i = 0; i < Resolutions.Count; i++)
-                {
-                    if (res > Resolutions[i])
-                    {
-                        Resolutions.Insert(i, res);
-                        break;
-                    }
-                    if (i == Resolutions.Count - 1)
-                    {
-                        Resolutions.Add(res);
-                        break;
-                    }
-                }
+                Resolutions.Add(res);
             }
         }
+
+        Resolutions.Sort((a, b) =>
+        {
+            if (a < b) return -1;
+            else return 0;
+        });
 
         if (Resolutions.IndexOf(currentRes) == -1)
             currentRes = DetermineNearestResolution(currentRes, 0, Resolutions.Count - 1);
 
-        ScalableBufferManager.ResizeBuffers((float)currentRes / Display.main.renderingHeight, (float)currentRes / Display.main.renderingHeight);
+        ScalableBufferManager.ResizeBuffers((float)currentRes / Screen.height, (float)currentRes / Screen.height);
+    }
+
+    public List<(int, string)> SetupFPS()
+    {
+        List<(int, string)> refreshRates = new();
+        int maxRefreshRate = (int)Math.Round(Screen.currentResolution.refreshRateRatio.value);
+
+        List<int> standardFps = new List<int> { 24, 30, 60, 90, 120 };
+        foreach (int fps in standardFps)
+        {
+            if (fps < maxRefreshRate && refreshRates.FindIndex(item => item.Item1 == fps) == -1)
+            {
+                refreshRates.Add((fps, $"{fps}"));
+            }
+        }
+
+        refreshRates.Add((maxRefreshRate, $"{maxRefreshRate}"));
+        refreshRates.Add((-1, $"Unlimited"));
+
+        refreshRates.Sort((a, b) =>
+        {
+            if (a.Item1 < b.Item1) return -1;
+            else return 0;
+        });
+
+        if (refreshRates.FindIndex(item => item.Item1 == refreshRate) == -1)
+            refreshRate = DetermineNearestFPS(refreshRate, refreshRates);
+        
+        return refreshRates;
     }
 
     public int DetermineNearestResolution(int res, int low, int high)
     {
-        if (low < high)
+        if (Resolutions.Contains(res))
         {
-            int mid = (low + high) / 2;
-            if (res < Resolutions[mid]) // if lower, make scope lower
-            {
-                return DetermineNearestResolution(res, low, mid - 1);
-            }
-            else if (res > Resolutions[mid]) // if higher, make scope higher
-            {
-                return DetermineNearestResolution(res, mid + 1, high);
-            }
-            else // if equal, return the same value passed
-            {
-                return res;
-            }
+            return res;
         }
         else
         {
-            Debug.Log(low);
-            if (low == high)
+            if (res < low)
             {
-                if (low - 1 >= 0 && high + 1 <= Resolutions.Count - 1)
-                {
-                    if (Mathf.Abs(res - Resolutions[low - 1]) < Mathf.Abs(res - Resolutions[low]))
-                    {
-                        return Resolutions[low - 1];
-                    }
-                    else if (Mathf.Abs(res - Resolutions[high + 1]) < Mathf.Abs(res - Resolutions[high]))
-                    {
-                        return Resolutions[high + 1];
-                    }
-                    else return Resolutions[high];
-                }
-                else return Resolutions[low];
+                return low;
+            }
+            else if (res > high)
+            {
+                return high;
             }
             else
             {
-                if (Mathf.Abs(res - Resolutions[low]) < Mathf.Abs(res - Resolutions[high]))
+                for (int i = 1; i < Resolutions.Count; i++)
                 {
-                    return Resolutions[low];
+                    int lowDist = Math.Abs(res - Resolutions[i - 1]);
+                    int highDist = Math.Abs(res - Resolutions[i]);
+
+                    if (lowDist < res && highDist > res)
+                    {
+                        if (lowDist < highDist)
+                        {
+                            return Resolutions[i - 1];
+                        }
+                        else
+                        {
+                            return Resolutions[i];
+                        }
+                    }
                 }
-                else return Resolutions[high];
+
+                return high;
+            }
+        }
+    }
+
+    public int DetermineNearestFPS(int fps, List<(int, string)> refreshRates)
+    {
+        if (refreshRates.FindIndex(item => item.Item1 == fps) != -1)
+        {
+            return fps;
+        }
+        else
+        {
+            if (fps < refreshRates[0].Item1)
+            {
+                return refreshRates[0].Item1;
+            }
+            else if (fps > refreshRates[^1].Item1)
+            {
+                return refreshRates[^1].Item1;
+            }
+            else
+            {
+                for (int i = 1; i < refreshRates.Count; i++)
+                {
+                    int lowDist = Math.Abs(fps - refreshRates[i - 1].Item1);
+                    int highDist = Math.Abs(fps - refreshRates[i].Item1);
+
+                    if (lowDist < fps && highDist > fps)
+                    {
+                        if (lowDist < highDist)
+                        {
+                            return refreshRates[i - 1].Item1;
+                        }
+                        else
+                        {
+                            return refreshRates[i].Item1;
+                        }
+                    }
+                }
+
+                return refreshRates[^1].Item1;
             }
         }
     }
@@ -139,77 +183,16 @@ public class ModifySettings : MonoBehaviour
         QualitySettings.SetQualityLevel(options.IndexOf(evt.newValue));
     }
 
-    public void SetTargetFPS(ChangeEvent<string> evt, List<string> options)
+    public void SetTargetFPS(ChangeEvent<string> evt, List<(int, string)> options)
     {
-        int i = options.IndexOf(evt.newValue);
-        if (i == 0)
-        {
-            refreshRate = 24;
-            Application.targetFrameRate = 24;
-        }
-        else if (i == 1)
-        {
-            refreshRate = 30;
-            Application.targetFrameRate = 30;
-        }
-        else if (i == 2)
-        {
-            refreshRate = 60;
-            Application.targetFrameRate = 60;
-        }
-        else if (i == 3)
-        {
-            refreshRate = 90;
-            Application.targetFrameRate = 90;
-        }
-        else if (i == 4)
-        {
-            refreshRate = 120;
-            Application.targetFrameRate = 120;
-        }
-        else
-        {
-            refreshRate = -1;
-            Application.targetFrameRate = -1;
-        }
+        int fps = options.Find(item => item.Item2 == evt.newValue).Item1;
+        SetTargetFPS(fps);
     }
 
-    public void SetPerformanceMode(ChangeEvent<string> evt, List<string> options)
+    public void SetTargetFPS(int fps)
     {
-        int i = options.IndexOf(evt.newValue);
-        if (i == (int)PerformanceLevels.Performance)
-        {
-            renderingMode = 0;
-            refreshRate = -1;
-            ctrl.AutomaticPerformanceControl = false;
-            Application.targetFrameRate = -1;
-            ctrl.CpuLevel = ctrl.MaxCpuPerformanceLevel;
-            ctrl.GpuLevel = ctrl.MaxGpuPerformanceLevel;
-        }
-        else if (i == (int)PerformanceLevels.Optimised)
-        {
-            renderingMode = 1;
-            refreshRate = Application.targetFrameRate;
-            ctrl.AutomaticPerformanceControl = true;
-        }
-        else if (i == (int)PerformanceLevels.Standard)
-        {
-            renderingMode = 2;
-            refreshRate = -1;
-            ctrl.AutomaticPerformanceControl = false;
-            Application.targetFrameRate = -1;
-            ctrl.CpuLevel = Mathf.RoundToInt(ctrl.MaxCpuPerformanceLevel / 2);
-            ctrl.GpuLevel = Mathf.RoundToInt(ctrl.MaxGpuPerformanceLevel / 2);
-        }
-        else if (i == (int)PerformanceLevels.Battery)
-        {
-            renderingMode = 3;
-            refreshRate = -1;
-            ctrl.AutomaticPerformanceControl = false;
-            Application.targetFrameRate = 30;
-            ctrl.CpuLevel = 0;
-            ctrl.GpuLevel = 0;
-        }
+        refreshRate = fps;
+        Application.targetFrameRate = fps;
     }
 
     public void SetRenderingResolution(ChangeEvent<string> evt, List<int> options)
@@ -226,43 +209,13 @@ public class ModifySettings : MonoBehaviour
             resolution
             );
         */
-        ScalableBufferManager.ResizeBuffers((float)currentRes / Display.main.renderingHeight, (float)currentRes / Display.main.renderingHeight);
+        ScalableBufferManager.ResizeBuffers((float)currentRes / Screen.height, (float)currentRes / Screen.height);
         Debug.Log(ScalableBufferManager.heightScaleFactor);
-    }
-
-    public int DetermineCurrentPerformanceMode()
-    {
-        if (ctrl.CpuLevel == ctrl.MaxCpuPerformanceLevel && ctrl.GpuLevel == ctrl.MaxGpuPerformanceLevel && ctrl.AutomaticPerformanceControl == false)
-            return (int)PerformanceLevels.Performance;
-        if (ctrl.AutomaticPerformanceControl == true)
-            return (int)PerformanceLevels.Optimised;
-        if (ctrl.CpuLevel == Mathf.RoundToInt(ctrl.MaxCpuPerformanceLevel / 2) && ctrl.GpuLevel == Mathf.RoundToInt(ctrl.MaxGpuPerformanceLevel / 2) && ctrl.AutomaticPerformanceControl == false)
-            return (int)PerformanceLevels.Standard;
-        if (ctrl.CpuLevel == 0 && ctrl.GpuLevel == 0 && ctrl.AutomaticPerformanceControl == false)
-            return (int)PerformanceLevels.Battery;
-        else
-            return -1;
-    }
-
-    public int DetermineTargetFPS()
-    {
-        if (Application.targetFrameRate > 0 && Application.targetFrameRate <= 24)
-            return 0;
-        else if (Application.targetFrameRate > 24 && Application.targetFrameRate <= 30)
-            return 1;
-        else if (Application.targetFrameRate > 30 && Application.targetFrameRate <= 60)
-            return 2;
-        else if (Application.targetFrameRate > 60 && Application.targetFrameRate <= 90)
-            return 3;
-        else if (Application.targetFrameRate > 90 && Application.targetFrameRate <= 120)
-            return 4;
-        else
-            return 5;
     }
 
     public bool DetermineFPSSliderAvailability()
     {
-        if (ctrl.AutomaticPerformanceControl == true)
+        if (ap != null)
             return true;
         else
             return false;
@@ -271,7 +224,7 @@ public class ModifySettings : MonoBehaviour
     public void UpdateResValues()
     {
         //for renderingResolution
-        if (displayheight != Display.main.renderingHeight || displaywidth != Display.main.renderingWidth)
+        if (displayheight != Screen.height || displaywidth != Screen.width)
         {
             SetupResolutions();
             List<string> optionsStr = new();
@@ -279,11 +232,11 @@ public class ModifySettings : MonoBehaviour
                 optionsStr.Add($"{item}p");
 
             if (Resolutions.IndexOf(currentRes) == -1)
-                currentRes = Display.main.renderingHeight;
+                currentRes = Screen.height;
 
-            displayheight = Display.main.renderingHeight; displaywidth = Display.main.renderingWidth;
+            displayheight = Screen.height; displaywidth = Screen.width;
             controller.UpdateValues("renderres", optionsStr);
-            ScalableBufferManager.ResizeBuffers((float)currentRes / Display.main.renderingHeight, (float)currentRes / Display.main.renderingHeight);
+            ScalableBufferManager.ResizeBuffers((float)currentRes / Screen.height, (float)currentRes / Screen.height);
 
         }
     }

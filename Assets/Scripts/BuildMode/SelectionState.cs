@@ -58,6 +58,7 @@ public class SelectionState : IBuildingState
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
             gameObjectData.Size,
+            Vector2.zero,
             materials
         );
         UpdateState(originalPosition, rotation);

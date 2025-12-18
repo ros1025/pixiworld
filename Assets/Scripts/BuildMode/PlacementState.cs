@@ -36,7 +36,8 @@ public class PlacementState : IBuildingState
         {
             previewSystem.StartShowingPlacementPreview(
                 objectData.Prefab,
-                objectData.Size);
+                objectData.Size,
+                Vector3.zero);
             UpdateState(gridPosition);
         }
         else

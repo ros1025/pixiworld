@@ -16,13 +16,15 @@ public class TestMesh : MonoBehaviour
         {
             for (int i = 0; i < mesh.mesh.vertices.Count(); i++)
             {
-                Debug.Log($"{i} : {mesh.mesh.vertices[i]}");
+                Debug.Log($"{i} : {mesh.mesh.vertices[i]}, Normal: {mesh.mesh.normals[i]}");
             }
 
+            /*
             for (int i = 0; i < mesh.mesh.triangles.Count(); i++)
             {
                 Debug.Log($"{i} : {mesh.mesh.triangles[i]}");
             }
+            */
         }
     }
 }

@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Splines;
+using UnityEngine.SocialPlatforms;
 
 public class PreviewSystem : MonoBehaviour
 {
     [SerializeField]
     private float previewYOffset = 0.05f;
+
+    [SerializeField]
+    private Vector2 cursorOffset;
 
     [SerializeField]
     private GameObject cellIndicator;
@@ -75,12 +79,15 @@ public class PreviewSystem : MonoBehaviour
         //materials = new();
     }
 
-    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size, List<MatData> materials)
+    public void StartMovingObjectPreview(Vector3 gridPosition, float rotation, GameObject prefab, Vector2Int size, Vector2 cursorOffset, List<MatData> materials)
     {
         previewObject = prefab;
         previewSelector = previewObject.transform.Find("Selector").gameObject;
         previewSize = size;
         previewPos = gridPosition;
+        cursorOffset.x = Math.Abs(cursorOffset.x) < 0.05f ? Math.Sign(cursorOffset.x) == -1 ? -0.05f : 0.05f : cursorOffset.x;
+        cursorOffset.y = Math.Abs(cursorOffset.y) < 0.05f ? Math.Sign(cursorOffset.x) == -1 ? -0.05f : 0.05f : cursorOffset.y;
+        this.cursorOffset = cursorOffset;
         this.materials.Clear();
         for (int i = 0; i < materials.Count; i++)
         {
@@ -118,13 +125,16 @@ public class PreviewSystem : MonoBehaviour
         cellIndicator.SetActive(true);
     }
 
-    public void StartShowingPlacementPreview(GameObject prefab, Vector2Int size)
+    public void StartShowingPlacementPreview(GameObject prefab, Vector2Int size, Vector2 cursorOffset)
     {
         previewObject = Instantiate(prefab);
         previewSelector = Instantiate(previewSelectorObject);
         previewSelector.transform.SetParent(previewObject.transform.transform);
         previewSelector.transform.name = "Selector";
         previewSize = size;
+        cursorOffset.x = Math.Abs(cursorOffset.x) < 0.05f ? Math.Sign(cursorOffset.x) == -1 ? -0.05f : 0.05f : cursorOffset.x;
+        cursorOffset.y = Math.Abs(cursorOffset.y) < 0.05f ? Math.Sign(cursorOffset.x) == -1 ? -0.05f : 0.05f : cursorOffset.y;
+        this.cursorOffset = cursorOffset;
         previewPos = new Vector3(cellIndicator.transform.position.x, 0, cellIndicator.transform.position.z);
         PreparePreview(previewObject);
         PrepareCursor(size);
@@ -226,7 +236,7 @@ public class PreviewSystem : MonoBehaviour
         if (size.x > 0 || size.y > 0)
         {
             cellIndicator.transform.localScale = new Vector3(size.x, size.y, size.y);
-            previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
+            previewSelector.transform.localPosition = new Vector3(cursorOffset.x, 0f, cursorOffset.y);
             previewSelector.transform.localScale = new Vector3(size.x - 0.1f, 0.6f, size.y - 0.1f);
             //cellIndicatorRenderer.material.mainTextureScale = size;
         }
@@ -541,10 +551,14 @@ public class PreviewSystem : MonoBehaviour
 
     private void MoveCursor(Vector3 position)
     {
-        cellIndicator.transform.position = new Vector3(position.x, position.y + previewYOffset, position.z);
-        previewSelector.transform.position = new Vector3(position.x + 0.05f, position.y, position.z + 0.05f);
-        //previewSelector.transform.localPosition = new Vector3(0.05f, 0f, 0.05f);
-        expanderParent.transform.position = new Vector3(position.x, position.y + previewYOffset * 2, position.z);
+        Vector3 localCursorOffsetTranslate = new();
+
+        if (previewObject != null)
+            localCursorOffsetTranslate = previewObject.transform.TransformDirection(new Vector3(cursorOffset.x, 0, cursorOffset.y));
+
+        cellIndicator.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y + previewYOffset, position.z + localCursorOffsetTranslate.z);
+        previewSelector.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y, position.z + + localCursorOffsetTranslate.z);
+        expanderParent.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y + previewYOffset * 2, position.z + localCursorOffsetTranslate.z);
     }
 
     private void MovePreview(Vector3 position)

@@ -27,7 +27,7 @@ public class TopBarController : MonoBehaviour
         SettingsRoot = SettingsBar.rootVisualElement;
         settingsButton = SettingsRoot.Q<Button>("Settings");
 
-        settingsButton.clicked += InvokeSettings;
+        settingsButton.RegisterCallback<ClickEvent>(evt => InvokeSettings());
     }
 
     private void InvokeSettings()

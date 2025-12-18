@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 21011, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Simulator Provider Loader
-  m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.AdaptivePerformance.Simulator.Editor.SimulatorProviderLoader
+  m_Script: {fileID: 21007, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: Basic Provider Loader
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.AdaptivePerformance.Basic.BasicProviderLoader
