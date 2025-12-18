@@ -32,7 +32,7 @@ public class WallModifyState : IBuildingState
         this.inputManager = inputManager;
         posList = new();
 
-        wallMapping.SelectRoad(grid.LocalToWorld(gridPosition), new Vector2Int(1, 1), 0, out selectedWall, out index, out List<Vector3> points);
+        wallMapping.SelectRoad(inputManager, out selectedWall, out index, out List<Vector3> points);
         if (index == -1)
             return;
         for (int i = 0; i < points.Count; i++)

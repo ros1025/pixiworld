@@ -54,6 +54,7 @@ public class DoorModifyState : IBuildingState
             originalRotation,
             door.prefab,
             new Vector2Int(doorsDataObject.Length, 1),
+            new Vector2(0, -0.5f),
             materials
             );
         }
@@ -66,7 +67,7 @@ public class DoorModifyState : IBuildingState
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials);
+            wallMapping.MoveWindows(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials);
         }
     }
 
@@ -102,7 +103,7 @@ public class DoorModifyState : IBuildingState
             materials.Add(previewSystem.materials[i]);
         }
 
-        wallMapping.MoveWindows(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.ID, targetWall, materials);
+        wallMapping.MoveWindows(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, materials);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;

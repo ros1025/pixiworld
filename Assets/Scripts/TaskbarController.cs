@@ -39,8 +39,8 @@ public class TaskbarController : MonoBehaviour
         buildButton.ClearBindings();
         mapButton.ClearBindings();
 
-        buildButton.clicked += BuildButtonPressed;
-        mapButton.clicked += MapButtonPressed;
+        buildButton.RegisterCallback<ClickEvent>(evt => BuildButtonPressed());
+        mapButton.RegisterCallback<ClickEvent>(evt => MapButtonPressed());
     }
 
     private void BuildButtonPressed()

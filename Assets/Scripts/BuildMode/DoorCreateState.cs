@@ -37,7 +37,8 @@ public class DoorCreateState : IBuildingState
         {
             previewSystem.StartShowingPlacementPreview(
                 doorsDataObject.Prefab,
-                new Vector2Int(doorsDataObject.Length, 1));
+                new Vector2Int(doorsDataObject.Length, 1),
+                new Vector2(0, -0.5f));
             UpdateState(gridPosition);
         }
         else
@@ -80,7 +81,7 @@ public class DoorCreateState : IBuildingState
         }
 
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
-        wallMapping.BuildWindows(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.ID, targetWall, newMaterials);
+        wallMapping.BuildWindows(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, newMaterials);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(doorsDataObject.Length, 1), doorsDataObject.Cost, rotation);
     }

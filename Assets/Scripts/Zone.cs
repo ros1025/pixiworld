@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,7 +17,7 @@ public class Zone : MonoBehaviour
      public PlacementSystem placement;
     [SerializeField] private Material zoneMaterial;
     VisualElement root; VisualElement lRoot;
-    [SerializeField] UnityEngine.UI.Button button; 
+    Button button; 
     Button upButton; Button downButton;
     Label floorLabel;
 
@@ -24,7 +25,8 @@ public class Zone : MonoBehaviour
     void Start()
     {
         root = document.rootVisualElement;
-        //button = root.Q<Button>();
+        button = root.Q<Button>();
+        button.RegisterCallback<ClickEvent>(e => EnterZone());
         lRoot = levels.rootVisualElement;
         upButton = lRoot.Q<Button>("UpButton");
         upButton.RegisterCallback<ClickEvent, int>(SwitchLevel, level + 1);
@@ -53,6 +55,8 @@ public class Zone : MonoBehaviour
         newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
         LevelData level = new LevelData(0, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
             newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), 0);
+        level.objectPlacer.SetPlacementSystem(placement);
+        level.walls.SetPlacementSystem(placement);
         floors.Insert(0, level);
 
         level.walls.SetCeilingsActive(false);
@@ -86,7 +90,7 @@ public class Zone : MonoBehaviour
     {
         if (placement.inBuildMode)
         {
-            button.gameObject.SetActive(false);
+            button.visible = false;
             if (floors.Count > 0 && placement.IsGridZone(floors[level - minLevel].cursor))
             {
                 upButton.visible = true;
@@ -97,36 +101,18 @@ public class Zone : MonoBehaviour
         else
         {
             Camera camera = Camera.main;
-            Vector3 coordinates = camera.WorldToScreenPoint(floors[maxLevel - minLevel].cursor.transform.position);
             upButton.visible = true;
             downButton.visible = true;
             floorLabel.visible = true;
-            if (coordinates.y > (Screen.height * 3 / 4))
+            if (Vector3.Distance(camera.transform.position, transform.position) > 50f)
             {
-                button.gameObject.SetActive(false);
+                button.visible = false;
             }
-            if (coordinates.y < (Screen.height * 3 / 4))
+            else
             {
-                button.gameObject.SetActive(true);
-                /*
-                float ratio = (float)(1 - (0.1 * (((coordinates.y / 150) * Mathf.Cos(camera.transform.eulerAngles.x * (Mathf.PI / 180))) + (camera.transform.position.y / 50))));
-                float scaleX = (float)1920 / Screen.width; float scaleY = (float)1080 / Screen.height;
-                root.style.left = (coordinates.x - (35 * ratio)) * scaleX;
-                root.style.top = (Screen.height - coordinates.y - (120 * ratio)) * scaleY;
-                button.style.height = (120 * ratio);
-                button.style.width = button.style.height;
-                float radius = (50 * ratio);
-                button.style.borderBottomLeftRadius = radius;
-                button.style.borderBottomRightRadius = radius;
-                button.style.borderTopLeftRadius = radius;
-                button.style.borderTopRightRadius = radius;
-                float padding = (15 * ratio);
-                button.style.paddingBottom = padding;
-                button.style.paddingTop = padding;
-                button.style.paddingLeft = padding;
-                button.style.paddingRight = padding;
-                */
-                button.transform.position = floors[maxLevel - minLevel].cursor.transform.position + new Vector3(0, 3, 0);
+                button.visible = true;
+                transform.rotation = camera.transform.rotation;
+                transform.localPosition = new Vector3(size.x / 2f, 5, size.y/2f);
             }
         }
     }
@@ -267,7 +253,7 @@ public class Zone : MonoBehaviour
         }
         else
         {
-            button.gameObject.SetActive(false);
+            button.visible = false;
             if (placement.inBuildMode == false)
             {
                 foreach (LevelData level in floors)

@@ -143,7 +143,7 @@ public class PreviewTools : MonoBehaviour
         VisualElement rootT = TexturesMenu.rootVisualElement;
         rootT.style.visibility = Visibility.Visible;
         rootT.style.left = customTexture.layout.xMin;
-        rootT.style.top = Screen.height - (rootT.ElementAt(0).layout.height + controls.layout.height + 20);
+        rootT.style.top = TexturesMenu.runtimePanel.panelSettings.referenceResolution.y - (rootT.ElementAt(0).layout.height + controls.layout.height + 20);
 
         Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
         tCancel.UnregisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);

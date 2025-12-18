@@ -12,5 +12,7 @@ public class DoorsData : ScriptableObject
     [field: SerializeField]
     public int Length { get; private set; } = 1;
     [field: SerializeField]
+    public int Height { get; private set; } = 2;
+    [field: SerializeField]
     public GameObject Prefab { get; private set; }
 }

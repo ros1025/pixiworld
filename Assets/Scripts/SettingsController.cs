@@ -36,7 +36,7 @@ public class SettingsController : MonoBehaviour
         graphicsToggle.RegisterCallback<ClickEvent, int>(UpdateMenus, 0);
         audioToggle.RegisterCallback<ClickEvent, int>(UpdateMenus, 1);
         progressToggle.RegisterCallback<ClickEvent, int>(UpdateMenus, 2);
-        exitSettings.clicked += ExitSettings;
+        exitSettings.RegisterCallback<ClickEvent>(evt => ExitSettings());
 
         InvokeGraphicsSettings();
     }
@@ -51,12 +51,8 @@ public class SettingsController : MonoBehaviour
         settings.SetupResolutions();
         MakeIntDropdownBar("graphics_renderresolution", "Render Resolution", settings.Resolutions.IndexOf(settings.currentRes), settings.Resolutions, "p", settings.SetRenderingResolution);
 
-        List<string> PerformanceModes = new();
-        PerformanceModes.AddRange(Enum.GetNames(typeof(ModifySettings.PerformanceLevels)));
-        MakeDropdownBar("graphics_performancemodes", "Performance Mode", settings.DetermineCurrentPerformanceMode(), PerformanceModes, settings.SetPerformanceMode);
-
-        List<string> fpsModes = new List<string> { "24", "30", "60", "90", "120", "Unlimited" };
-        MakeDropdownBar("graphics_targetfps", "FPS Level", settings.DetermineTargetFPS(), fpsModes, settings.SetTargetFPS);
+        List<(int, string)> fpsModes = settings.SetupFPS();
+        MakeIntDropdownBar("graphics_targetfps", "FPS Level", fpsModes.FindIndex(item => item.Item1 == settings.refreshRate), fpsModes, settings.SetTargetFPS);
     }
 
     void InvokeProgressSettings()
@@ -102,6 +98,30 @@ public class SettingsController : MonoBehaviour
 
         field.label = label;
         field.choices = options;
+        field.index = defaultChoice;
+        box.Add(field);
+
+        field.RegisterCallback(method, options);
+    }
+
+    void MakeIntDropdownBar(string name, string label, int defaultChoice, List<(int, string)> options, EventCallback<ChangeEvent<string>, List<(int, string)>> method)
+    {
+        VisualElement box = new VisualElement();
+        box.name = name;
+        box.AddToClassList("list-object");
+        container.Add(box);
+
+        DropdownField field = new DropdownField();
+
+        List<string> choices = new();
+
+        foreach ((int, string) option in options)
+        {
+            choices.Add(option.Item2);
+        }
+
+        field.label = label;
+        field.choices = choices;
         field.index = defaultChoice;
         box.Add(field);
 
@@ -163,7 +183,7 @@ public class SettingsController : MonoBehaviour
         image.AddToClassList("settings-options-button__image");
         button.Add(image);
 
-        button.clicked += method;
+        button.RegisterCallback<ClickEvent>(evt => method.Invoke());
     }
 
     void MakeToggleButton(string name, string label, bool defaultChoice, EventCallback<ChangeEvent<bool>> method)

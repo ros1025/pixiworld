@@ -638,6 +638,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         else gridPosition = grid.WorldToLocal(mousePosition);
     }
 
+    public Vector3 SmoothenPosition(Vector3 pos)
+    {
+        if (preview.gridSnap || itemMode == Wall)
+        {
+            return grid.CellToLocal(grid.WorldToCell(pos));
+        }
+        else return grid.WorldToLocal(pos);
+    }
+
     public void SetRotation(float rotation)
     {
         this.rotation = rotation;

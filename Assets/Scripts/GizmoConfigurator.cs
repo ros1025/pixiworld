@@ -27,7 +27,7 @@ public class GizmoConfigurator : MonoBehaviour
     {
         Button button = new();
         button.text = label;
-        button.clicked += action;
+        button.RegisterCallback<ClickEvent>(evt => action.Invoke());
         buttons.Add(button);
     }
 
@@ -35,7 +35,7 @@ public class GizmoConfigurator : MonoBehaviour
     {
         Button button = new();
         button.text = label;
-        button.clicked += action;
+        button.RegisterCallback<ClickEvent>(evt => action.Invoke());
         buttons.Insert(index, button);
     }
 
