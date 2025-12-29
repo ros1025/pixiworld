@@ -2538,6 +2538,8 @@ public class WallMapping : MonoBehaviour
 
         intersections.Add(intersection);
         intersection.collider = collider.GetComponent<MeshCollider>();
+        intersection.mesh = collider.GetComponent<MeshFilter>();
+        intersection.renderer = collider.GetComponent<MeshRenderer>();
 
         BuildIntersection(intersections.IndexOf(intersection));
     }

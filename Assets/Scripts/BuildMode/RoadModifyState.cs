@@ -144,7 +144,7 @@ public class RoadModifyState : IBuildingState
             displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
-        roadMapping.ModifyRoad(selectedRoad, displayPos, roadsDataObject.width, selectedObjectIndex);
+        roadMapping.ModifyRoad(selectedRoad, displayPos, roadsDataObject.width, selectedObjectIndex, roadsDataObject.tex);
 
         posList.Clear();
         length = 0;
