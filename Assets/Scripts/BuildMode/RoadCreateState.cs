@@ -127,7 +127,7 @@ public class RoadCreateState : IBuildingState
             displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
-        roadMapping.AddRoad(displayPos, roadsData.width, roadsData.ID);
+        roadMapping.AddRoad(displayPos, roadsData.width, roadsData.ID, roadsData.tex);
 
         posList.Clear();
         length = 0;

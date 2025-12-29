@@ -89,8 +89,10 @@ public class JunctionBuilderOverlay : Overlay
         GameObject collider = new();
         collider.transform.SetParent(GameObject.Find("RoadSystem").transform);
         collider.AddComponent<MeshCollider>();
+        collider.AddComponent<MeshFilter>();
+        collider.AddComponent<MeshRenderer>();
         collider.layer = 6;
-        Selection.activeGameObject.GetComponent<RoadMapping>().AddJunction(intersection, collider.GetComponent<MeshCollider>());
+        Selection.activeGameObject.GetComponent<RoadMapping>().AddJunction(intersection, collider.GetComponent<MeshCollider>(), collider.GetComponent<MeshFilter>(), collider.GetComponent<MeshRenderer>());
     }
 
     private void OnClearJunction()

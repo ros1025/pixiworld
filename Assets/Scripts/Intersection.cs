@@ -10,6 +10,8 @@ using UnityEngine.Splines;
         public List<JunctionInfo> junctions;
         public List<float> curves;
         public MeshCollider collider = new();
+        public MeshRenderer renderer = new();
+        public MeshFilter mesh = new();
 
         public void AddJunction(Spline spline, BezierKnot knot, float curve)
         {
