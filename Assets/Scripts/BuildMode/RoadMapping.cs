@@ -2,15 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using JetBrains.Annotations;
 using NUnit.Framework.Constraints;
+using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.Splines;
+using UnityEngine.Splines.ExtrusionShapes;
 
 public class RoadMapping : MonoBehaviour
 {
-    private List<Vector3> m_vertsP1;
-    private List<Vector3> m_vertsP2;
     public List<Intersection> intersections = new();
     public List<Roads> roads = new();
     [SerializeField] private SplineSampler m_SplineSampler;
@@ -24,36 +28,7 @@ public class RoadMapping : MonoBehaviour
 
     void MakeRoad()
     {
-        for (int i = 0; i < 3; i++)
-        {
-            GetVerts();
-            BuildMesh();
-        }
-    }
-
-    private void GetVerts()
-    {
-        m_vertsP1 = new List<Vector3>();
-        m_vertsP2 = new List<Vector3>();
-
-        Vector3 p1;
-        Vector3 p2;
-        for (int j = 0; j < roads.Count; j++)
-        {
-            int resolution = (int)(roads[j].resolution);
-            float step = 1f / (float)resolution;
-            for (int i = 0; i < resolution; i++)
-            {
-                float t = step * i;
-                m_SplineSampler.SampleSplineWidth(j, t, roads[j].width, out p1, out p2);
-                m_vertsP1.Add(p1);
-                m_vertsP2.Add(p2);
-            }
-
-            m_SplineSampler.SampleSplineWidth(j, 1f, roads[j].width, out p1, out p2);
-            m_vertsP1.Add(p1);
-            m_vertsP2.Add(p2);
-        }
+        BuildMesh();
     }
 
     public void AddJunction(Intersection intersection, MeshCollider collider, MeshFilter mesh, MeshRenderer renderer)
@@ -62,6 +37,7 @@ public class RoadMapping : MonoBehaviour
         intersection.collider = collider;
         intersection.mesh = mesh;
         intersection.renderer = renderer;
+        BuildIntersectionMesh(intersections.IndexOf(intersection));
     }
 
     public void RemoveJunction(Intersection intersection)
@@ -207,6 +183,8 @@ public class RoadMapping : MonoBehaviour
             a = junctionEdges[j - 1].left;
             curvePoints.Add(a);
             b = (j < junctionEdges.Count) ? junctionEdges[j].right : junctionEdges[0].right;
+            intersection.curves[j - 1] = 0.5f + 
+                                        (0.1f * Mathf.Sin(Vector3.SignedAngle(junctionEdges[j - 1].center - center, ((j < junctionEdges.Count) ? junctionEdges[j].center : junctionEdges[0].center) - center, Vector3.down)));
             mid = Vector3.Lerp(a, b, 0.5f);
             Vector3 dir = center - mid;
             mid = mid - dir;
@@ -253,15 +231,15 @@ public class RoadMapping : MonoBehaviour
                 uvs.Add(new Vector2(curvePoints[j].z, curvePoints[j].x));
                 uvs.Add(new Vector2(curvePoints[j].z, curvePoints[j].x));
             }
-            contactTris.Add(((j - 1) * 6) + 0); contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 4);
+            contactTris.Add(((j - 1) * 6) + 4); contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 0);
             contactTris.Add(((j - 1) * 6) + 1); contactTris.Add(((j - 1) * 6) + 3); contactTris.Add(((j - 1) * 6) + 5);
-            contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 3); contactTris.Add(((j - 1) * 6) + 5);
-            contactTris.Add(((j - 1) * 6) + 5); contactTris.Add(((j - 1) * 6) + 4); contactTris.Add(((j - 1) * 6) + 2);
+            contactTris.Add(((j - 1) * 6) + 5); contactTris.Add(((j - 1) * 6) + 3); contactTris.Add(((j - 1) * 6) + 2);
+            contactTris.Add(((j - 1) * 6) + 2); contactTris.Add(((j - 1) * 6) + 4); contactTris.Add(((j - 1) * 6) + 5);
 
-            tris.Add(((j - 1) * 6) + 0); tris.Add(((j - 1) * 6) + 2); tris.Add(((j - 1) * 6) + 4);
+            tris.Add(((j - 1) * 6) + 4); tris.Add(((j - 1) * 6) + 2); tris.Add(((j - 1) * 6) + 0);
             tris.Add(((j - 1) * 6) + 1); tris.Add(((j - 1) * 6) + 3); tris.Add(((j - 1) * 6) + 5);
-            tris.Add(((j - 1) * 6) + 2); tris.Add(((j - 1) * 6) + 3); tris.Add(((j - 1) * 6) + 5);
-            tris.Add(((j - 1) * 6) + 5); tris.Add(((j - 1) * 6) + 4); tris.Add(((j - 1) * 6) + 2);
+            tris.Add(((j - 1) * 6) + 5); tris.Add(((j - 1) * 6) + 3); tris.Add(((j - 1) * 6) + 2);
+            tris.Add(((j - 1) * 6) + 2); tris.Add(((j - 1) * 6) + 4); tris.Add(((j - 1) * 6) + 5);
         }
 
         verts.AddRange(currentVerts);
@@ -302,12 +280,14 @@ public class RoadMapping : MonoBehaviour
     }
 
     //remove points from road after the intersection and place them into a new road
-    private void FilterPoints(Spline road, Spline road2, List<Vector3> points, Dictionary<Vector3, List<BezierKnot>> pointMap, float ratio, out List<Vector3> points2, out Dictionary<Vector3, List<BezierKnot>> pointMap2, out bool splitSpline)
+    private void FilterPoints(Spline road, Spline road2, List<Vector3> points, Dictionary<Vector3, List<BezierKnot>> pointMap, float ratio, float width, out List<Vector3> points2, out Dictionary<Vector3, List<BezierKnot>> pointMap2, out bool splitSpline)
     {
         List<BezierKnot> knotList = new(); List<BezierKnot> knotList2 = new();
         List<Vector3> removePoints = new();
         points2 = new(); pointMap2 = new();
         splitSpline = true;
+        float widthT = width / road.GetLength();
+
         foreach (Vector3 point in points)
         {
             List<bool> isAhead = new();
@@ -315,7 +295,7 @@ public class RoadMapping : MonoBehaviour
             {
                 int j = road.IndexOf(roadKnot);
                 float knotT = road.ConvertIndexUnit(j, PathIndexUnit.Knot, PathIndexUnit.Normalized);
-                if (knotT > ratio)
+                if (knotT > ratio + widthT)
                 {
                     knotList.Add(roadKnot);
                     isAhead.Add(true);
@@ -346,6 +326,48 @@ public class RoadMapping : MonoBehaviour
         foreach (BezierKnot roadKnot in knotList2) { road2.Add(roadKnot); }
     }
 
+    private void FilterPoints(Spline road, Spline road2, List<Vector3> points, float ratio, int width, out List<Vector3> points2, out Vector3 dir1, out Vector3 dir2)
+    {
+        //List<BezierKnot> knotList = new(); List<BezierKnot> knotList2 = new();
+        List<Vector3> removePoints = new();
+        points2 = new();
+        float widthT = width / road.GetLength();
+        Vector3 selectedPoint = road.EvaluatePosition(ratio);
+
+        foreach (Vector3 point in points)
+        {
+            float knotT = EvaluateT(road, point);
+            if (Vector3.Distance(point, selectedPoint) < width + 0.1f)
+            {
+                removePoints.Add(point);
+            }
+            else if (knotT <= ratio + widthT)
+            {
+                removePoints.Add(point);
+                if (!points2.Contains(point))
+                {
+                    points2.Add(point);
+                }
+            }
+        }
+        foreach (Vector3 point in removePoints) { points.Remove(point); }
+
+        List<BezierKnot> knotList = BuildKnots(points, width);
+        List<BezierKnot> knotList2 = BuildKnots(points2, width);
+        road.Clear(); road2.Clear();
+    
+        foreach (BezierKnot roadKnot in knotList) { road.Add(roadKnot); }
+        foreach (BezierKnot roadKnot in knotList2) { road2.Add(roadKnot); }
+
+        if (points.Count >= 1)
+            dir1 = points[0] - selectedPoint;
+        else dir1 = Vector3.forward;
+
+        if (points2.Count >= 1)
+            dir2 = selectedPoint - points2[^1];
+        else dir2 = Vector3.forward;
+    }
+
     private void FilterIntersections(Spline s, Spline r, float sT)
     {
         Spline combinedSpline = new Spline();
@@ -364,11 +386,11 @@ public class RoadMapping : MonoBehaviour
             {
                 if (intersect.junctions[a].spline == s)
                 {
-                    int indexR = combinedSpline.IndexOf(intersect.junctions[a].knot);
-                    float rT = combinedSpline.ConvertIndexUnit(indexR, PathIndexUnit.Knot, PathIndexUnit.Normalized);
+                    int knotIndex = intersect.junctions[a].knotIndex == 0 ? 0 : r.Count - 1;
+                    float rT = EvaluateT(combinedSpline, intersect.junctions[a].knot.Position);
                     if (rT < sT)
                     {
-                        Intersection.JunctionInfo jinfo = new Intersection.JunctionInfo(r, r[intersect.junctions[a].knotIndex]);
+                        Intersection.JunctionInfo jinfo = new Intersection.JunctionInfo(r, r[knotIndex]);
                         intersect.junctions[a] = jinfo;
                     }
                 }
@@ -423,39 +445,29 @@ public class RoadMapping : MonoBehaviour
                     {
                         SplineUtility.ReverseFlow(splineB);
                         roadB.points.Reverse();
-                        for (int pointMap = 0; pointMap < roadB.points.Count; pointMap++)
+                        
+                        for (int knotIndex = 0; knotIndex < splineB.Count; knotIndex++)
                         {
-                            List<BezierKnot> newBRoadMap = roadB.roadMap[roadB.points[pointMap]].knotCluster;
-                            newBRoadMap.Reverse();
-                            for (int knotIndex = 0; knotIndex < newBRoadMap.Count; knotIndex++)
-                            {
-                                BezierKnot knot = newBRoadMap[knotIndex];
-                                Quaternion newRotationQuaternion = knot.Rotation;
-                                Vector3 newRotation = newRotationQuaternion.eulerAngles;
-                                knot.Rotation = Quaternion.Euler(newRotation.x, newRotation.y - 180, newRotation.z);
-                                newBRoadMap[knotIndex] = knot;
-                            }
-                            roadB.roadMap[roadB.points[pointMap]].knotCluster = newBRoadMap;
+                            BezierKnot knot = splineB[knotIndex];
+                            Quaternion newRotationQuaternion = knot.Rotation;
+                            Vector3 newRotation = newRotationQuaternion.eulerAngles;
+                            knot.Rotation = Quaternion.Euler(newRotation.x, newRotation.y - 180, newRotation.z);
+                            splineB[knotIndex] = knot;
                         }
                         indexB = splineB.Count;
                     }
+
                     else if (indexA > 0 && indexB > 0)
                     {
                         SplineUtility.ReverseFlow(splineB);
                         roadB.points.Reverse();
-                        for (int pointMap = 0; pointMap < roadB.points.Count; pointMap++)
+                        for (int knotIndex = 0; knotIndex < splineB.Count; knotIndex++)
                         {
-                            List<BezierKnot> newBRoadMap = roadB.roadMap[roadB.points[pointMap]].knotCluster;
-                            newBRoadMap.Reverse();
-                            for (int knotIndex = 0; knotIndex < newBRoadMap.Count; knotIndex++)
-                            {
-                                BezierKnot knot = newBRoadMap[knotIndex];
-                                Quaternion newRotationQuaternion = knot.Rotation;
-                                Vector3 newRotation = newRotationQuaternion.eulerAngles;
-                                knot.Rotation = Quaternion.Euler(newRotation.x, newRotation.y - 180, newRotation.z);
-                                newBRoadMap[knotIndex] = knot;
-                            }
-                            roadB.roadMap[roadB.points[pointMap]].knotCluster = newBRoadMap;
+                            BezierKnot knot = splineB[knotIndex];
+                            Quaternion newRotationQuaternion = knot.Rotation;
+                            Vector3 newRotation = newRotationQuaternion.eulerAngles;
+                            knot.Rotation = Quaternion.Euler(newRotation.x, newRotation.y - 180, newRotation.z);
+                            splineB[knotIndex] = knot;
                         }
                         indexB = 0;
                     }
@@ -491,18 +503,13 @@ public class RoadMapping : MonoBehaviour
     {
         Spline newSpline = new Spline();
         List<Vector3> newPoints = new List<Vector3>();
-        Dictionary<Vector3, List<BezierKnot>> newMap = new Dictionary<Vector3, List<BezierKnot>>();
 
         for (int i = 0; i < roadA.points.Count - 1; i++)
         {
             newPoints.Add(roadA.points[i]);
-            newMap.Add(roadA.points[i], roadA.roadMap[roadA.points[i]].knotCluster);
         }
 
-        BezierKnot joinKnotA = roadA.roadMap[roadA.points[^1]].knotCluster[0]; //first intersecting knot
-        BezierKnot joinKnotB = roadB.roadMap[roadB.points[0]].knotCluster[0]; //second intersecting knot
-
-        Vector3 center = GetPointCenter((Vector3)roadA.points[^1], (roadA.points[^2] - roadA.points[^1]).normalized, (Vector3)roadB.points[0], (roadB.points[1] - roadB.points[0]).normalized);
+        Vector3 center = placementSystem.SmoothenPosition(GetPointCenter((Vector3)roadA.points[^1], (roadA.points[^2] - roadA.points[^1]).normalized, (Vector3)roadB.points[0], (roadB.points[1] - roadB.points[0]).normalized));
         //Debug.Log(center);
 
         float prevAngle = Vector3.SignedAngle(Vector3.forward, center - roadA.points[^2], Vector3.up);
@@ -515,24 +522,7 @@ public class RoadMapping : MonoBehaviour
 
         if (sign > 0)
         {
-            Vector3 m1 = Vector3.Cross(center - roadA.points[^2], Vector3.up).normalized * roadA.width;
-            Vector3 m2 = (((roadA.points[^2] - center).normalized + (roadB.points[1] - center).normalized) / 2).normalized * (1f/pointMagnitude);
-            Vector3 m3 = Vector3.Cross(roadB.points[1] - center, Vector3.up).normalized * roadB.width;
-
-            Debug.Log($"{center} {m2} {m1} {m3} {(1f/pointMagnitude)}");
-
-            joinKnotA.Position = (Vector3.SignedAngle(roadB.points[1] - center, center - roadA.points[^2], Vector3.up) < 0) ? center + m2 + m1 : center + m2 - m1;
-            joinKnotA.Rotation = Quaternion.Euler(0, prevAngle, 0);
-            joinKnotA.TangentIn = new Unity.Mathematics.float3(0, 0, -Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-            joinKnotA.TangentOut = new Unity.Mathematics.float3(0, 0, Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-
-            joinKnotB.Position = (Vector3.SignedAngle(roadB.points[1] - center, center - roadA.points[^2], Vector3.up) < 0) ? center + m2 + m3 : center + m2 - m3;
-            joinKnotB.Rotation = Quaternion.Euler(0, angle, 0);
-            joinKnotB.TangentIn = new Unity.Mathematics.float3(0, 0, -Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-            joinKnotB.TangentOut = new Unity.Mathematics.float3(0, 0, Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-
             newPoints.Add(center);
-            newMap.Add(center, new List<BezierKnot> { joinKnotA, joinKnotB });
         }
 
         for (int i = 1; i < roadB.points.Count; i++)
@@ -540,20 +530,17 @@ public class RoadMapping : MonoBehaviour
             if (newPoints.FindIndex(item => Vector3.Distance(roadB.points[i], item) < roadB.width + 0.5f) == -1)
             {
                 newPoints.Add(roadB.points[i]);
-                newMap.Add(roadB.points[i], roadB.roadMap[roadB.points[i]].knotCluster);
             }
         }
 
-        for (int i = 0; i < newPoints.Count; i++)
+        List<BezierKnot> knots = BuildKnots(newPoints, roadB.width);
+        foreach (BezierKnot kt in knots)
         {
-            foreach (BezierKnot kt in newMap[newPoints[i]])
-            {
-                //Debug.Log($"{newPoints[i]} {kt.Position}");
-                newSpline.Add(kt);
-            }
+            //Debug.Log($"{newPoints[i]} {kt.Position}");
+            newSpline.Add(kt);
         }
 
-        MakeSpline(newSpline, newMap, newPoints, roadA.width, roadA.tex, roadA.ID);
+        MakeSpline(newSpline, newPoints, roadA.width, roadA.tex, roadA.ID);
 
         foreach (Intersection intersect in intersections)
         {
@@ -609,11 +596,307 @@ public class RoadMapping : MonoBehaviour
         return false;
     }
 
-    public void AddRoad(List<Vector3> points, int width, long ID, Texture2D tex)
+    public Vector3 CalculateIntersectionCenter(Spline spline, Intersection intersection)
     {
-        //add a road based on the coordinates of the build mode
-        Spline spline = new Spline();
-        Dictionary<Vector3, List<BezierKnot>> splinePoints = new();
+        Vector3 center = new();
+        
+        foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+        {                            
+            Vector3 tangent1 = junction.knotIndex == 0 ? Vector3.Normalize(junction.spline.EvaluateTangent(0)) : Vector3.Normalize(junction.spline.EvaluateTangent(1));
+            Unity.Mathematics.float3 hitSplinePoint = new();
+            SplineUtility.GetNearestPoint(spline, (Vector3)junction.knot.Position, out hitSplinePoint, out float tx, (int)((spline.GetLength() * 2)));
+            Vector3 tangent2 = Vector3.Normalize(spline.EvaluateTangent(tx));
+            center += GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2);
+        }
+
+        center /= intersection.GetJunctions().Count();
+
+        return transform.TransformPoint(placementSystem.SmoothenPosition(center));
+    }
+
+    public Vector3 CalculateIntersectionCenter(Intersection intersection)
+    {
+        Vector3 center = new();
+        
+        for (int i = 1; i < intersection.junctions.Count(); i++)
+        {                            
+            Vector3 tangent1 = intersection.junctions[i].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(1));
+            Vector3 tangent2 = intersection.junctions[0].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(1));
+            Vector3 localCenter = GetPointCenter((Vector3)intersection.junctions[i].knot.Position, tangent1, (Vector3)intersection.junctions[0].knot.Position, tangent2);
+            Debug.Log($"{(Vector3)intersection.junctions[i].knot.Position}:{tangent1} {(Vector3)intersection.junctions[0].knot.Position}:{tangent2} || Center: {localCenter}");
+            center += localCenter;
+        }
+
+        center /= (intersection.GetJunctions().Count() - 1);
+
+        return transform.TransformPoint(placementSystem.SmoothenPosition(center));
+    }
+
+    public void CreateIntersection(List<int> intersectionBuild, List<Vector3> points, /*Dictionary<Vector3, List<BezierKnot>> splinePoints*/ int width, Spline spline, List<List<Spline>> roadsList, List<List<BezierKnot>> knotsList, Texture2D tex, long ID, Roads road, bool isEdit)
+    {
+        List<Vector3> pointsRef = points;
+        List<RaycastHit> hitList = new();
+        List<List<Roads>> roadPairs = new();
+        List<(Spline, Vector3, Vector3)> hitRemoveList = new();
+
+        //detects overlap and creates an intersection automatically
+        for (int i = 1; i < pointsRef.Count; i++)
+        {
+            Vector3 p1 = pointsRef[i - 1]; Vector3 p2 = pointsRef[i];
+            RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(width, 0.5f, 0.1f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
+            RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(width, 0.5f, 0.1f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
+
+            List<RaycastHit> hits = new(); hits.AddRange(hits1); hits.AddRange(hits2);
+            foreach (RaycastHit hit in hits)
+            {
+                //Debug.Log($"{hit.collider.gameObject}, {hit.point}");
+                if (!HitsContainCollider(hitList, hit, new Vector3(width * 2, 0.5f, width * 2)) && !(hit.point == Vector3.zero && p1 != Vector3.zero) && !(isEdit && hit.collider == road.collider))
+                {
+                    hitList.Add(hit);
+                    hitList.Sort((a, b) =>
+                    {
+                        if (a.point == Vector3.zero) { a.point = p1; }
+                        float tThis = EvaluateT(spline, a.point);
+                        float tComp = EvaluateT(spline, b.point);
+
+                        if (tThis < tComp)
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    });
+                }
+            }
+        }
+
+        foreach (RaycastHit hit in hitList)
+        {
+            for (int j = 0; j < intersections.Count; j++)
+            {
+                if (hit.collider == intersections[j].collider)
+                {
+                    Spline spline2 = new();
+                    //Dictionary<Vector3, List<BezierKnot>> spline2Points = new();
+                    List<Vector3> points2 = new();
+
+                    Vector3 intersectingSplinePoint = CalculateIntersectionCenter(intersections[j]);
+
+                    //determine the direction to move the splines in
+                    float t1 = EvaluateT(spline, intersectingSplinePoint);
+                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
+
+                    if (intersections[j].junctions.FindIndex(item => item.spline == spline) == -1)
+                    {
+                        //insert incoming spline
+                        if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
+                        {
+                            FilterPoints(spline, spline2, points, t1, width, out points2, out dir1, out Vector3 dir2);
+                            
+                            points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
+                            points2.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)));
+
+                            RebuildRoadKnots(points, spline, width);
+                            RebuildRoadKnots(points2, spline2, width);
+                            MakeSpline(spline2, points2, width, tex, ID);
+                            for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
+                            {
+                                for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
+                                {
+                                    if (roadsList[filterRoadList][filterRoad] == spline)
+                                    {
+                                        roadsList[filterRoadList][filterRoad] = spline2;
+                                    }
+                                }
+                            }
+
+                            intersections[j].AddJunction(spline, spline[0], 0.5f);
+                            intersections[j].AddJunction(spline2, spline[^1], 0.5f);
+                        }
+                        else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
+                        {
+                            points[^1] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
+                            RebuildRoadKnots(points, spline, width);
+                            intersections[j].AddJunction(spline, spline[^1], 0.5f);
+                        }
+                        else
+                        {
+                            points[0] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
+                            RebuildRoadKnots(points, spline, width);
+                            intersections[j].AddJunction(spline, spline[0], 0.5f);
+                        }
+
+                        intersectionBuild.Add(j);
+                    }
+
+                    foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
+                    {
+                        hitRemoveList.Add((junction.spline, junction.knot.Position, ((Quaternion)junction.knot.Rotation) * new Vector3(width + 0.5f, 0.1f, 0.5f)));
+                        Debug.Log(((Quaternion)junction.knot.Rotation) * new Vector3(width + 0.5f, 0.1f, 1.5f));
+                    }
+                }
+                else if (intersections[j].junctions.FindIndex(item => item.spline == spline) != -1)
+                {
+                    foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
+                    {
+                        hitRemoveList.Add((junction.spline, junction.knot.Position, ((Quaternion)junction.knot.Rotation) * new Vector3(width + 0.5f, 0.1f, 1.5f)));
+                    }
+
+                    intersectionBuild.Add(j);
+                }
+            }
+            for (int j = 0; j < roads.Count; j++)
+            {
+                if (hit.collider == roads[j].collider)
+                {
+                    Spline spline2 = new(); Spline spline3 = new(); Roads roadJ = roads[j];
+                    //Dictionary<Vector3, List<BezierKnot>> spline2Points = new(); Dictionary<Vector3, List<BezierKnot>> spline3Points = new();
+                    List<Vector3> points2 = new(); List<Vector3> points3 = new();
+                    List<Spline> internalRoadsList = new(); List<BezierKnot> internalKnotsList = new();
+
+                    //determine the spline in which it is intersecting
+                    Vector3 thisSplinePoint = new(); Vector3 otherSplinePoint = new();
+                    m_SplineSampler.SampleSplinePoint(spline, hit.point, (int)(spline.GetLength() * 2), out thisSplinePoint, out float t1);
+                    m_SplineSampler.SampleSplinePoint(roadJ.road, hit.point, roadJ.resolution, out otherSplinePoint, out float t2);
+
+                    //if the roadsJ has been replaced in an earlier intersection, then find the spline it was replaced by.
+                    foreach (List<Roads> roadPair in roadPairs)
+                    {
+                        if (roadPair.Contains(roadJ))
+                        {
+                            Roads otherRoad = roadPair.IndexOf(roadJ) == 0 ? roadPair[1] : roadPair[0];
+                            m_SplineSampler.SampleSplinePoint(otherRoad.road, hit.point, (int)(otherRoad.road.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
+                            if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
+                            {
+                                otherSplinePoint = alternativeSplinePoint;
+                                t2 = tAlt;
+                                roadJ = otherRoad;
+                            }
+                        }
+                    }
+
+                    //determine the direction to move the splines in
+                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
+                    Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(roadJ.road, t2);
+                    Vector3 intersectingSplinePoint = placementSystem.SmoothenPosition(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized)); //used to prioritise the existing road coordinates in the creation of an intersection
+
+                    t1 = EvaluateT(spline, intersectingSplinePoint); t2 = EvaluateT(roadJ.road, intersectingSplinePoint);
+                    dir1 = SplineUtility.EvaluateTangent(spline, t1);
+                    dir2 = SplineUtility.EvaluateTangent(roadJ.road, t2);
+
+                    if (hitRemoveList.FindIndex(item => item.Item1 == roadJ.road && (
+                        (Mathf.Abs(intersectingSplinePoint.x - item.Item2.x) < Mathf.Abs(item.Item3.x) && Mathf.Abs(intersectingSplinePoint.y - item.Item2.y) < Mathf.Abs(item.Item3.y) && Mathf.Abs(intersectingSplinePoint.z - item.Item2.z) < Mathf.Abs(item.Item3.z)) 
+                        || (Mathf.Abs(hit.point.x - item.Item2.x) < Mathf.Abs(item.Item3.x) && Mathf.Abs(hit.point.y - item.Item2.y) < Mathf.Abs(item.Item3.y) && Mathf.Abs(hit.point.z - item.Item2.z) < Mathf.Abs(item.Item3.z))
+                    )) == -1)
+                    {
+                        Debug.Log($"{roads.IndexOf(roadJ)} {hit.point} {intersectingSplinePoint}");
+
+                        //insert incoming spline
+                        if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
+                        {
+                            FilterPoints(spline, spline2, points, t1, width, out points2, out dir1, out Vector3 dir3);
+
+                            points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
+                            points2.Add(intersectingSplinePoint - (dir3.normalized * (width + 0.5f)));
+
+                            RebuildRoadKnots(points, spline, width);
+                            RebuildRoadKnots(points2, spline2, width);
+                            MakeSpline(spline2, points2, width, tex, ID);
+                            FilterIntersections(spline, spline2, t1);
+                            for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
+                            {
+                                for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
+                                {
+                                    if (roadsList[filterRoadList][filterRoad] == spline)
+                                    {
+                                        roadsList[filterRoadList][filterRoad] = spline2;
+                                    }
+                                }
+                            }
+                            internalRoadsList.Add(spline); internalRoadsList.Add(spline2);
+                            internalKnotsList.Add(spline[0]); internalKnotsList.Add(spline2[^1]);
+                        }
+                        else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
+                        {
+                            points[^1] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
+                            RebuildRoadKnots(points, spline, width);
+                            internalRoadsList.Add(spline); internalKnotsList.Add(spline[^1]);
+                        }
+                        else
+                        {
+                            points[0] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
+                            RebuildRoadKnots(points, spline, width);
+                            internalRoadsList.Add(spline); internalKnotsList.Add(spline[0]);
+                        }
+
+                        //insert overlapping spline
+                        if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) < 1 && EvaluateT(roadJ.road, intersectingSplinePoint - (dir2.normalized * (width + 0.5f))) > 0)
+                        {
+                            FilterPoints(roadJ.road, spline3, roadJ.points, t2, width, out points3, out dir2, out Vector3 dir4);
+
+                            roadJ.points.Insert(0, intersectingSplinePoint + (dir2.normalized * (width + 0.5f)));
+                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
+
+                            points3.Add(intersectingSplinePoint - (dir4.normalized * (width + 0.5f)));
+
+                            RebuildRoadKnots(roadJ.points, roadJ.road, width);
+                            RebuildRoadKnots(points3, spline3, width);
+                            MakeSpline(spline3, points3, width, tex, ID);
+                            FilterIntersections(roadJ.road, spline3, t2);
+                            for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
+                            {
+                                for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
+                                {
+                                    if (roadsList[filterRoadList][filterRoad] == roadJ.road)
+                                    {
+                                        if (!roadJ.road.Contains(knotsList[filterRoadList][filterRoad]) && spline3.Contains(knotsList[filterRoadList][filterRoad]))
+                                        {
+                                            roadsList[filterRoadList][filterRoad] = spline3;
+                                        }
+                                    }
+                                }
+                            }
+                            internalRoadsList.Add(roadJ.road); internalRoadsList.Add(spline3);
+                            internalKnotsList.Add(roadJ.road[0]); internalKnotsList.Add(spline3[^1]);
+                            roadPairs.Add(new List<Roads> {roadJ, roads.Find(item => item.road == spline3)});
+
+                            hitRemoveList.Add((spline3, intersectingSplinePoint, (Quaternion)spline3[^1].Rotation * new Vector3(width + 1.5f, 0.1f, width + 1.5f)));
+                            hitRemoveList.Add((spline3, points3[^1], (Quaternion)spline3[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 1.5f)));
+                        }
+                        else if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) >= 1)
+                        {
+                            roadJ.points[^1] = intersectingSplinePoint - (dir2.normalized * (width + 0.5f));
+                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
+                            RebuildRoadKnots(roadJ.points, roadJ.road, width);
+                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(roadJ.road[^1]);
+                        }
+                        else
+                        {
+                            roadJ.points[0] = intersectingSplinePoint + (dir2.normalized * (width + 0.5f));
+                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
+                            RebuildRoadKnots(roadJ.points, roadJ.road, width);
+                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(roadJ.road[0]);
+                        }
+
+                        roadsList.Add(internalRoadsList);
+                        knotsList.Add(internalKnotsList);
+                        hitRemoveList.Add((roadJ.road, intersectingSplinePoint, (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 1.5f, 0.1f, width + 1.5f)));
+                        hitRemoveList.Add((roadJ.road, roadJ.points[0], (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 1.5f)));
+                        Debug.Log(roadJ.points[0] + (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 0.5f));
+
+                        BuildRoadMesh(roads.IndexOf(roadJ));
+                    }
+                }
+            }
+        }
+    }
+
+    public List<BezierKnot> BuildKnots(List<Vector3> points, int width)
+    {
+        List<BezierKnot> knots = new();
+
         foreach (Vector3 point in points)
         {
             float angle; float prevAngle;
@@ -643,19 +926,24 @@ public class RoadMapping : MonoBehaviour
                 knot2.Position = (Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, point - points[points.IndexOf(point) - 1], Vector3.up) < 0) ? point + m2 + m1 : point + m2 - m1;
                 knot2.Rotation = Quaternion.Euler(0, angle, 0);
 
-                spline.Add(knot);
-                spline.Add(knot2);
-                splinePoints.Add(point, new List<BezierKnot> { knot, knot2 });
+                knots.Add(knot);
+                knots.Add(knot2);
             }
             else if (points.IndexOf(point) == 0)
             {
-                angle = Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, Vector3.forward, Vector3.down);
+                if (points.Count > 1)
+                {
+                    angle = Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, Vector3.forward, Vector3.down);
+                }
+                else
+                {
+                    angle = 0;
+                }
                 knot.Position = point;
                 knot.Rotation = Quaternion.Euler(0, angle, 0);
                 knot.TangentIn = new Unity.Mathematics.float3(0, 0, -1f);
                 knot.TangentOut = new Unity.Mathematics.float3(0, 0, 1f);
-                spline.Add(knot);
-                splinePoints.Add(point, new List<BezierKnot> { knot });
+                knots.Add(knot);
             }
             else
             {
@@ -664,915 +952,190 @@ public class RoadMapping : MonoBehaviour
                 knot.Rotation = Quaternion.Euler(0, angle, 0);
                 knot.TangentIn = new Unity.Mathematics.float3(0, 0, -1f);
                 knot.TangentOut = new Unity.Mathematics.float3(0, 0, 1f);
-                spline.Add(knot);
-                splinePoints.Add(point, new List<BezierKnot> { knot });
+                knots.Add(knot);
             }
         }
 
-        List<Vector3> pointsRef = points;
-        Dictionary<Vector3, List<BezierKnot>> pointMapRef = splinePoints;
-        List<RaycastHit> hitList = new();
+        return knots;
+    }
+
+    public void RebuildRoadKnots(List<Vector3> points, Spline spline, int width)
+    {
+        List<BezierKnot> knots = BuildKnots(points, width);
+        spline.Clear();
+        spline.AddRange(knots);
+    }
+
+    public void AddRoad(List<Vector3> points, int width, long ID, Texture2D tex)
+    {
+        //add a road based on the coordinates of the build mode
+        Spline spline = new Spline();
+        List<BezierKnot> knots = BuildKnots(points, width);
+
+        foreach (BezierKnot knot in knots)
+        {
+            spline.Add(knot);
+        }
+
         List<List<Spline>> roadsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<List<Roads>> roadPairs = new();
-        List<Spline> hitRemoveList = new();
-        //detects overlap and creates an intersection automatically
-        for (int i = 1; i < pointsRef.Count; i++)
-        {
-            Vector3 p1 = pointsRef[i - 1]; Vector3 p2 = pointsRef[i];
-            RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(width, 0.5f, 0.1f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
-            RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(width, 0.5f, 0.1f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
+        List<int> intersectionBuild = new();
+        CreateIntersection(intersectionBuild, points, width, spline, roadsList, knotsList, tex, ID, null, false);
 
-            List<RaycastHit> hits = new(); hits.AddRange(hits1); hits.AddRange(hits2);
-            foreach (RaycastHit hit in hits)
-            {
-                //Debug.Log($"{hit.collider.gameObject}, {hit.point}");
-                if (!HitsContainCollider(hitList, hit, new Vector3(width * 2, 0.5f, width * 2)) && !(hit.point == Vector3.zero && p1 != Vector3.zero))
-                {
-                    hitList.Add(hit);
-                    hitList.Sort((a, b) =>
-                    {
-                        if (a.point == Vector3.zero) { a.point = p1; }
-                        float tThis = EvaluateT(spline, a.point);
-                        float tComp = EvaluateT(spline, b.point);
+        MakeSpline(spline, points, width, tex, ID);
 
-                        if (tThis < tComp)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    });
-                }
-            }
-        }
-
-        foreach (RaycastHit hit in hitList)
-        {
-            for (int j = 0; j < intersections.Count; j++)
-            {
-                if (hit.collider == intersections[j].collider)
-                {
-                    Spline spline2 = new();
-                    Dictionary<Vector3, List<BezierKnot>> spline2Points = new();
-                    List<Vector3> points2 = new();
-
-                    Vector3 center = new();
-                    
-                    foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                    {                            
-                        Vector3 tangent1 = junction.knotIndex == 0 ? Vector3.Normalize(junction.spline.EvaluateTangent(0)) : Vector3.Normalize(junction.spline.EvaluateTangent(1));
-                        Unity.Mathematics.float3 hitSplinePoint = new();
-                        SplineUtility.GetNearestPoint(spline, (Vector3)junction.knot.Position, out hitSplinePoint, out float tx, (int)((spline.GetLength() * 2)));
-                        Vector3 tangent2 = Vector3.Normalize(spline.EvaluateTangent(tx));
-                        center += GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2);
-                    }
-
-                    center /= intersections[j].GetJunctions().Count();
-
-                    Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(center));
-
-                    //determine the direction to move the splines in
-                    float t1 = EvaluateT(spline, intersectingSplinePoint);
-                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-
-                    //add new splines and split the roads (plan)
-                    BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                    knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                    knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                    BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                    knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                    knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                    //insert incoming spline
-                    if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
-                    {
-                        FilterPoints(spline, spline2, points, splinePoints, t1, out points2, out spline2Points, out bool splitSpline);
-                        if (splitSpline)
-                        {
-                            spline.Insert(0, knot1); points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                            splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-
-                            spline2.Add(knot2); points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                            spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-
-                            MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                            for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                            {
-                                for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                {
-                                    if (roadsList[filterRoadList][filterRoad] == spline)
-                                    {
-                                        roadsList[filterRoadList][filterRoad] = spline2;
-                                    }
-                                }
-                            }
-
-                            List<Spline> containerSplines = new();
-                            foreach (Spline splinesIndex in m_SplineContainer.Splines) { containerSplines.Add(splinesIndex); }
-                        }
-                        else
-                        {
-                            Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                            points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                            splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline[0] });
-                            m_SplineSampler.SampleSplinePoint(spline, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                            knot1.Position = knot1Pos;
-                            knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0); spline[0] = knot1;
-
-                            Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline2, t1);
-                            points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                            spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline2[^1] });
-                            m_SplineSampler.SampleSplinePoint(spline2, intersectingSplinePoint - (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                            knot2.Position = knot2Pos;
-                            knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0); spline2[^1] = knot2;
-
-                            MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                            for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                            {
-                                for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                {
-                                    if (roadsList[filterRoadList][filterRoad] == spline)
-                                    {
-                                        roadsList[filterRoadList][filterRoad] = spline2;
-                                    }
-                                }
-                            }
-                        }
-
-                        intersections[j].AddJunction(spline, knot1, 0.5f);
-                        intersections[j].AddJunction(spline2, knot1, 0.5f);
-                    }
-                    else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
-                    {
-                        spline.SetKnot(spline.Count - 1, knot2); points[^1] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                        splinePoints.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-                        splinePoints.Remove(intersectingSplinePoint);
-                        intersections[j].AddJunction(spline, knot2, 0.5f);
-                    }
-                    else
-                    {
-                        spline.SetKnot(0, knot1); points[0] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                        splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                        splinePoints.Remove(intersectingSplinePoint);
-                        intersections[j].AddJunction(spline, knot1, 0.5f);
-                    }
-
-                    foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                    {
-                        hitRemoveList.Add(junction.spline);
-                    }
-                }
-            }
-            for (int j = 0; j < roads.Count; j++)
-            {
-                if (hit.collider == roads[j].collider)
-                {
-                    Spline spline2 = new(); Spline spline3 = new(); Roads roadJ = roads[j];
-                    Dictionary<Vector3, List<BezierKnot>> spline2Points = new(); Dictionary<Vector3, List<BezierKnot>> spline3Points = new();
-                    List<Vector3> points2 = new(); List<Vector3> points3 = new();
-                    List<Spline> internalRoadsList = new(); List<BezierKnot> internalKnotsList = new();
-
-                    //determine the spline in which it is intersecting
-                    Vector3 thisSplinePoint = new(); Vector3 otherSplinePoint = new();
-                    m_SplineSampler.SampleSplinePoint(spline, hit.point, (int)(spline.GetLength() * 2), out thisSplinePoint, out float t1);
-                    m_SplineSampler.SampleSplinePoint(roadJ.road, hit.point, roadJ.resolution, out otherSplinePoint, out float t2);
-
-                    //if the roadsJ has been replaced in an earlier intersection, then find the spline it was replaced by.
-                    foreach (List<Roads> roadPair in roadPairs)
-                    {
-                        if (roadPair.Contains(roadJ))
-                        {
-                            Roads otherRoad = roadPair.IndexOf(roadJ) == 0 ? roadPair[1] : roadPair[0];
-                            m_SplineSampler.SampleSplinePoint(otherRoad.road, hit.point, (int)(otherRoad.road.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
-                            if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
-                            {
-                                otherSplinePoint = alternativeSplinePoint;
-                                t2 = tAlt;
-                                roadJ = otherRoad;
-                            }
-                        }
-                    }
-
-                    //determine the direction to move the splines in
-                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                    Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(roadJ.road, t2);
-                    Vector3 intersectingSplinePoint = GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized); //used to prioritise the existing road coordinates in the creation of an intersection
-
-                    t1 = EvaluateT(spline, intersectingSplinePoint); t2 = EvaluateT(roadJ.road, intersectingSplinePoint);
-                    dir1 = SplineUtility.EvaluateTangent(spline, t1);
-                    dir2 = SplineUtility.EvaluateTangent(roadJ.road, t2);
-
-                    if (hitRemoveList.FindIndex(item => item == roadJ.road) == -1)
-                    {
-                        //add new splines and split the roads (plan)
-                        BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                        knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                        knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                        knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                        knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        BezierKnot knot3 = new BezierKnot(); knot3.Position = intersectingSplinePoint + (dir2.normalized * (width + 0.5f));
-                        knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                        knot3.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                        knot3.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        BezierKnot knot4 = new BezierKnot(); knot4.Position = intersectingSplinePoint - (dir2.normalized * (width + 0.5f));
-                        knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                        knot4.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                        knot4.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        //insert incoming spline
-                        if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
-                        {
-                            FilterPoints(spline, spline2, points, splinePoints, t1, out points2, out spline2Points, out bool splitSpline);
-                            if (splitSpline)
-                            {
-                                spline.Insert(0, knot1); points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-
-                                spline2.Add(knot2); points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                                {
-                                    for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                    {
-                                        if (roadsList[filterRoadList][filterRoad] == spline)
-                                        {
-                                            roadsList[filterRoadList][filterRoad] = spline2;
-                                        }
-                                    }
-                                }
-                                internalRoadsList.Add(spline); internalRoadsList.Add(spline2);
-                                internalKnotsList.Add(knot1); internalKnotsList.Add(knot2);
-                            }
-                            else
-                            {
-                                Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                                points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline[0] });
-                                m_SplineSampler.SampleSplinePoint(spline, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                                knot1.Position = knot1Pos;
-                                knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0);
-                                spline[0] = knot1;
-
-                                Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline2, t1);
-                                points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline2[^1] });
-                                m_SplineSampler.SampleSplinePoint(spline2, intersectingSplinePoint - (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                                knot2.Position = knot2Pos;
-                                knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0);
-                                spline2[^1] = knot2;
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                                {
-                                    for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                    {
-                                        if (roadsList[filterRoadList][filterRoad] == spline)
-                                        {
-                                            roadsList[filterRoadList][filterRoad] = spline2;
-                                        }
-                                    }
-                                }
-                                internalRoadsList.Add(spline); internalRoadsList.Add(spline2);
-                                internalKnotsList.Add(spline[0]); internalKnotsList.Add(spline2[^1]);
-                            }
-                        }
-                        else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
-                        {
-                            spline.SetKnot(spline.Count - 1, knot2); points[^1] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(spline); internalKnotsList.Add(knot2);
-                        }
-                        else
-                        {
-                            spline.SetKnot(0, knot1); points[0] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(spline); internalKnotsList.Add(knot1);
-                        }
-
-                        //insert overlapping spline
-                        if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) < 1 && EvaluateT(roadJ.road, intersectingSplinePoint - (dir2.normalized * (width + 0.5f))) > 0)
-                        {
-                            FilterPoints(roadJ.road, spline3, roadJ.points, roadJ.GetRoadMap(), t2, out points3, out spline3Points, out bool splitSpline);
-                            //Debug.Log($"{splitSpline}, {intersectingSplinePoint},");
-
-                            if (splitSpline)
-                            {
-                                roadJ.road.Insert(0, knot3); roadJ.points.Insert(0, intersectingSplinePoint + (dir2.normalized * (width + 0.5f)));
-                                roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot3 }));
-                                roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-
-                                spline3.Add(knot4); points3.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)));
-                                spline3Points.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new List<BezierKnot> { knot4 });
-
-                                MakeSpline(spline3, spline3Points, points3, width, tex, ID);
-                                FilterIntersections(roadJ.road, spline3, t2);
-                                for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                                {
-                                    for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                    {
-                                        if (roadsList[filterRoadList][filterRoad] == roadJ.road)
-                                        {
-                                            if (!roadJ.road.Contains(knotsList[filterRoadList][filterRoad]) && spline3.Contains(knotsList[filterRoadList][filterRoad]))
-                                            {
-                                                roadsList[filterRoadList][filterRoad] = spline3;
-                                            }
-                                        }
-                                    }
-                                }
-                                internalRoadsList.Add(roadJ.road); internalRoadsList.Add(spline3);
-                                internalKnotsList.Add(knot3); internalKnotsList.Add(knot4);
-                            }
-                            else
-                            {
-                                Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(roadJ.road, t2);
-                                roadJ.points.Insert(0, intersectingSplinePoint + (dir2.normalized * (width + 0.5f)));
-                                roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { roadJ.road[0] }));
-                                m_SplineSampler.SampleSplinePoint(roadJ.road, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                                knot3.Position = knot1Pos;
-                                knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0); roadJ.road[0] = knot3;
-
-                                Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline3, t2);
-                                points3.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)));
-                                spline3Points.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new List<BezierKnot> { spline3[^1] });
-                                m_SplineSampler.SampleSplinePoint(spline3, intersectingSplinePoint - (dirB.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                                knot4.Position = knot2Pos;
-                                knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0); spline3[^1] = knot4;
-
-                                MakeSpline(spline3, spline3Points, points3, width, tex, ID);
-                                FilterIntersections(roadJ.road, spline3, t2);
-                                for (int filterRoadList = 0; filterRoadList < roadsList.Count; filterRoadList++)
-                                {
-                                    for (int filterRoad = 0; filterRoad < roadsList[filterRoadList].Count; filterRoad++)
-                                    {
-                                        if (roadsList[filterRoadList][filterRoad] == roadJ.road)
-                                        {
-                                            if (!roadJ.road.Contains(knotsList[filterRoadList][filterRoad]) && spline3.Contains(knotsList[filterRoadList][filterRoad]))
-                                            {
-                                                roadsList[filterRoadList][filterRoad] = spline3;
-                                            }
-                                        }
-                                    }
-                                }
-                                internalRoadsList.Add(roadJ.road); internalRoadsList.Add(spline3);
-                                internalKnotsList.Add(roadJ.road[0]); internalKnotsList.Add(spline3[^1]);
-                            }
-
-                            roadPairs.Add(new List<Roads> {roadJ, roads.Find(item => item.road == spline3)});
-                        }
-                        else if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) >= 1)
-                        {
-                            roadJ.road.SetKnot(roadJ.road.Count - 1, knot4); roadJ.points[^1] = intersectingSplinePoint - (dir2.normalized * (width + 0.5f));
-                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-                            roadJ.roadMap.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot4 }));
-
-                            roadJ.roadMap.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(knot4);
-                        }
-                        else
-                        {
-                            roadJ.road.SetKnot(0, knot3); roadJ.points[0] = intersectingSplinePoint + (dir2.normalized * (width + 0.5f));
-                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-                            roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot3 }));
-
-                            roadJ.roadMap.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(knot3);
-                        }
-
-                        roadsList.Add(internalRoadsList);
-                        knotsList.Add(internalKnotsList);
-                        //hitRemoveList.Add(roadJ.road);
-                    }
-                }
-            }
-        }
-
-        MakeSpline(spline, splinePoints, points, width, tex, ID);
         for (int k = 0; k < roadsList.Count; k++)
         {
             MakeIntersection(roadsList[k], knotsList[k]);
         }
+        foreach (int index in intersectionBuild)
+        {
+            BuildIntersectionMesh(index);
+        }
+
         CleanRoads();
         CleanIntersections();
-        MakeRoad();
     }
 
     public void ModifyRoad(Roads road, List<Vector3> points, int width, long ID, Texture2D tex)
     {
         Spline spline = road.road;
+        road.points = points;
         //modify a road based on the coordinates of the build mode
-        Dictionary<Vector3, List<BezierKnot>> splinePoints = new();
-        foreach (Vector3 point in points)
+        List<BezierKnot> knots = BuildKnots(points, width);
+
+        for (int knotAddIndex = 0; knotAddIndex < knots.Count; knotAddIndex++)
         {
-            float angle; float prevAngle;
-            BezierKnot knot = new BezierKnot();
-            if (points.IndexOf(point) < points.Count - 1 && points.IndexOf(point) >= 1)
+            if (knotAddIndex < spline.Count)
             {
-                angle = Vector3.SignedAngle(Vector3.forward, points[points.IndexOf(point) + 1] - point, Vector3.up);
-                prevAngle = Vector3.SignedAngle(Vector3.forward, point - points[points.IndexOf(point) - 1], Vector3.up);
-
-                angle = angle >= 0 ? angle : 360 + angle;
-                prevAngle = prevAngle >= 0 ? prevAngle : 360 + prevAngle;
-                float pointMagnitude = Mathf.Abs(Mathf.Cos((angle - prevAngle) / 2f * Mathf.PI / 180f)) < Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)) ? Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)) : Mathf.Abs(Mathf.Cos((angle - prevAngle) / 2f * Mathf.PI / 180f));
-
-                Vector3 m1 = Vector3.Cross(points[points.IndexOf(point) + 1] - point, Vector3.up).normalized * width;
-                Vector3 m2 = (((points[points.IndexOf(point) + 1] - point).normalized + (points[points.IndexOf(point) - 1] - point).normalized) / 2).normalized * (1f/pointMagnitude);
-                Vector3 m3 = Vector3.Cross(point - points[points.IndexOf(point) - 1], Vector3.up).normalized * width;
-
-                //make nicer curves
-                BezierKnot knot2 = new BezierKnot();
-                knot.Position = (Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, point - points[points.IndexOf(point) - 1], Vector3.up) < 0) ? point + m2 + m3 : point + m2 - m3;
-                knot.Rotation = Quaternion.Euler(0, prevAngle, 0);
-                knot.TangentIn = new Unity.Mathematics.float3(0, 0, -Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-                knot.TangentOut = new Unity.Mathematics.float3(0, 0, Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-
-                knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-                knot2.TangentOut = new Unity.Mathematics.float3(0, 0, Mathf.Abs(Mathf.Sin((angle - prevAngle) / 2f * Mathf.PI / 180f)));
-                knot2.Position = (Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, point - points[points.IndexOf(point) - 1], Vector3.up) < 0) ? point + m2 + m1 : point + m2 - m1;
-                knot2.Rotation = Quaternion.Euler(0, angle, 0);
-
-                if (road.points.Count > points.IndexOf(point))
-                {
-                    spline.SetKnot(road.road.IndexOf(road.roadMap[road.points[points.IndexOf(point)]].knotCluster[0]), knot);
-                }
-                else
-                {
-                    spline.Add(knot);
-                }
-
-                if (road.points.Count > points.IndexOf(point) && road.roadMap[road.points[points.IndexOf(point)]].knotCluster.Count > 1)
-                {
-                    spline.SetKnot(road.road.IndexOf(road.roadMap[road.points[points.IndexOf(point)]].knotCluster[1]), knot2);
-                }
-                else
-                {
-                    spline.Add(knot2);
-                }
-                splinePoints.Add(point, new List<BezierKnot> { knot, knot2 });
-            }
-            else if (points.IndexOf(point) == 0)
-            {
-                angle = Vector3.SignedAngle(points[points.IndexOf(point) + 1] - point, Vector3.forward, Vector3.down);
-                knot.Position = point;
-                knot.Rotation = Quaternion.Euler(0, angle, 0);
-                knot.TangentIn = new Unity.Mathematics.float3(0, 0, -1f);
-                knot.TangentOut = new Unity.Mathematics.float3(0, 0, 1f);
-                if ((points.IndexOf(point) * 2) < road.road.Count)
-                {
-                    spline.SetKnot(0, knot);
-                }
-                else
-                {
-                    spline.Add(knot);
-                }
-                splinePoints.Add(point, new List<BezierKnot> { knot });
+                spline.SetKnot(knotAddIndex, knots[knotAddIndex]);
             }
             else
             {
-                angle = Vector3.SignedAngle(point - points[points.IndexOf(point) - 1], Vector3.forward, Vector3.down);
-                knot.Position = point;
-                knot.Rotation = Quaternion.Euler(0, angle, 0);
-                knot.TangentIn = new Unity.Mathematics.float3(0, 0, -1f);
-                knot.TangentOut = new Unity.Mathematics.float3(0, 0, 1f);
-                if ((points.IndexOf(point) * 2) - 1 < road.road.Count)
-                {
-                    spline.SetKnot(spline.Count - 1, knot);
-                }
-                else
-                {
-                    spline.Add(knot);
-                }
-                splinePoints.Add(point, new List<BezierKnot> { knot });
+                spline.Add(knots[knotAddIndex]);
             }
         }
 
         foreach (Intersection intersection in intersections)
         {
-            List<Intersection.JunctionEdge> junctionEdges = new List<Intersection.JunctionEdge>();
-            Vector3 center = new Vector3();
-            bool containsThisSpline = false;
-            int knotIndex = -1;
-            Intersection.JunctionInfo selectedJunction = new Intersection.JunctionInfo();
-            foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+            if (intersection.junctions.FindIndex(item => item.spline == spline) != -1)
             {
-                if (junction.spline == spline)
-                {
-                    containsThisSpline = true;
-                    knotIndex = junction.knotIndex;
-                    selectedJunction = junction;
-                    break;
-                }
+                Intersection.JunctionInfo selectedJunction = intersection.junctions.Find(item => item.spline == spline);
+                Vector3 intersectingSplinePoint = CalculateIntersectionCenter(spline, intersection);
 
-            }
-            if (containsThisSpline)
-            {
-                foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+                int knotIndex = selectedJunction.knotIndex == 0 ? 0 : spline.Count - 1;
+
+                if (Vector3.Distance(intersectingSplinePoint, spline[knotIndex].Position) > width + 3f)
                 {
-                    int splineIndex = junction.GetSplineIndex(m_SplineContainer);
-                    float t = junction.knotIndex == 0 ? 0f : 1f;
-                    m_SplineSampler.SampleSplineWidth(splineIndex, t, roads[splineIndex].width, out Vector3 p1, out Vector3 p2);
-                    //if knot index is 0 we are facing away from the junction, otherwise we are facing the junction
-                    if (junction.knotIndex == 0)
+                    intersection.junctions.Remove(intersection.junctions.Find(item => item.spline == spline));
+                }
+                else
+                {
+                    Intersection.JunctionInfo newJunction = new();
+                    newJunction.spline = spline;
+
+                    if (knotIndex == 0)
                     {
-                        junctionEdges.Add(new Intersection.JunctionEdge(p1, p2));
+                        newJunction.knotIndex = 0;
+                        newJunction.knot = spline[0];
                     }
                     else
                     {
-                        junctionEdges.Add(new Intersection.JunctionEdge(p2, p1));
+                        newJunction.knotIndex = spline.Count - 1;
+                        newJunction.knot = spline[spline.Count - 1];
                     }
 
-                    center += p1;
-                    center += p2;
-                }
-                center /= (junctionEdges.Count * 2);
-                if (Vector3.Distance(center, (Vector3)spline[knotIndex].Position) > width + 3f)
-                {
-                    intersection.junctions.Remove(selectedJunction);
+                    intersection.junctions[intersection.junctions.FindIndex(item => item.spline == spline)] = newJunction;
                 }
             }
         }
 
-        List<Vector3> pointsRef = points;
-        Dictionary<Vector3, List<BezierKnot>> pointMapRef = splinePoints;
-        List<RaycastHit> hitList = new();
         List<List<Spline>> roadsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<List<Roads>> roadPairs = new();
-        List<Spline> hitRemoveList = new();
-        //detects overlap and creates an intersection automatically
-        for (int i = 1; i < pointsRef.Count; i++)
-        {
-            Vector3 p1 = pointsRef[i - 1]; Vector3 p2 = pointsRef[i];
-            RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(width, 0.5f, 0.1f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
-            RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(width, 0.5f, 0.1f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.1f, LayerMask.GetMask("Selector"));
-            List<RaycastHit> hits = new(); hits.AddRange(hits1); hits.AddRange(hits2);
-            foreach (RaycastHit hit in hits)
-            {
-                if (!HitsContainCollider(hitList, hit, new Vector3(width * 2, 0.5f, width * 2)) && !(hit.point == Vector3.zero && p1 != Vector3.zero) && hit.collider != road.collider)
-                {
-                    hitList.Add(hit);
-                    hitList.Sort((a, b) =>
-                    {
-                        if (a.point == Vector3.zero) { a.point = p1; }
-                        float tThis = EvaluateT(spline, a.point);
-                        float tComp = EvaluateT(spline, b.point);
-
-                        if (tThis < tComp)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    });
-                }
-            }
-        }
-
-        foreach (RaycastHit hit in hitList)
-        {
-            for (int j = 0; j < intersections.Count; j++)
-            {
-                if (hit.collider == intersections[j].collider)
-                {
-                    if (!IntersectionsContainRoad(road, intersections[j]))
-                    {
-                        Spline spline2 = new();
-                        Dictionary<Vector3, List<BezierKnot>> spline2Points = new();
-                        List<Vector3> points2 = new();
-
-                        /*                     
-                        List<Intersection.JunctionEdge> junctionEdges = new List<Intersection.JunctionEdge>();
-
-                        Vector3 center = new Vector3();
-                        foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                        {
-                            int splineIndex = junction.GetSplineIndex(m_SplineContainer);
-                            float t = junction.knotIndex == 0 ? 0f : 1f;
-                            m_SplineSampler.SampleSplineWidth(splineIndex, t, roads[splineIndex].width, out Vector3 p1, out Vector3 p2);
-                            //if knot index is 0 we are facing away from the junction, otherwise we are facing the junction
-                            if (junction.knotIndex == 0)
-                            {
-                                junctionEdges.Add(new Intersection.JunctionEdge(p1, p2));
-                            }
-                            else
-                            {
-                                junctionEdges.Add(new Intersection.JunctionEdge(p2, p1));
-                            }
-
-                            center += p1;
-                            center += p2;
-                        } 
-                        */
-
-                        Vector3 center = new();
-                        
-                        foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                        {                            
-                            Vector3 tangent1 = junction.knotIndex == 0 ? Vector3.Normalize(junction.spline.EvaluateTangent(0)) : Vector3.Normalize(junction.spline.EvaluateTangent(1));
-                            Unity.Mathematics.float3 hitSplinePoint = new();
-                            SplineUtility.GetNearestPoint(spline, (Vector3)junction.knot.Position, out hitSplinePoint, out float tx, (int)((spline.GetLength() * 2)));
-                            Vector3 tangent2 = Vector3.Normalize(spline.EvaluateTangent(tx));
-                            center += GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2);
-                        }
-
-                        center /= intersections[j].GetJunctions().Count();
-
-                        Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(center));
-
-                        //determine the direction to move the splines in
-                        float t1 = EvaluateT(spline, intersectingSplinePoint);
-                        Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-
-                        //add new splines and split the roads (plan)
-                        BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                        knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                        knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        //insert incoming spline
-                        if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
-                        {
-                            FilterPoints(spline, spline2, points, splinePoints, t1, out points2, out spline2Points, out bool splitSpline);
-                            if (splitSpline)
-                            {
-                                spline.Insert(0, knot1); points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                                road.resolution = (int)(spline.GetLength() * 2);
-
-                                spline2.Add(knot2); points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                FilterIntersections(spline, spline2, t1);
-                                List<Spline> containerSplines = new();
-                                foreach (Spline splinesIndex in m_SplineContainer.Splines) { containerSplines.Add(splinesIndex); }
-                            }
-                            else
-                            {
-                                Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                                points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline[0] });
-                                m_SplineSampler.SampleSplinePoint(spline, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                                knot1.Position = knot1Pos;
-                                knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0); spline[0] = knot1;
-
-                                Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline2, t1);
-                                points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline2[^1] });
-                                m_SplineSampler.SampleSplinePoint(spline2, intersectingSplinePoint - (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                                knot2.Position = knot2Pos;
-                                knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0); spline2[^1] = knot2;
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                FilterIntersections(spline, spline2, t1);
-                                road.resolution = (int)(spline.GetLength() * 2);
-                            }
-
-                            intersections[j].AddJunction(spline, knot1, 0.5f);
-                            intersections[j].AddJunction(spline2, knot1, 0.5f);
-                        }
-                        else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
-                        {
-                            spline.SetKnot(spline.Count - 1, knot2); points[^1] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            intersections[j].AddJunction(spline, knot2, 0.5f);
-                        }
-                        else
-                        {
-                            spline.SetKnot(0, knot1); points[0] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            intersections[j].AddJunction(spline, knot1, 0.5f);
-                        }
-                    }
-                    
-                    foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                    {
-                        hitRemoveList.Add(junction.spline);
-                    }
-                }
-            }
-
-            for (int j = 0; j < roads.Count; j++)
-            {
-                if (hit.collider == roads[j].collider)
-                {
-                    Spline spline2 = new(); Spline spline3 = new(); Roads roadJ = roads[j];
-                    Dictionary<Vector3, List<BezierKnot>> spline2Points = new(); Dictionary<Vector3, List<BezierKnot>> spline3Points = new();
-                    List<Vector3> points2 = new(); List<Vector3> points3 = new();
-                    List<Spline> internalRoadsList = new(); List<BezierKnot> internalKnotsList = new();
-
-                    //determine the spline in which it is intersecting
-                    Vector3 thisSplinePoint = new(); Vector3 otherSplinePoint = new();
-                    m_SplineSampler.SampleSplinePoint(spline, hit.point, (int)(spline.GetLength() * 2), out thisSplinePoint, out float t1);
-                    m_SplineSampler.SampleSplinePoint(roadJ.road, hit.point, roadJ.resolution, out otherSplinePoint, out float t2);
-
-                    //if the roadsJ has been replaced in an earlier intersection, then find the spline it was replaced by.
-                    foreach (List<Roads> roadPair in roadPairs)
-                    {
-                        if (roadPair.Contains(roadJ))
-                        {
-                            Roads otherRoad = roadPair.IndexOf(roadJ) == 0 ? roadPair[1] : roadPair[0];
-                            m_SplineSampler.SampleSplinePoint(otherRoad.road, hit.point, (int)(otherRoad.road.GetLength() * 2), out Vector3 alternativeSplinePoint, out float tAlt);
-                            if (Vector3.Distance(thisSplinePoint, alternativeSplinePoint) < Vector3.Distance(thisSplinePoint, otherSplinePoint))
-                            {
-                                otherSplinePoint = alternativeSplinePoint;
-                                t2 = tAlt;
-                                roadJ = otherRoad;
-                            }
-                        }
-                    }
-
-                    //determine the direction to move the splines in
-                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                    Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(roadJ.road, t2);
-                    Vector3 intersectingSplinePoint = GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized); //used to prioritise the existing road coordinates in the creation of an intersection
-
-                    t1 = EvaluateT(spline, intersectingSplinePoint); t2 = EvaluateT(roadJ.road, intersectingSplinePoint);
-                    dir1 = SplineUtility.EvaluateTangent(spline, t1);
-                    dir2 = SplineUtility.EvaluateTangent(roadJ.road, t2);
-
-                    if (hitRemoveList.FindIndex(item => item == roadJ.road) == -1)
-                    {
-                        //add new splines and split the roads (plan)
-                        BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                        knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                        knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        BezierKnot knot3 = new BezierKnot(); knot3.Position = intersectingSplinePoint + (dir2.normalized * (width + 0.5f));
-                        knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                        knot3.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        BezierKnot knot4 = new BezierKnot(); knot4.Position = intersectingSplinePoint - (dir2.normalized * (width + 0.5f));
-                        knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                        knot4.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        //insert incoming spline
-                        if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
-                        {
-                            FilterPoints(spline, spline2, points, splinePoints, t1, out points2, out spline2Points, out bool splitSpline);
-                            if (splitSpline)
-                            {
-                                spline.Insert(0, knot1); points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                                road.resolution = (int)(spline.GetLength() * 2);
-
-                                spline2.Add(knot2); points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                FilterIntersections(spline, spline2, t1);
-                                internalRoadsList.Add(spline); internalRoadsList.Add(spline2);
-                                internalKnotsList.Add(knot1); internalKnotsList.Add(knot2);
-                            }
-                            else
-                            {
-                                Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                                points.Insert(0, intersectingSplinePoint + (dir1.normalized * (width + 0.5f)));
-                                splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline[0] });
-                                m_SplineSampler.SampleSplinePoint(spline, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                                knot1.Position = knot1Pos;
-                                knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0); spline[0] = knot1;
-
-                                Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline2, t1);
-                                points2.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)));
-                                spline2Points.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { spline2[^1] });
-                                m_SplineSampler.SampleSplinePoint(spline2, intersectingSplinePoint - (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                                knot2.Position = knot2Pos;
-                                knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0); spline2[^1] = knot2;
-
-                                MakeSpline(spline2, spline2Points, points2, width, tex, ID);
-                                FilterIntersections(spline, spline2, t1);
-                                road.resolution = (int)(spline.GetLength() * 2);
-                                internalRoadsList.Add(spline); internalRoadsList.Add(spline2);
-                                internalKnotsList.Add(spline[0]); internalKnotsList.Add(spline2[^1]);
-                            }
-                        }
-                        else if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) >= 1)
-                        {
-                            spline.SetKnot(spline.Count - 1, knot2); points[^1] = intersectingSplinePoint + (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint + (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot2 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(spline); internalKnotsList.Add(knot2);
-                        }
-                        else
-                        {
-                            spline.SetKnot(0, knot1); points[0] = intersectingSplinePoint - (dir1.normalized * (width + 0.5f));
-                            splinePoints.Add(intersectingSplinePoint - (dir1.normalized * (width + 0.5f)), new List<BezierKnot> { knot1 });
-                            splinePoints.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(spline); internalKnotsList.Add(knot1);
-                        }
-
-                        //insert overlapping spline
-                        if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) < 1 && EvaluateT(roadJ.road, intersectingSplinePoint - (dir2.normalized * (width + 0.5f))) > 0)
-                        {
-                            FilterPoints(roadJ.road, spline3, roadJ.points, roadJ.GetRoadMap(), t2, out points3, out spline3Points, out bool splitSpline);
-
-                            if (splitSpline)
-                            {
-
-                                roadJ.road.Insert(0, knot3); roadJ.points.Insert(0, intersectingSplinePoint + (dir2.normalized * (width + 0.5f)));
-                                roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot3 }));
-                                roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-
-                                spline3.Add(knot4); points3.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)));
-                                spline3Points.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new List<BezierKnot> { knot4 });
-
-                                MakeSpline(spline3, spline3Points, points3, width, tex, ID);
-                                FilterIntersections(roadJ.road, spline3, t2);
-                                internalRoadsList.Add(roadJ.road); internalRoadsList.Add(spline3);
-                                internalKnotsList.Add(knot3); internalKnotsList.Add(knot4);
-                            }
-                            else
-                            {
-                                Vector3 dirA = (Vector3)SplineUtility.EvaluateTangent(roadJ.road, t2);
-                                roadJ.points.Insert(0, intersectingSplinePoint + (dir2.normalized * (width + 0.5f)));
-                                roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { roadJ.road[0] }));
-                                m_SplineSampler.SampleSplinePoint(roadJ.road, intersectingSplinePoint + (dirA.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot1Pos, out float tx);
-                                knot3.Position = knot1Pos;
-                                knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirA.normalized, Vector3.forward, Vector3.down), 0); roadJ.road[0] = knot3;
-
-                                Vector3 dirB = (Vector3)SplineUtility.EvaluateTangent(spline3, t2);
-                                points3.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)));
-                                spline3Points.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new List<BezierKnot> { spline3[^1] });
-                                m_SplineSampler.SampleSplinePoint(spline3, intersectingSplinePoint - (dirB.normalized * (width + 0.5f)), (int)(spline.GetLength() * 2), out Vector3 knot2Pos, out float ty);
-                                knot4.Position = knot2Pos;
-                                knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dirB.normalized, Vector3.forward, Vector3.down), 0); spline3[^1] = knot4;
-
-                                MakeSpline(spline3, spline3Points, points3, width, tex, ID);
-                                FilterIntersections(roadJ.road, spline3, t2);
-                                internalRoadsList.Add(roadJ.road); internalRoadsList.Add(spline3);
-                                internalKnotsList.Add(roadJ.road[0]); internalKnotsList.Add(spline3[^1]);
-                            }
-
-                            roadPairs.Add(new List<Roads> {roadJ, roads.Find(item => item.road == spline3)});
-                        }
-                        else if (EvaluateT(roadJ.road, intersectingSplinePoint + (dir2.normalized * (width + 0.5f))) >= 1)
-                        {
-                            roadJ.road.SetKnot(roadJ.road.Count - 1, knot4); roadJ.points[^1] = intersectingSplinePoint - (dir2.normalized * (width + 0.5f));
-                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-                            roadJ.roadMap.Add(intersectingSplinePoint - (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot4 }));
-                            roadJ.roadMap.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(knot4);
-                        }
-                        else
-                        {
-                            roadJ.road.SetKnot(0, knot3); roadJ.points[0] = intersectingSplinePoint + (dir2.normalized * (width + 0.5f));
-                            roadJ.resolution = (int)(roadJ.road.GetLength() * 2);
-                            roadJ.roadMap.Add(intersectingSplinePoint + (dir2.normalized * (width + 0.5f)), new KnotClusterWrapper(new List<BezierKnot> { knot3 }));
-                            roadJ.roadMap.Remove(intersectingSplinePoint);
-                            internalRoadsList.Add(roadJ.road); internalKnotsList.Add(knot3);
-                        }
-                    }
-
-                    roadsList.Add(internalRoadsList);
-                    knotsList.Add(internalKnotsList);
-                    //hitRemoveList.Add(roadJ.road);
-                }
-            }
-        }
+        List<int> intersectionBuild = new();
+        CreateIntersection(intersectionBuild, points, width, spline, roadsList, knotsList, tex, ID, road, true);
 
         road.points = points;
-        road.roadMap = road.ConvertToSerializedRoadMap(splinePoints);
         road.width = width;
         road.ID = ID;
         road.resolution = (int)(spline.GetLength() * 2);
+        BuildRoadMesh(roads.IndexOf(road));
 
         for (int k = 0; k < roadsList.Count; k++)
         {
             MakeIntersection(roadsList[k], knotsList[k]);
         }
+        foreach (int index in intersectionBuild)
+        {
+            BuildIntersectionMesh(index);
+        }
         CleanRoads();
         CleanIntersections();
-        MakeRoad();
     }
 
-    private void MakeSpline(Spline spline, Dictionary<Vector3, List<BezierKnot>> splinePoints, List<Vector3> points, int width, Texture2D tex, long ID)
+    public void ModifyIntersection(Intersection intersection, Vector3 center)
+    {
+        List<(int, Intersection.JunctionInfo)> newJunctions = new();
+
+        foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+        {
+            Roads road = roads.Find(item => item.road == junction.spline);
+            int index = junction.knotIndex == 0 ? 0 : road.points.Count;
+
+            if (index == 0)
+            {
+                Vector3 dir = road.points[1] - center;
+                road.points[0] = center + (dir.normalized * (road.width + 0.5f));
+                road.resolution = (int)(road.road.GetLength() * 2);
+                RebuildRoadKnots(road.points, road.road, road.width);
+
+                Intersection.JunctionInfo newJunction = new();
+                newJunction.spline = road.road;
+                newJunction.knotIndex = 0;
+                newJunction.knot = road.road[0];
+                newJunctions.Add((intersection.junctions.IndexOf(junction), newJunction));
+            }
+            else
+            {
+                Vector3 dir = road.points[^2] - center;
+                road.points[^1] = center + (dir.normalized * (road.width + 0.5f));
+                road.resolution = (int)(road.road.GetLength() * 2);
+                RebuildRoadKnots(road.points, road.road, road.width);
+
+                Intersection.JunctionInfo newJunction = new();
+                newJunction.spline = road.road;
+                newJunction.knotIndex = road.road.Count - 1;
+                newJunction.knot = road.road[road.road.Count - 1];
+                newJunctions.Add((intersection.junctions.IndexOf(junction), newJunction));
+            }
+        }
+
+        for (int i = 0; i < newJunctions.Count; i++)
+        {
+            intersection.junctions[newJunctions[i].Item1] = newJunctions[i].Item2;
+            Roads road = roads.Find(item => item.road == newJunctions[i].Item2.spline);
+            List<List<Spline>> roadsList = new();
+            List<List<BezierKnot>> knotsList = new();
+            List<int> intersectionBuild = new();
+            CreateIntersection(intersectionBuild, road.points, road.width, road.road, roadsList, knotsList, road.tex, road.ID, road, true);
+            for (int k = 0; k < roadsList.Count; k++)
+            {
+                MakeIntersection(roadsList[k], knotsList[k]);
+            }
+            foreach (int index in intersectionBuild)
+            {
+                BuildIntersectionMesh(index);
+            }
+
+            BuildRoadMesh(roads.IndexOf(road));
+        }
+
+        CleanRoads();
+        CleanIntersections();
+        BuildIntersectionMesh(intersections.IndexOf(intersection));
+    }
+
+    private void MakeSpline(Spline spline, List<Vector3> points, int width, Texture2D tex, long ID)
     {
         //if the spline is valid, then spawn it
         if (Vector3.Distance(points[0], points[^1]) > 0.01f)
@@ -1586,7 +1149,9 @@ public class RoadMapping : MonoBehaviour
             c.AddComponent<MeshRenderer>();
             c.layer = LayerMask.NameToLayer("Selector");
             Material material = Instantiate(roadMat);
-            roads.Add(new Roads(spline, splinePoints, points, (int)(spline.GetLength() * 2), width, c.GetComponent<MeshCollider>(), c.GetComponent<MeshRenderer>(), c.GetComponent<MeshFilter>(), material, tex, ID));
+            Roads road = new Roads(spline, points, (int)(spline.GetLength() * 2), width, c.GetComponent<MeshCollider>(), c.GetComponent<MeshRenderer>(), c.GetComponent<MeshFilter>(), material, tex, ID);
+            roads.Add(road);
+            BuildRoadMesh(roads.IndexOf(road));
         }
         //or else, undo the creation of intersections with the spline
         else
@@ -1625,6 +1190,7 @@ public class RoadMapping : MonoBehaviour
             road.mesh = c.GetComponent<MeshFilter>();
             road.renderer = c.GetComponent<MeshRenderer>();
             roads.Add(road);
+            BuildRoadMesh(roads.IndexOf(road));
         }
         else
         {
@@ -1649,6 +1215,7 @@ public class RoadMapping : MonoBehaviour
     private void MakeIntersection(List<Spline> splines, List<BezierKnot> knots)
     {
         Intersection intersection = new Intersection();
+        List<(Spline, BezierKnot)> removeIndex = new();
         for (int i = 0; i < splines.Count; i++)
         {
             if (CheckPointsEqual(splines[i], out Spline equalSpline))
@@ -1657,9 +1224,14 @@ public class RoadMapping : MonoBehaviour
             }
             else
             {
-                //Debug.Log("No possible splines found!");
-                break;
+                removeIndex.Add((splines[i], knots[i]));
             }
+        }
+
+        foreach ((Spline, BezierKnot) remove in removeIndex)
+        {
+            splines.Remove(remove.Item1);
+            knots.Remove(remove.Item2);
         }
 
         for (int c = 0; c < splines.Count; c++)
@@ -1682,23 +1254,35 @@ public class RoadMapping : MonoBehaviour
         AddJunction(intersection, collider.GetComponent<MeshCollider>(), collider.GetComponent<MeshFilter>(), collider.GetComponent<MeshRenderer>());
     }
 
-    public void SelectRoad(Vector3 position, Vector2Int size, float rotation, out Roads selectedRoad, out int index, out int width, out long ID, out List<Vector3> points)
+    public void SelectRoad(InputManager input, out Roads selectedRoad, out int index, out int width, out long ID, out List<Vector3> points)
     {
-        Collider[] overlaps = Physics.OverlapBox(position, new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, 5, 0), LayerMask.GetMask("Selector"));
-        selectedRoad = null; index = -1; width = 0; ID = -1; points = new();
-        foreach (Roads road in roads)
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        index = -1; width = 0; ID = -1; points = new();
+        selectedRoad = roads.Find(road => overlapsList.FindIndex(col => col.collider == road.collider) != -1);
+        if (selectedRoad != null)
         {
-            Collider selector = road.collider;
-            foreach (Collider hit in overlaps)
+            index = roads.IndexOf(selectedRoad);
+            width = selectedRoad.width;
+            ID = selectedRoad.ID;
+            points = selectedRoad.points;
+        }
+    }
+
+    public void SelectIntersection(InputManager input, out Intersection selectedIntersection, out int index, out List<Roads> roads)
+    {
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        index = -1; roads = new();
+        selectedIntersection = intersections.Find(intersection => overlapsList.FindIndex(col => col.collider == intersection.collider) != -1);
+        if (selectedIntersection != null)
+        {
+            index = intersections.IndexOf(selectedIntersection);
+
+            foreach (Intersection.JunctionInfo junction in selectedIntersection.GetJunctions())
             {
-                if (hit == selector)
-                {
-                    selectedRoad = road;
-                    index = roads.IndexOf(road);
-                    width = road.width;
-                    ID = road.ID;
-                    points = road.points;
-                }
+                Roads road = this.roads.Find(item => item.road == junction.spline);
+                roads.Add(road);
             }
         }
     }
@@ -1765,6 +1349,18 @@ public class RoadMapping : MonoBehaviour
         return false;
     }
 
+    public bool CheckIntersectionSelect(InputManager input)
+    {
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (intersections.FindIndex(intersection => overlapsList.FindIndex(col => col.collider == intersection.collider) != -1) != -1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
     private bool CheckPointsEqual(Spline spline, out Spline equalSpline)
     {
         equalSpline = null;
@@ -1799,21 +1395,11 @@ public class RoadMapping : MonoBehaviour
 
     private Vector3 GetPointCenter(Vector3 origin1, Vector3 tangent1, Vector3 origin2, Vector3 tangent2)
     {
-        float angleA = Vector3.SignedAngle(tangent2, tangent1, Vector3.down);
-        float angleB = Vector3.SignedAngle(origin1 - origin2, tangent1, Vector3.down);
-        float angleC = Vector3.SignedAngle(origin2 - origin1, tangent2, Vector3.up);
-        float sign1 = 1; float sign2 = 1;
+        float t1 = Vector3.Dot(Vector3.Cross(origin2 - origin1, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized)) * Vector3.Dot(Vector3.Cross(tangent1.normalized, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized));
+        float t2 = Vector3.Dot(Vector3.Cross(origin2 - origin1, tangent1.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized)) * Vector3.Dot(Vector3.Cross(tangent1.normalized, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized));
 
-        if (Mathf.Sin(angleA * (Mathf.PI / 180)) == 0)
-        {
-            angleA = 180; sign1 = -1; sign2 = -1;
-        }
-
-        float t1 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleC * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign1;
-        float t2 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleB * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign2;
-
-        Vector3 p1 = placementSystem.SmoothenPosition(origin1 + (t1 * tangent1));
-        Vector3 p2 = placementSystem.SmoothenPosition(origin2 + (t2 * tangent2));
+        Vector3 p1 = origin1 + (t1 * tangent1);
+        Vector3 p2 = origin2 + (t2 * tangent2);
 
         if (Vector3.Distance(p1, p2) < 0.1f)
         {
@@ -1864,7 +1450,7 @@ public class RoadMapping : MonoBehaviour
 public class Roads
 {
     public Spline road;
-    public SerializedDictionary<Vector3, KnotClusterWrapper> roadMap;
+    //public SerializedDictionary<Vector3, KnotClusterWrapper> roadMap;
     public List<Vector3> points;
     public int resolution;
     public int width;
@@ -1874,11 +1460,11 @@ public class Roads
     public MeshRenderer renderer;
     public Texture2D tex;
 
-    public Roads(Spline road, Dictionary<Vector3, List<BezierKnot>> roadMap, List<Vector3> points, int resolution, int width, MeshCollider collider, MeshRenderer renderer, MeshFilter mesh, Material mat, Texture2D tex, long ID)
+    public Roads(Spline road, List<Vector3> points, int resolution, int width, MeshCollider collider, MeshRenderer renderer, MeshFilter mesh, Material mat, Texture2D tex, long ID)
     {
         this.road = road;
 
-        this.roadMap = ConvertToSerializedRoadMap(roadMap);
+        //this.roadMap = ConvertToSerializedRoadMap(roadMap);
 
         this.points = points;
         this.resolution = resolution;
@@ -1893,6 +1479,7 @@ public class Roads
         this.tex = tex;
     }
 
+/*
     public Dictionary<Vector3, List<BezierKnot>> GetRoadMap()
     {
         Dictionary<Vector3, List<BezierKnot>> returnedRoadMap = new Dictionary<Vector3, List<BezierKnot>>();
@@ -1904,6 +1491,7 @@ public class Roads
 
         return returnedRoadMap;
     }
+    */
 
     public SerializedDictionary<Vector3, KnotClusterWrapper> ConvertToSerializedRoadMap(Dictionary<Vector3, List<BezierKnot>> roadMap)
     {

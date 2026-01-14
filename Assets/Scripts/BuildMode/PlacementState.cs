@@ -10,7 +10,6 @@ public class PlacementState : IBuildingState
     PlacementSystem placementSystem;
     ObjectsDatabaseSO database;
     ObjectPlacer objectPlacer;
-    SoundFeedback soundFeedback;
     private Vector3 displayPosition;
     private float rotation;
 
@@ -20,8 +19,7 @@ public class PlacementState : IBuildingState
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
                           ObjectsDatabaseSO database,
-                          ObjectPlacer objectPlacer,
-                          SoundFeedback soundFeedback)
+                          ObjectPlacer objectPlacer)
     {
         this.objectData = objectData;
         this.grid = grid;
@@ -29,7 +27,6 @@ public class PlacementState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.objectPlacer = objectPlacer;
-        this.soundFeedback = soundFeedback;
 
         //selectedObjectIndex = database.objectsData.IndexOf(objectData);
         if (database.objectsData.Contains(objectData))
@@ -66,10 +63,8 @@ public class PlacementState : IBuildingState
         bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
 
         List<MatData> newMaterials = new();

@@ -11,7 +11,6 @@ public class RoadModifyState : IBuildingState
     PlacementSystem placementSystem;
     RoadsDatabaseSO database;
     RoadMapping roadMapping;
-    SoundFeedback soundFeedback;
     InputManager inputManager;
     Roads selectedRoad;
     int width;
@@ -19,6 +18,8 @@ public class RoadModifyState : IBuildingState
     float length;
     private List<Vector3> posList;
     private List<Vector3> originalPosList;
+
+    private Dictionary<Vector3, Vector3> posMap;
     bool edited;
 
     public RoadModifyState(Vector3 gridPosition,
@@ -27,20 +28,16 @@ public class RoadModifyState : IBuildingState
                            PlacementSystem placementSystem,
                            RoadsDatabaseSO database,
                            InputManager inputManager,
-                           RoadMapping roadMapping,
-                           SoundFeedback soundFeedback)
+                           RoadMapping roadMapping)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
         this.database = database;
         this.roadMapping = roadMapping;
-        this.soundFeedback = soundFeedback;
         this.inputManager = inputManager;
 
-
-        soundFeedback.PlaySound(SoundType.Click);
-        roadMapping.SelectRoad(grid.LocalToWorld(gridPosition), Vector2Int.one, 0, out selectedRoad, out index, out width, out selectedObjectIndex, out List<Vector3> displayPosList);
+        roadMapping.SelectRoad(inputManager, out selectedRoad, out index, out width, out selectedObjectIndex, out List<Vector3> displayPosList);
         roadsDataObject = database.roadsData.Find(data => data.ID == selectedObjectIndex);
 
 
@@ -48,9 +45,11 @@ public class RoadModifyState : IBuildingState
             return;
         edited = false;
         posList = new();
+        posMap = new();
         for (int i = 0; i < displayPosList.Count; i++)
         {
             posList.Add(grid.WorldToLocal(displayPosList[i]));
+            posMap.Add(grid.WorldToLocal(displayPosList[i]), grid.WorldToLocal(displayPosList[i]));
         }
         originalPosList = posList;
         CalculateLength();
@@ -89,13 +88,28 @@ public class RoadModifyState : IBuildingState
             int index = previewSystem.expanders.IndexOf(previewSystem.SelectedCursor);
             if ((index > 0 && Vector3.Distance(posList[index - 1], gridPosition) < 0.1f) || (index < posList.Count - 1 && Vector3.Distance(posList[index + 1], gridPosition) < 0.1f))
             {
-                posList.RemoveAt(index);
-                CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                if (index != 0 || index != posList.Count - 1)
+                {
+                    posList.RemoveAt(index);
+                    if (index < originalPosList.Count)
+                    {
+                        posMap[originalPosList[index]] = Vector3.negativeInfinity;
+                    }
+                    CalculateLength();
+                    previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
+                }
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
+                if (index < originalPosList.Count)
+                {
+                    posMap[originalPosList[index]] = gridPosition;
+                }
+                else if (index == posList.Count - 1)
+                {
+                    posMap[originalPosList[^1]] = gridPosition;
+                }
                 CalculateLength();
                 previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), roadsDataObject.Cost * Mathf.RoundToInt(length), length, width, 0.1f);
             }
@@ -104,7 +118,7 @@ public class RoadModifyState : IBuildingState
         {
             if (previewSystem.SelectedCursor == previewSystem.gameObject)
             {
-                if (!(posList.Contains(gridPosition)))
+                if (!posList.Contains(gridPosition))
                 {
                     int index = previewSystem.GetSplineIndex(gridPosition);
                     if (index >= 0)
@@ -115,12 +129,14 @@ public class RoadModifyState : IBuildingState
                     }
                 }
             }
-            else if (!(posList.Contains(gridPosition)))
+            /*
+            else if (!posList.Contains(gridPosition))
             {
                 posList.Add(gridPosition);
                 CalculateLength();
                 UpdateState(gridPosition, 0);
             }
+            */
         }
 
     }
@@ -131,12 +147,10 @@ public class RoadModifyState : IBuildingState
 
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
 
         Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
-        soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new List<Vector3>();
         for (int i = 0; i < posList.Count; i++)

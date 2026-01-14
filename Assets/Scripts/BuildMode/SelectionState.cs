@@ -14,7 +14,6 @@ public class SelectionState : IBuildingState
     ObjectsDatabaseSO database;
     ObjectPlacer objectPlacer;
     InputManager inputManager;
-    SoundFeedback soundFeedback;
     List<MatData> materials;
     private Vector3 displayPosition;
     private float rotation; private float originalRotation;
@@ -27,8 +26,7 @@ public class SelectionState : IBuildingState
                           PlacementSystem placementSystem,
                           ObjectsDatabaseSO database,
                           ObjectPlacer objectPlacer,
-                          InputManager inputManager,
-                          SoundFeedback soundFeedback)
+                          InputManager inputManager)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
@@ -36,9 +34,7 @@ public class SelectionState : IBuildingState
         this.database = database;
         this.objectPlacer = objectPlacer;
         this.inputManager = inputManager;
-        this.soundFeedback = soundFeedback;
 
-        soundFeedback.PlaySound(SoundType.Click);
         selectedObject = objectPlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
@@ -91,10 +87,8 @@ public class SelectionState : IBuildingState
         bool placementValidity = CheckPlacementValidity(gridPosition, gameObjectData);
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place);
         displayPosition = grid.LocalToWorld(gridPosition);
 
         materials.Clear();

@@ -11,7 +11,6 @@ public class RoadCreateState : IBuildingState
     PlacementSystem placementSystem;
     RoadsDatabaseSO database;
     RoadMapping roadMapping;
-    SoundFeedback soundFeedback;
     int width;
     float length;
     private List<Vector3> posList;
@@ -24,8 +23,7 @@ public class RoadCreateState : IBuildingState
                            PreviewSystem previewSystem,
                            PlacementSystem placementSystem,
                             RoadsDatabaseSO database,
-                           RoadMapping roadMapping,
-                           SoundFeedback soundFeedback)
+                           RoadMapping roadMapping)
     {
         this.roadsData = roadsData;
         this.grid = grid;
@@ -33,8 +31,6 @@ public class RoadCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.roadMapping = roadMapping;
-        this.soundFeedback = soundFeedback;
-
 
         posList = new();
         //selectedObjectIndex = database.roadsData.IndexOf(roadsData);
@@ -114,12 +110,10 @@ public class RoadCreateState : IBuildingState
 
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
 
         Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
-        soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new List<Vector3>();
         for (int i = 0; i < posList.Count; i++)

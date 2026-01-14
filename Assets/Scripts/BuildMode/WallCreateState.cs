@@ -8,21 +8,18 @@ public class WallCreateState : IBuildingState
     WallMapping wallMapping;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
-    SoundFeedback soundFeedback;
     private List<Vector3> posList;
     float length;
 
     public WallCreateState(Grid grid,
                             WallMapping wallMapping,
                             PreviewSystem previewSystem,
-                            PlacementSystem placementSystem,
-                            SoundFeedback soundFeedback)
+                            PlacementSystem placementSystem)
     {
         this.grid = grid;
         this.wallMapping = wallMapping;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
-        this.soundFeedback = soundFeedback;
 
         posList = new();
         previewSystem.AddWalls();
@@ -101,11 +98,9 @@ public class WallCreateState : IBuildingState
 
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
 
-        soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new();
         for (int i = 0; i < posList.Count; i++)

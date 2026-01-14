@@ -10,7 +10,6 @@ public class ZoneCreateState : IBuildingState
     PlacementSystem placementSystem;
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
-    SoundFeedback soundFeedback;
     private Vector2Int size;
     private Vector3 pos;
     private Vector3 displayPosition; 
@@ -22,8 +21,7 @@ public class ZoneCreateState : IBuildingState
                            PreviewSystem previewSystem,
                            PlacementSystem placementSystem,
                            ZonesDatabaseSO database,
-                           ZonePlacer zonePlacer,
-                           SoundFeedback soundFeedback)
+                           ZonePlacer zonePlacer)
     {
         this.zonesDataObject = zonesDataObject;
         this.grid = grid;
@@ -31,7 +29,6 @@ public class ZoneCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.zonePlacer = zonePlacer;
-        this.soundFeedback = soundFeedback;
         size = new Vector2Int(10, 10);
 
         //selectedObjectIndex = database.zonesData.IndexOf(zonesDataObject);
@@ -75,14 +72,12 @@ public class ZoneCreateState : IBuildingState
 
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
 
         pos = grid.WorldToLocal(previewSystem.previewPos);
         size = previewSystem.previewSize;
         displayPosition = grid.LocalToWorld(pos);
-        soundFeedback.PlaySound(SoundType.Place);
 
         zonePlacer.PlaceZones(displayPosition, pos, zonesDataObject.ID, size, 0.05f, rotation);
 

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Splines;
+using UnityEngine.Splines.ExtrusionShapes;
 
 public class WallMapping : MonoBehaviour
 {
@@ -84,7 +86,7 @@ public class WallMapping : MonoBehaviour
         points2 = new();
         for (int i = 0; i < points.Count; i++)
         {
-            if (Vector3.Distance(points[i], SplineUtility.EvaluatePosition(wall, ratio)) < 0.5f)
+            if (Vector3.Distance(points[i], SplineUtility.EvaluatePosition(wall, ratio)) < 0.04f)
             {
                 removePoints.Add(points[i]);
             }
@@ -1028,57 +1030,6 @@ public class WallMapping : MonoBehaviour
         return false;
     }
 
-    private List<List<int>> GetDuplicatePoints(List<BezierKnot> points)
-    {
-        List<List<int>> d1 = new();
-        List<int> skipIndex = new();
-
-        for (int i = 0; i < points.Count - 1; i++)
-        {
-            if (!skipIndex.Contains(i))
-            {
-                List<int> internalList = new();
-                List<BezierKnot> duplicates = points.FindAll(data => (Vector3)data.Position == (Vector3)points[i].Position);
-                if (duplicates.Count > 1)
-                {
-                    for (int j = 0; j < duplicates.Count; j++)
-                    {
-                        if (internalList.Count > 0)
-                            internalList.Add(points.IndexOf(duplicates[j], internalList[j - 1] + 1));
-                        else internalList.Add(points.IndexOf(duplicates[j]));
-                        skipIndex.Add(j);
-                    }
-                    d1.Add(internalList);
-                }
-            }
-        }
-
-        return d1;
-    }
-
-    private List<BezierKnot> RemoveDuplicatePoints(List<BezierKnot> points)
-    {
-        List<BezierKnot> removePoints = new();
-
-        for (int i = 0; i < points.Count - 1; i++)
-        {
-            for (int j = i + 1; j < points.Count; j++)
-            {
-                if (Vector3.Distance(points[i].Position, points[j].Position) < 0.5f)
-                {
-                    removePoints.Add(points[j]);
-                }
-            }
-        }
-
-        for (int i = 0; i < removePoints.Count; i++)
-        {
-            points.Remove(removePoints[i]);
-        }
-
-        return points;
-    }
-
     private float GetAngle(List<BezierKnot> points)
     {
         float angle = 0;
@@ -1324,6 +1275,26 @@ public class WallMapping : MonoBehaviour
         return nearest;
     }
 
+    private void CleanWalls()
+    {
+        List<Wall> deleteWalls = new();
+
+        for (int i = 0; i < walls.Count; i++)
+        {
+            if (walls[i].wall.GetLength() < 0.5f)
+            {
+                deleteWalls.Add(walls[i]);
+            }
+        }
+
+        for (int i = 0; i < deleteWalls.Count; i++)
+        {
+            Destroy(deleteWalls[i].collider.gameObject);
+            Destroy(deleteWalls[i].mesh.gameObject);
+            walls.Remove(deleteWalls[i]);
+        }
+    }
+
     private void CleanRooms()
     {
         List<Room> deleteRooms = new();
@@ -1355,36 +1326,61 @@ public class WallMapping : MonoBehaviour
                 intersections.Remove(intersections[i]);
             }
         }
+
+
+        List<Intersection> deleteIntersections = new();
+        for (int i = 0; i < intersections.Count; i++)
+        {
+            if (!deleteIntersections.Contains(intersections[i]))
+            {
+                Vector3 center = CalculateIntersectionCenter(intersections[i]);
+                List<Intersection> commonIntersections = intersections.FindAll(item => Vector3.Distance(CalculateIntersectionCenter(item), center) < 0.5f && item != intersections[i]);
+
+                foreach (Intersection intersection in commonIntersections)
+                {
+                    foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
+                    {
+                        if (intersections[i].junctions.FindIndex(item => item.spline == junction.spline) != -1)
+                        {
+                            BezierKnot knot = junction.knotIndex == 0 ? junction.spline[0] : junction.spline[^1];
+                            intersections[i].AddJunction(junction.spline, knot, 0.5f);
+                        }
+                    }
+
+                    deleteIntersections.Add(intersection);
+                }
+            }
+        }
+
+        foreach (Intersection intersection in deleteIntersections)
+        {
+            Destroy(intersection.collider.gameObject);
+            intersections.Remove(intersection);
+        }
     }
 
-    private bool EditKnotsInIntersection(Spline mainSpline, BezierKnot mainKnot, Vector3 position, out List<Spline> intersectList)
+    private bool EditKnotsInIntersection(Spline mainSpline, int knotIndex, Vector3 position, out List<Spline> intersectList)
     {
         intersectList = new();
         bool isEdit = false;
         foreach (Intersection intersection in intersections)
         {
-            if (intersection.junctions.FindIndex(item => item.spline == mainSpline && item.knot.Equals(mainKnot)) != -1)
+            if (intersection.junctions.FindIndex(item => item.spline == mainSpline && item.knotIndex == knotIndex) != -1)
             {
                 for (int i = 0; i < intersection.junctions.Count; i++)
                 {
-                    if (i != intersection.junctions.FindIndex(item => item.spline == mainSpline && item.knot.Equals(mainKnot)))
+                    if (i != intersection.junctions.FindIndex(item => item.spline == mainSpline && item.knotIndex == knotIndex))
                     {
-                        BezierKnot newKnot = intersection.junctions[i].knot;
-                        newKnot.Position = position;
-                        int otherPointIndex = intersection.junctions[i].knotIndex == 0 ? 1 : 0;
-                        if (otherPointIndex == 1)
-                            Quaternion.Euler(0, Vector3.SignedAngle((Vector3)intersection.junctions[i].spline[otherPointIndex].Position - position, Vector3.forward, Vector3.down), 0);
-                        else
-                            Quaternion.Euler(0, Vector3.SignedAngle(position - (Vector3)intersection.junctions[i].spline[otherPointIndex].Position, Vector3.forward, Vector3.down), 0);
-                        intersection.junctions[i].spline[intersection.junctions[i].knotIndex] = newKnot;
-                        Intersection.JunctionInfo newInfo = new Intersection.JunctionInfo(intersection.junctions[i].spline, newKnot);
-                        intersection.junctions[i] = newInfo;
                         intersectList.Add(intersection.junctions[i].spline);
 
                         if (walls.FindIndex(item => item.wall == intersection.junctions[i].spline) != -1)
                         {
                             Wall wall = walls.Find(item => item.wall == intersection.junctions[i].spline);
                             wall.points[intersection.junctions[i].knotIndex] = position;
+                            BuildSplineKnots(wall.wall, wall.points);
+                            Intersection.JunctionInfo newInfo = new Intersection.JunctionInfo(wall.wall, wall.wall[intersection.junctions[i].knotIndex]);
+                            intersection.junctions[i] = newInfo;
+
                             BuildWall(walls.IndexOf(wall));
                         }
                     }
@@ -1395,6 +1391,25 @@ public class WallMapping : MonoBehaviour
             }
         }
         return isEdit;
+    }
+
+    private void EditKnotsInIntersection(Intersection intersection, Vector3 position)
+    {
+        for (int i = 0; i < intersection.junctions.Count; i++)
+        {
+            if (walls.FindIndex(item => item.wall == intersection.junctions[i].spline) != -1)
+            {
+                Wall wall = walls.Find(item => item.wall == intersection.junctions[i].spline);
+                wall.points[intersection.junctions[i].knotIndex] = position;
+                BuildSplineKnots(wall.wall, wall.points);
+                Intersection.JunctionInfo newInfo = new Intersection.JunctionInfo(wall.wall, wall.wall[intersection.junctions[i].knotIndex]);
+                intersection.junctions[i] = newInfo;
+
+                BuildWall(walls.IndexOf(wall));
+            }
+        }
+
+        BuildIntersection(intersections.IndexOf(intersection));
     }
 
     private bool SmallestAngleInIntersection(List<BezierKnot> knots, int knotIndex, float angle)
@@ -1589,27 +1604,22 @@ public class WallMapping : MonoBehaviour
 
     private void CreateRoom(Spline spline, BezierKnot knot, int direction, List<BezierKnot> knotList)
     {
-        knotList.Add(knot);
-        List<List<int>> duples = GetDuplicatePoints(knotList);
-        if (duples.Count > 0)
+        int repIndex = knotList.IndexOf(knot);
+        if (repIndex != -1)
         {
             if (knotList.Count >= 3)
             {
-                for (int i = 0; i < duples.Count; i++)
-                {
-                    for (int j = 1; j < duples[i].Count; j++)
-                    {
-                        List<BezierKnot> newKnotList = knotList.GetRange(duples[i][j - 1], duples[i][j] - duples[i][j - 1]);
+                List<BezierKnot> newKnotList = knotList.GetRange(repIndex, knotList.Count - repIndex);
 
-                        if (!HasRoomWithPoints(newKnotList) && newKnotList.Count >= 3 && IsRoomMeshContinuous(newKnotList))
-                        {
-                            MakeRoom(newKnotList);
-                        }
-                    }
+                if (!HasRoomWithPoints(newKnotList) && newKnotList.Count >= 3 && IsRoomMeshContinuous(newKnotList))
+                {
+                    Debug.Log(string.Join(",", newKnotList));
+                    MakeRoom(newKnotList);
                 }
             }
             return;
         }
+        knotList.Add(knot);
 
         if (spline.IndexOf(knot) - 1 >= 0 && direction == 0)
         {
@@ -1635,7 +1645,7 @@ public class WallMapping : MonoBehaviour
         {
             if (SplineInIntersection(intersections[i], spline, knot))
             {
-                //Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
+                Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
                 nextJunctions.Add(intersections[i]);
             }
         }
@@ -1662,341 +1672,35 @@ public class WallMapping : MonoBehaviour
         }
     }
 
-    public void AddWalls(List<Vector3> points)
+    public Vector3 CalculateIntersectionCenter(Intersection intersection)
     {
-        for (int i = 1; i < points.Count; i++)
-        {
-            Spline spline = new Spline();
-            List<Vector3> splinePoints = new();
-            //List<int> singleKnot = new();
-
-            Vector3 p1 = points[i - 1];
-            Vector3 p2 = points[i];
-
-            BezierKnot k1 = new BezierKnot();
-            k1.Position = transform.InverseTransformPoint(p1);
-            k1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
-            k1.TangentIn = new Unity.Mathematics.float3(0, 0, 0.1f);
-            k1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-            BezierKnot k2 = new BezierKnot();
-            k2.Position = transform.InverseTransformPoint(p2);
-            k2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
-            k2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-            k2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-            spline.Add(k1); spline.Add(k2);
-            splinePoints.Add(transform.InverseTransformPoint(p1)); splinePoints.Add(transform.InverseTransformPoint(p2)); //gets only the two points
-
-            List<List<Spline>> wallsList = new();
-            List<List<BezierKnot>> knotsList = new();
-            List<Vector3> hitRemoveList = new();
-            List<RaycastHit> hitList = new();
-            List<int> intersectionBuild = new();
-
-            //Uses a boxcast to determine intersection points
-            RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(0.04f, 0.04f, 0.04f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
-            RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(0.04f, 0.04f, 0.04f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
-            List<RaycastHit> hits = new(); hits.AddRange(hits1); hits.AddRange(hits2);
-            foreach (RaycastHit hit in hits)
-            {
-                if (!HitsContainCollider(hitList, hit) && !(hit.point == Vector3.zero && points[i] != Vector3.zero))
-                {
-                    hitList.Add(hit);
-                    hitList.Sort((a, b) =>
-                    {
-                        if (a.point == Vector3.zero) { a.point = p1; }
-                        float tThis = EvaluateT(spline, a.point);
-                        float tComp = EvaluateT(spline, b.point);
-
-                        if (tThis < tComp)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    });
-                }
-            }
-
-            foreach (RaycastHit hit in hitList)
-            {
-                for (int j = 0; j < intersections.Count; j++)
-                {
-                    if (hit.collider == intersections[j].collider)
-                    {
-                        Spline spline2 = new Spline();
-                        List<Vector3> spline2Points = new();
-
-                        Vector3 center = new();
-                        
-                        foreach (Intersection.JunctionInfo junction in intersections[j].GetJunctions())
-                        {                            
-                            Vector3 tangent1 = junction.knotIndex == 0 ? Vector3.Normalize(junction.spline.EvaluateTangent(0)) : Vector3.Normalize(junction.spline.EvaluateTangent(1));
-                            Unity.Mathematics.float3 hitSplinePoint = new();
-                            SplineUtility.GetNearestPoint(spline, (Vector3)junction.knot.Position, out hitSplinePoint, out float tx, (int)((spline.GetLength() * 2)));
-                            Vector3 tangent2 = Vector3.Normalize(spline.EvaluateTangent(tx));
-                            center += GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2);
-                        }
-
-                        center /= intersections[j].GetJunctions().Count();
-
-                        Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(center));
-
-                        //determine the direction to move the splines in
-                        float t1 = EvaluateT(spline, intersectingSplinePoint);
-                        Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-
-                        //add new splines and split the roads (plan)
-                        BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint;
-                        knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                        knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                        BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint;
-                        knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                        knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                        knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                        //insert incoming spline
-                        if (EvaluateT(spline, intersectingSplinePoint) < 1 && EvaluateT(spline, intersectingSplinePoint) > 0
-                            && Vector3.Distance(splinePoints[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(splinePoints[^1], intersectingSplinePoint) >= 0.5f)
-                        {
-                            FilterPoints(spline, spline2, splinePoints, t1, out spline2Points);
-                            spline.Insert(0, knot1); splinePoints.Insert(0, intersectingSplinePoint);
-
-                            spline2.Add(knot2); spline2Points.Add(intersectingSplinePoint);
-
-                            for (int filterWallList = 0; filterWallList < wallsList.Count; filterWallList++)
-                            {
-                                for (int filterWall = 0; filterWall < wallsList[filterWallList].Count; filterWall++)
-                                {
-                                    if (wallsList[filterWallList][filterWall] == spline)
-                                    {
-                                        wallsList[filterWallList][filterWall] = spline2;
-                                    }
-                                }
-                            }
-                            intersections[j].AddJunction(spline, spline[0], 0.5f);
-                            intersections[j].AddJunction(spline2, spline2[^1], 0.5f);
-                            MakeSpline(spline2, spline2Points);
-                        }
-                        else if (Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
-                        {
-                            spline.SetKnot(0, knot1);
-                            intersections[j].AddJunction(spline, spline[0], 0.5f);
-                        }
-                        else
-                        {
-                            spline.SetKnot(spline.Count - 1, knot2);
-                            intersections[j].AddJunction(spline, spline[^1], 0.5f);
-                        }
-
-                        for (int k = 0; k < intersections[j].junctions.Count; k++)
-                        {
-                            for (int w = 0; w < walls.Count; w++)
-                            {
-                                if (walls[w].wall == intersections[j].junctions[k].spline && intersections[j].junctions[k].spline != spline)
-                                {
-                                    BezierKnot modifyKnot = intersections[j].junctions[k].knot;
-                                    modifyKnot.Position = intersectingSplinePoint;
-                                    walls[w].wall.SetKnot(intersections[j].junctions[k].knotIndex, modifyKnot);
-                                    intersections[j].junctions[k] = new Intersection.JunctionInfo(intersections[j].junctions[k].spline, modifyKnot);
-                                    BuildWall(w);
-                                }
-                            }
-                        }
-
-                        //Debug.Log(transform.TransformPoint(intersectingSplinePoint));
-                        hitRemoveList.Add(transform.TransformPoint(intersectingSplinePoint));
-                        intersectionBuild.Add(j);
-                    }
-                }
-            }
-
-            foreach (RaycastHit hit in hitList)
-            {
-                for (int j = 0; j < walls.Count; j++)
-                {
-                    if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1)
-                    {
-                        Spline spline2 = new Spline();
-                        List<Vector3> spline2Points = new();
-                        Spline spline3 = new Spline();
-                        List<Vector3> spline3Points = new();
-
-                        List<Spline> internalWallList = new();
-                        List<BezierKnot> internalKnotList = new();
-
-                        Unity.Mathematics.float3 thisSplinePoint = new(); Unity.Mathematics.float3 otherSplinePoint = new();
-                        SplineUtility.GetNearestPoint(spline, hit.point, out thisSplinePoint, out float t1, (int)((spline.GetLength() * 2)));
-                        SplineUtility.GetNearestPoint(walls[j].wall, hit.point, out otherSplinePoint, out float t2, walls[j].resolution);
-                        
-                        Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
-                        Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(walls[j].wall, t2);
-                        Vector3 intersectingSplinePoint = transform.TransformPoint(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized)); //used to prioritise the existing road coordinates in the creation of an intersection
-                        Debug.Log(intersectingSplinePoint);
-
-                        if (hitRemoveList.FindIndex(item => Vector3.Distance(item, intersectingSplinePoint) < 0.1f) == -1)
-                        {
-                            BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint;
-                            knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                            knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                            knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                            BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint;
-                            knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                            knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                            knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                            BezierKnot knot3 = new BezierKnot(); knot3.Position = intersectingSplinePoint;
-                            knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                            knot3.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                            knot3.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                            BezierKnot knot4 = new BezierKnot(); knot4.Position = intersectingSplinePoint;
-                            knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                            knot4.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                            knot4.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                            //insert incoming spline
-                            if (Vector3.Distance(splinePoints[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(splinePoints[^1], intersectingSplinePoint) >= 0.5f)
-                            {
-                                FilterPoints(spline, spline2, splinePoints, t1, out spline2Points);
-                                spline.Insert(0, knot1); splinePoints.Insert(0, intersectingSplinePoint);
-
-                                spline2.Add(knot2); spline2Points.Add(intersectingSplinePoint);
-
-                                for (int filterWallList = 0; filterWallList < wallsList.Count; filterWallList++)
-                                {
-                                    for (int filterWall = 0; filterWall < wallsList[filterWallList].Count; filterWall++)
-                                    {
-                                        if (wallsList[filterWallList][filterWall] == spline)
-                                        {
-                                            wallsList[filterWallList][filterWall] = spline2;
-                                        }
-                                    }
-                                }
-                                internalWallList.Add(spline); internalWallList.Add(spline2);
-                                internalKnotList.Add(spline[0]); internalKnotList.Add(spline2[^1]);
-                                MakeSpline(spline2, spline2Points);
-                                //CreateRoom(spline2, spline2[spline2.Count - 1], 0, new List<BezierKnot>());
-                            }
-                            else if (Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
-                            {
-                                spline.SetKnot(0, knot1);
-                                internalWallList.Add(spline); internalKnotList.Add(spline[0]);
-                                //singleKnot.Remove(0);
-                            }
-                            else if (Vector3.Distance(splinePoints[^1], intersectingSplinePoint) < 0.5f)
-                            {
-                                spline.SetKnot(spline.Count - 1, knot2);
-                                internalWallList.Add(spline); internalKnotList.Add(spline[^1]);
-                                //singleKnot.Remove(1);
-                            }
-
-                            //insert overlapping spline
-                            if (EvaluateT(walls[j].wall, intersectingSplinePoint) > 0 && EvaluateT(walls[j].wall, intersectingSplinePoint) < 1 && Vector3.Distance(walls[j].points[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) >= 0.5f)
-                            {
-                                FilterPoints(walls[j].wall, spline3, walls[j].points, t2, out spline3Points);
-                                walls[j].wall.Insert(0, knot3); walls[j].points.Insert(0, intersectingSplinePoint);
-
-                                spline3.Add(knot4); spline3Points.Add(intersectingSplinePoint);
-                                walls[j].resolution = ((int)(walls[j].wall.GetLength() * 2));
-
-                                MakeSpline(spline3, spline3Points);
-                                FilterIntersections(walls[j].wall, spline3, t2);
-                                internalWallList.Add(walls[j].wall); internalWallList.Add(spline3);
-                                internalKnotList.Add(walls[j].wall[0]); internalKnotList.Add(spline3[^1]);
-                                BuildWall(j);
-                            }
-                            else if (Vector3.Distance(walls[j].points[0], intersectingSplinePoint) < 0.5f)
-                            {
-                                walls[j].wall.SetKnot(0, knot3);
-                                internalWallList.Add(walls[j].wall); internalKnotList.Add(walls[j].wall[0]);
-                                BuildWall(j);
-                            }
-                            else if (Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) < 0.5f)
-                            {
-                                walls[j].wall.SetKnot(walls[j].wall.Count - 1, knot4);
-                                internalWallList.Add(walls[j].wall); internalKnotList.Add(walls[j].wall[^1]);
-                                BuildWall(j);
-                            }
-
-                            if (internalWallList.Count > 0)
-                            {
-                                wallsList.Add(internalWallList);
-                                knotsList.Add(internalKnotList);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            MakeSpline(spline, splinePoints);
-            for (int k = 0; k < wallsList.Count; k++)
-            {
-                MakeIntersection(wallsList[k], knotsList[k]);
-            }
-            foreach (int index in intersectionBuild)
-            {
-                BuildIntersection(index);
-            }
-
-            CleanRooms();
-            CleanIntersections();
-            CreateRoom(spline, spline[0], 1, new List<BezierKnot>());
-            //CreateRoom(spline, spline[^1], 0, new List<BezierKnot>());
-            //MakeWalls();
+        Vector3 center = new();
+        
+        for (int i = 1; i < intersection.junctions.Count(); i++)
+        {                            
+            Vector3 tangent1 = intersection.junctions[i].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(1));
+            Vector3 tangent2 = intersection.junctions[0].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(1));
+            Vector3 localCenter = GetPointCenter((Vector3)intersection.junctions[i].knot.Position, tangent1, (Vector3)intersection.junctions[0].knot.Position, tangent2);
+            center += localCenter;
         }
+
+        center /= (intersection.GetJunctions().Count() - 1);
+
+        return transform.TransformPoint(placementSystem.SmoothenPosition(center));
     }
 
-    public void ModifyWalls(Wall wall, List<Vector3> points)
+    private void CreateIntersection(Spline spline, Vector3 p1, Vector3 p2, List<Vector3> splinePoints, List<List<Spline>> wallsList, List<List<BezierKnot>> knotsList, List<int> intersectionBuild, bool isEdit, Wall wall)
     {
-        Spline spline = wall.wall;
-        List<Vector3> pointsList = points;
-        List<Spline> intersectList = new();
-
-        Vector3 p1 = points[0];
-        Vector3 p2 = points[1];
-
-        BezierKnot k1 = new BezierKnot();
-        k1.Position = transform.InverseTransformPoint(p1);
-        k1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
-        k1.TangentIn = new Unity.Mathematics.float3(0, 0, 0.1f);
-        k1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-        BezierKnot k2 = new BezierKnot();
-        k2.Position = transform.InverseTransformPoint(p2);
-        k2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
-        k2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-        k2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-        bool isIntersect1 = EditKnotsInIntersection(spline, spline[0], transform.InverseTransformPoint(p1), out List<Spline> newIntersectList);
-        intersectList.AddRange(newIntersectList);
-
-        bool isIntersect2 = EditKnotsInIntersection(spline, spline[1], transform.InverseTransformPoint(p2), out List<Spline> newIntersectList2);
-        intersectList.AddRange(newIntersectList2);
-
-        spline.SetKnot(0, k1);
-        spline.SetKnot(spline.Count - 1, k2);
-        wall.wall = spline;
-
-        List<List<Spline>> wallsList = new();
-        List<List<BezierKnot>> knotsList = new();
         List<Vector3> hitRemoveList = new();
         List<RaycastHit> hitList = new();
-        List<Intersection> removeIntersectionList = new();
 
         //Uses a boxcast to determine intersection points
-        RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(0.04f, 0.04f, 0.04f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
-        RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(0.04f, 0.04f, 0.04f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
+        RaycastHit[] hits1 = Physics.BoxCastAll(p1, new Vector3(0.04f, height, 0.25f), (p2 - p1).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p2 - p1, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
+        RaycastHit[] hits2 = Physics.BoxCastAll(p2, new Vector3(0.04f, height, 0.25f), (p1 - p2).normalized, Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, p1 - p2, Vector3.up), 0), Vector3.Distance(p1, p2) + 0.04f, LayerMask.GetMask("Selector"));
         List<RaycastHit> hits = new(); hits.AddRange(hits1); hits.AddRange(hits2);
         foreach (RaycastHit hit in hits)
         {
-            if (!HitsContainCollider(hitList, hit) && !(hit.point == Vector3.zero && p1 != Vector3.zero))
+            if (!HitsContainCollider(hitList, hit) && !(hit.point == Vector3.zero && p2 != Vector3.zero))
             {
                 hitList.Add(hit);
                 hitList.Sort((a, b) =>
@@ -2021,7 +1725,7 @@ public class WallMapping : MonoBehaviour
         {
             for (int j = 0; j < intersections.Count; j++)
             {
-                if (hit.collider == intersections[j].collider && intersections[j].junctions.FindIndex(item => item.spline == spline) == -1)
+                if (hit.collider == intersections[j].collider)
                 {
                     Spline spline2 = new Spline();
                     List<Vector3> spline2Points = new();
@@ -2035,123 +1739,74 @@ public class WallMapping : MonoBehaviour
                         SplineUtility.GetNearestPoint(spline, (Vector3)junction.knot.Position, out hitSplinePoint, out float tx, (int)((spline.GetLength() * 2)));
                         Vector3 tangent2 = Vector3.Normalize(spline.EvaluateTangent(tx));
                         center += GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2);
+                        //Debug.Log($"{junction.knot.Position} {GetPointCenter((Vector3)junction.knot.Position, tangent1, (Vector3)hitSplinePoint, tangent2)}");
                     }
-
                     center /= intersections[j].GetJunctions().Count();
 
                     Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(center));
 
                     //determine the direction to move the splines in
                     float t1 = EvaluateT(spline, intersectingSplinePoint);
-                    Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
+                    Debug.Log($"{center} {intersectingSplinePoint} {placementSystem.SmoothenPosition(center)}");
 
-                    //add new splines and split the roads (plan)
-                    BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint;
-                    knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                    knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                    BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint;
-                    knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                    knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                    //insert incoming spline
-                    if (EvaluateT(spline, intersectingSplinePoint) < 1 && EvaluateT(spline, intersectingSplinePoint) > 0
-                        && Vector3.Distance(pointsList[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(pointsList[^1], intersectingSplinePoint) >= 0.5f)
+                    if (intersections[j].junctions.FindIndex(item => item.spline == spline) == -1)
                     {
-                        FilterPoints(spline, spline2, pointsList, t1, out spline2Points);
-                        spline.Insert(0, knot1); pointsList.Insert(0, intersectingSplinePoint);
-
-                        spline2.Add(knot2); spline2Points.Add(intersectingSplinePoint);
-
-                        MakeSpline(spline2, spline2Points);
-                        FilterIntersections(spline, spline2, t1);
-                        intersections[j].AddJunction(spline, spline[0], 0.5f);
-                        intersections[j].AddJunction(spline2, spline2[^1], 0.5f);
-                        BuildIntersection(j);
-
-                    }
-                    else if (Vector3.Distance(pointsList[0], intersectingSplinePoint) < 0.5f)
-                    {
-                        spline.SetKnot(0, knot1);
-                        if (!isIntersect1)
+                        Debug.Log(intersectingSplinePoint);
+                        //insert incoming spline
+                        if (EvaluateT(spline, intersectingSplinePoint) == 0f || Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
                         {
+                            //spline.SetKnot(0, knot1);
                             intersections[j].AddJunction(spline, spline[0], 0.5f);
-                            BuildIntersection(j);
-
                         }
-                        else
+                        else if (EvaluateT(spline, intersectingSplinePoint) == 1f || Vector3.Distance(splinePoints[^1], intersectingSplinePoint) < 0.5f)
                         {
-                            for (int k = 0; k < intersections.Count; k++)
-                            {
-                                if (intersections[k].junctions.FindIndex(item => item.spline == spline && item.knot.Equals(spline[0])) != -1)
-                                {
-                                    for (int i = 0; i < intersections[k].junctions.Count; i++)
-                                    {
-                                        BezierKnot newKnot = intersections[k].junctions[i].knot;
-                                        newKnot.Position = p1;
-                                        int otherPointIndex = intersections[k].junctions[i].knotIndex == 0 ? 1 : 0;
-                                        if (otherPointIndex == 1)
-                                            Quaternion.Euler(0, Vector3.SignedAngle((Vector3)intersections[k].junctions[i].spline[otherPointIndex].Position - p1, Vector3.forward, Vector3.down), 0);
-                                        else
-                                            Quaternion.Euler(0, Vector3.SignedAngle(p1 - (Vector3)intersections[k].junctions[i].spline[otherPointIndex].Position, Vector3.forward, Vector3.down), 0);
-                                        intersections[j].AddJunction(intersections[k].junctions[i].spline, newKnot, 0.5f);
-                                    }
-
-                                    removeIntersectionList.Add(intersections[k]);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        spline.SetKnot(spline.Count - 1, knot2);
-                        if (!isIntersect2)
-                        {
+                            //spline.SetKnot(spline.Count - 1, knot2);
                             intersections[j].AddJunction(spline, spline[^1], 0.5f);
-                            BuildIntersection(j);
                         }
-                        else
+                        else if (EvaluateT(spline, intersectingSplinePoint) < 1f && EvaluateT(spline, intersectingSplinePoint) > 0f
+                            && Vector3.Distance(splinePoints[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(splinePoints[^1], intersectingSplinePoint) >= 0.5f)
                         {
-                            for (int k = 0; k < intersections.Count; k++)
-                            {
-                                if (intersections[k].junctions.FindIndex(item => item.spline == spline && item.knot.Equals(spline[1])) != -1)
-                                {
-                                    for (int i = 0; i < intersections[k].junctions.Count; i++)
-                                    {
-                                        BezierKnot newKnot = intersections[k].junctions[i].knot;
-                                        newKnot.Position = p2;
-                                        int otherPointIndex = intersections[k].junctions[i].knotIndex == 0 ? 1 : 0;
-                                        if (otherPointIndex == 1)
-                                            Quaternion.Euler(0, Vector3.SignedAngle((Vector3)intersections[k].junctions[i].spline[otherPointIndex].Position - p2, Vector3.forward, Vector3.down), 0);
-                                        else
-                                            Quaternion.Euler(0, Vector3.SignedAngle(p2 - (Vector3)intersections[k].junctions[i].spline[otherPointIndex].Position, Vector3.forward, Vector3.down), 0);
-                                        intersections[j].AddJunction(intersections[k].junctions[i].spline, newKnot, 0.5f);
-                                    }
+                            FilterPoints(spline, spline2, splinePoints, t1, out spline2Points);
+                            splinePoints.Insert(0, intersectingSplinePoint);
+                            spline2Points.Add(intersectingSplinePoint);
 
-                                    removeIntersectionList.Add(intersections[k]);
+                            BuildSplineKnots(spline, splinePoints);
+                            BuildSplineKnots(spline2, spline2Points);
+
+                            for (int filterWallList = 0; filterWallList < wallsList.Count; filterWallList++)
+                            {
+                                for (int filterWall = 0; filterWall < wallsList[filterWallList].Count; filterWall++)
+                                {
+                                    if (wallsList[filterWallList][filterWall] == spline)
+                                    {
+                                        wallsList[filterWallList][filterWall] = spline2;
+                                    }
+                                }
+                            }
+                            intersections[j].AddJunction(spline, spline[0], 0.5f);
+                            intersections[j].AddJunction(spline2, spline2[^1], 0.5f);
+                            MakeSpline(spline2, spline2Points);
+                        }
+
+                        for (int k = 0; k < intersections[j].junctions.Count; k++)
+                        {
+                            for (int w = 0; w < walls.Count; w++)
+                            {
+                                if (walls[w].wall == intersections[j].junctions[k].spline && intersections[j].junctions[k].spline != spline)
+                                {
+                                    BezierKnot modifyKnot = intersections[j].junctions[k].knot;
+                                    modifyKnot.Position = intersectingSplinePoint;
+                                    walls[w].wall.SetKnot(intersections[j].junctions[k].knotIndex, modifyKnot);
+                                    intersections[j].junctions[k] = new Intersection.JunctionInfo(intersections[j].junctions[k].spline, modifyKnot);
+                                    BuildWall(w);
                                 }
                             }
                         }
                     }
 
-                    for (int k = 0; k < intersections[j].junctions.Count; k++)
-                    {
-                        for (int w = 0; w < walls.Count; w++)
-                        {
-                            if (walls[w].wall == intersections[j].junctions[k].spline && intersections[j].junctions[k].spline != spline)
-                            {
-                                BezierKnot modifyKnot = intersections[j].junctions[k].knot;
-                                modifyKnot.Position = intersectingSplinePoint;
-                                walls[w].wall.SetKnot(intersections[j].junctions[k].knotIndex, modifyKnot);
-                                intersections[j].junctions[k] = new Intersection.JunctionInfo(intersections[j].junctions[k].spline, modifyKnot);
-                                BuildIntersection(j);
-                            }
-                        }
-                    }
-
-                    hitRemoveList.Add(transform.TransformPoint(intersectingSplinePoint));
+                    hitRemoveList.Add(intersectingSplinePoint);
+                    intersectionBuild.Add(j);
+                    Debug.Log(j);
                 }
             }
         }
@@ -2160,7 +1815,7 @@ public class WallMapping : MonoBehaviour
         {
             for (int j = 0; j < walls.Count; j++)
             {
-                if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.1f) == -1 && walls[j] != wall)
+                if (hit.collider == walls[j].collider && hitRemoveList.FindIndex(item => Vector3.Distance(item, hit.point) < 0.5f) == -1 && !(isEdit && walls[j] == wall))
                 {
                     Spline spline2 = new Spline();
                     List<Vector3> spline2Points = new();
@@ -2176,106 +1831,170 @@ public class WallMapping : MonoBehaviour
                     
                     Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
                     Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(walls[j].wall, t2);
-                    Vector3 intersectingSplinePoint = transform.TransformPoint(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized)); //used to prioritise the existing road coordinates in the creation of an intersection
-                    Debug.Log(intersectingSplinePoint);
+                    Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized))); //used to prioritise the existing road coordinates in the creation of an intersection
+                    t1 = EvaluateT(spline, intersectingSplinePoint);
+                    t2 = EvaluateT(walls[j].wall, intersectingSplinePoint);
 
-                    BezierKnot knot1 = new BezierKnot(); knot1.Position = intersectingSplinePoint;
-                    knot1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                    knot1.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                    BezierKnot knot2 = new BezierKnot(); knot2.Position = intersectingSplinePoint;
-                    knot2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir1.normalized, Vector3.forward, Vector3.down), 0);
-                    knot2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                    knot2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                    BezierKnot knot3 = new BezierKnot(); knot3.Position = intersectingSplinePoint;
-                    knot3.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                    knot3.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-                    knot3.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-
-                    BezierKnot knot4 = new BezierKnot(); knot4.Position = intersectingSplinePoint;
-                    knot4.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(dir2.normalized, Vector3.forward, Vector3.down), 0);
-                    knot4.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
-                    knot4.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
-
-                    //insert incoming spline
-                    if (Vector3.Distance(pointsList[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(pointsList[^1], intersectingSplinePoint) >= 0.5f)
+                    if (hitRemoveList.FindIndex(item => Vector3.Distance(item, intersectingSplinePoint) < 0.5f) == -1)
                     {
-                        FilterPoints(spline, spline2, pointsList, t1, out spline2Points);
-                        spline.Insert(0, knot1); pointsList.Insert(0, intersectingSplinePoint);
-                        wall.resolution = ((int)(spline.GetLength() * 2));
-
-                        spline2.Add(knot2); spline2Points.Add(intersectingSplinePoint);
-
-                        MakeSpline(spline2, spline2Points);
-                        FilterIntersections(spline, spline2, t1);
-                        internalWallList.Add(spline); internalWallList.Add(spline2);
-                        internalKnotList.Add(spline[0]); internalKnotList.Add(spline2[^1]);
-                        //CreateRoom(spline2, spline2[spline2.Count - 1], 0, new List<BezierKnot>());
-                    }
-                    else if (Vector3.Distance(pointsList[0], intersectingSplinePoint) < 0.5f)
-                    {
-                        spline.SetKnot(0, knot1);
-                        if (!isIntersect1)
+                        Debug.Log($"{hit.point} {intersectingSplinePoint}");
+                        //insert incoming spline
+                        if (EvaluateT(spline, intersectingSplinePoint) == 0f || Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
                         {
                             internalWallList.Add(spline); internalKnotList.Add(spline[0]);
                         }
-                        //singleKnot.Remove(0);
-                    }
-                    else if (Vector3.Distance(pointsList[^1], intersectingSplinePoint) < 0.5f)
-                    {
-                        spline.SetKnot(spline.Count - 1, knot2);
-                        if (!isIntersect2)
+                        else if (EvaluateT(spline, intersectingSplinePoint) == 1f || Vector3.Distance(splinePoints[^1], intersectingSplinePoint) < 0.5f)
                         {
                             internalWallList.Add(spline); internalKnotList.Add(spline[^1]);
                         }
-                        //singleKnot.Remove(1);
-                    }
+                        else if (Vector3.Distance(splinePoints[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(splinePoints[^1], intersectingSplinePoint) >= 0.5f)
+                        {
+                            FilterPoints(spline, spline2, splinePoints, t1, out spline2Points);
+                            splinePoints.Insert(0, intersectingSplinePoint);
+                            spline2Points.Add(intersectingSplinePoint);
 
-                    //insert overlapping spline
-                    if (EvaluateT(walls[j].wall, intersectingSplinePoint) > 0 && EvaluateT(walls[j].wall, intersectingSplinePoint) < 1 && Vector3.Distance(walls[j].points[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) >= 0.5f)
-                    {
-                        FilterPoints(walls[j].wall, spline3, walls[j].points, t2, out spline3Points);
-                        walls[j].wall.Insert(0, knot3); walls[j].points.Insert(0, intersectingSplinePoint);
+                            BuildSplineKnots(spline, splinePoints);
+                            BuildSplineKnots(spline2, spline2Points);
+                            Debug.Log($"{string.Join(",", splinePoints)} {string.Join(",", spline2Points)}");
 
-                        spline3.Add(knot4); spline3Points.Add(intersectingSplinePoint);
-                        walls[j].resolution = ((int)(walls[j].wall.GetLength() * 2));
+                            for (int filterWallList = 0; filterWallList < wallsList.Count; filterWallList++)
+                            {
+                                for (int filterWall = 0; filterWall < wallsList[filterWallList].Count; filterWall++)
+                                {
+                                    if (wallsList[filterWallList][filterWall] == spline)
+                                    {
+                                        wallsList[filterWallList][filterWall] = spline2;
+                                    }
+                                }
+                            }
+                            internalWallList.Add(spline); internalWallList.Add(spline2);
+                            internalKnotList.Add(spline[0]); internalKnotList.Add(spline2[^1]);
+                            MakeSpline(spline2, spline2Points);
+                            //CreateRoom(spline2, spline2[spline2.Count - 1], 0, new List<BezierKnot>());
+                        }
 
-                        MakeSpline(spline3, spline3Points);
-                        FilterIntersections(walls[j].wall, spline3, t2);
-                        internalWallList.Add(walls[j].wall); internalWallList.Add(spline3);
-                        internalKnotList.Add(walls[j].wall[0]); internalKnotList.Add(spline3[^1]);
-                        BuildWall(j);
-                    }
-                    else if (Vector3.Distance(walls[j].points[0], intersectingSplinePoint) < 0.5f)
-                    {
-                        walls[j].wall.SetKnot(0, knot3);
-                        if (!isIntersect1)
+                        //insert overlapping spline
+                        if (EvaluateT(walls[j].wall, intersectingSplinePoint) == 0f || Vector3.Distance(walls[j].points[0], intersectingSplinePoint) < 0.5f)
                         {
                             internalWallList.Add(walls[j].wall); internalKnotList.Add(walls[j].wall[0]);
+                            walls[j].resolution = (int)(walls[j].wall.GetLength() * 2);
+                            BuildWall(j);
                         }
-                        BuildWall(j);
-                    }
-                    else if (Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) < 0.5f)
-                    {
-                        walls[j].wall.SetKnot(walls[j].wall.Count - 1, knot4);
-                        if (!isIntersect2)
+                        else if (EvaluateT(walls[j].wall, intersectingSplinePoint) == 1f || Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) < 0.5f)
                         {
                             internalWallList.Add(walls[j].wall); internalKnotList.Add(walls[j].wall[^1]);
+                            walls[j].resolution = (int)(walls[j].wall.GetLength() * 2);
+                            BuildWall(j);
                         }
-                        BuildWall(j);
+                        else if (EvaluateT(walls[j].wall, intersectingSplinePoint) > 0f && EvaluateT(walls[j].wall, intersectingSplinePoint) < 1f && Vector3.Distance(walls[j].points[0], intersectingSplinePoint) >= 0.5f && Vector3.Distance(walls[j].points[^1], intersectingSplinePoint) >= 0.5f)
+                        {
+                            FilterPoints(walls[j].wall, spline3, walls[j].points, t2, out spline3Points);
+                            walls[j].points.Insert(0, intersectingSplinePoint);
+                            spline3Points.Add(intersectingSplinePoint);
+                            
+                            BuildSplineKnots(walls[j].wall, walls[j].points);
+                            BuildSplineKnots(spline3, spline3Points);
+                            walls[j].resolution = (int)(walls[j].wall.GetLength() * 2);
+                            Debug.Log($"{string.Join(",", walls[j].points)} {string.Join(",", spline3Points)}");
+
+                            MakeSpline(spline3, spline3Points);
+                            FilterIntersections(walls[j].wall, spline3, t2);
+                            internalWallList.Add(walls[j].wall); internalWallList.Add(spline3);
+                            internalKnotList.Add(walls[j].wall[0]); internalKnotList.Add(spline3[^1]);
+                            BuildWall(j);
+                        }
+
+                        if (internalWallList.Count > 0)
+                        {
+                            wallsList.Add(internalWallList);
+                            knotsList.Add(internalKnotList);
+                        }
                     }
 
-                    if (internalWallList.Count > 0)
-                    {
-                        wallsList.Add(internalWallList);
-                        knotsList.Add(internalKnotList);
-                    }
+                    hitRemoveList.Add(intersectingSplinePoint);
                 }
             }
         }
+    }
 
+    private void BuildSplineKnots(Spline spline, List<Vector3> points)
+    {
+        spline.Clear();
+        for (int i = 1; i < points.Count; i++)
+        {
+            Vector3 p1 = points[i - 1];
+            Vector3 p2 = points[i];
+
+            BezierKnot k1 = new BezierKnot();
+            k1.Position = transform.InverseTransformPoint(p1);
+            k1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
+            k1.TangentIn = new Unity.Mathematics.float3(0, 0, 0.1f);
+            k1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
+
+            BezierKnot k2 = new BezierKnot();
+            k2.Position = transform.InverseTransformPoint(p2);
+            k2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
+            k2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
+            k2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
+
+            spline.Add(k1); spline.Add(k2);
+        }
+    }
+
+    public void AddWalls(List<Vector3> points)
+    {
+        for (int i = 1; i < points.Count; i++)
+        {
+            Spline spline = new Spline();
+            List<Vector3> splinePoints = new();
+            //List<int> singleKnot = new();
+
+            Vector3 p1 = points[i - 1];
+            Vector3 p2 = points[i];
+            splinePoints.Add(transform.InverseTransformPoint(p1)); splinePoints.Add(transform.InverseTransformPoint(p2)); //gets only the two points
+            BuildSplineKnots(spline, splinePoints);
+
+            List<List<Spline>> wallsList = new();
+            List<List<BezierKnot>> knotsList = new();
+            List<int> intersectionBuild = new();
+            CreateIntersection(spline, p1, p2, splinePoints, wallsList, knotsList, intersectionBuild, false, null);
+            
+            MakeSpline(spline, splinePoints);
+            for (int k = 0; k < wallsList.Count; k++)
+            {
+                MakeIntersection(wallsList[k], knotsList[k]);
+            }
+            foreach (int index in intersectionBuild)
+            {
+                BuildIntersection(index);
+            }
+
+            CleanWalls();
+            CleanRooms();
+            CleanIntersections();
+            CreateRoom(spline, spline[0], 1, new List<BezierKnot>());
+            //CreateRoom(spline, spline[^1], 0, new List<BezierKnot>());
+            //MakeWalls();
+        }
+    }
+
+    public void ModifyWalls(Wall wall, List<Vector3> points)
+    {
+        Spline spline = wall.wall;
+        List<Vector3> pointsList = points;
+        List<Spline> intersectList = new();
+
+        Vector3 p1 = points[0];
+        Vector3 p2 = points[1];
+        BuildSplineKnots(spline, points);
+
+        bool isIntersect1 = EditKnotsInIntersection(spline, 0, transform.InverseTransformPoint(p1), out List<Spline> newIntersectList);
+        intersectList.AddRange(newIntersectList);
+
+        bool isIntersect2 = EditKnotsInIntersection(spline, spline.Count - 1, transform.InverseTransformPoint(p2), out List<Spline> newIntersectList2);
+        intersectList.AddRange(newIntersectList2);
+
+        wall.wall = spline;
         foreach (Intersection intersection in intersections)
         {
             if (intersection.junctions.FindIndex(item => item.spline == wall.wall) != -1)
@@ -2287,8 +2006,6 @@ public class WallMapping : MonoBehaviour
                     intersection.junctions[intersection.junctions.IndexOf(junction)] = newInfo;
 
                     BuildIntersection(intersections.IndexOf(intersection));
-
-
                 }
                 else
                 {
@@ -2296,11 +2013,17 @@ public class WallMapping : MonoBehaviour
                     intersection.junctions[intersection.junctions.IndexOf(junction)] = newInfo;
 
                     BuildIntersection(intersections.IndexOf(intersection));
-
-
                 }
             }
         }
+
+        CleanWalls();
+        CleanIntersections();
+
+        List<List<Spline>> wallsList = new();
+        List<List<BezierKnot>> knotsList = new();
+        List<int> intersectionBuild = new();
+        CreateIntersection(spline, p1, p2, pointsList, wallsList, knotsList, intersectionBuild, true, wall);
 
         wall.wall = spline;
         wall.points = pointsList;
@@ -2309,12 +2032,34 @@ public class WallMapping : MonoBehaviour
         {
             MakeIntersection(wallsList[k], knotsList[k]);
         }
-        for (int k = 0; k < removeIntersectionList.Count; k++)
+        foreach (int index in intersectionBuild)
         {
-            Destroy(removeIntersectionList[k].collider.gameObject);
-            intersections.Remove(removeIntersectionList[k]);
+            BuildIntersection(index);
         }
 
+        foreach (Spline s in intersectList)
+        {
+            Wall w = walls.Find(item => item.wall == s);
+            List<Vector3> sPointsList = w.points;
+            List<List<Spline>> wallsList2 = new();
+            List<List<BezierKnot>> knotsList2 = new();
+            List<int> intersectionBuild2 = new();
+            CreateIntersection(s, w.points[0], w.points[^1], sPointsList, wallsList2, knotsList2, intersectionBuild2, true, w);
+
+            w.wall = spline;
+            w.points = sPointsList;
+            w.resolution = (int)(spline.GetLength() * 2);
+            for (int k = 0; k < wallsList2.Count; k++)
+            {
+                MakeIntersection(wallsList2[k], knotsList2[k]);
+            }
+            foreach (int index in intersectionBuild2)
+            {
+                BuildIntersection(index);
+            }
+        }
+
+        CleanWalls();
         CleanRooms();
         CleanIntersections();
         CreateRoom(spline, spline[0], 1, new List<BezierKnot>());
@@ -2322,6 +2067,38 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(wall));
         //MakeWalls();
 
+    }
+
+    public void ModifyIntersection(Intersection intersection, Vector3 position)
+    {
+        Vector3 pos = transform.InverseTransformPoint(position);
+        EditKnotsInIntersection(intersection, pos);
+        CleanWalls();
+        CleanIntersections();
+
+        for (int i = 0; i < intersection.junctions.Count; i++)
+        {
+            Wall wall = walls.Find(item => item.wall == intersection.junctions[i].spline);
+            List<List<Spline>> wallsList = new();
+            List<List<BezierKnot>> knotsList = new();
+            List<int> intersectionBuild = new();
+            CreateIntersection(wall.wall, wall.points[0], wall.points[^1], wall.points, wallsList, knotsList, intersectionBuild, true, wall);
+            for (int k = 0; k < wallsList.Count; k++)
+            {
+                MakeIntersection(wallsList[k], knotsList[k]);
+            }
+            foreach (int index in intersectionBuild)
+            {
+                BuildIntersection(index);
+            }
+
+            BuildWall(walls.IndexOf(wall));
+        }
+
+        CleanWalls();
+        CleanRooms();
+        CleanIntersections();
+        BuildIntersection(intersections.IndexOf(intersection));
     }
 
     public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
@@ -2332,16 +2109,6 @@ public class WallMapping : MonoBehaviour
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            /*List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
-            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
-            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
-            {
-                mats[j] = matList[j];
-            }
-            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
-            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
-            */
-
             for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
             {
                 newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
@@ -2470,7 +2237,7 @@ public class WallMapping : MonoBehaviour
 
     private void MakeSpline(Spline spline, List<Vector3> points)
     {
-        if (Vector3.Distance(points[0], points[^1]) > 0.01f)
+        if (Vector3.Distance(points[0], points[^1]) >= 0.5f)
         {
             m_SplineContainer.AddSpline(spline);
 
@@ -2573,68 +2340,46 @@ public class WallMapping : MonoBehaviour
         BuildRoom(rooms.IndexOf(newRoom));
     }
 
-    public void SelectRoad(Vector3 position, Vector2Int size, float rotation, out Wall selectedWall, out int index, out List<Vector3> points)
+    public void SelectWall(InputManager input, out Wall selectedWall, out int index, out List<Vector3> points)
     {
-        Collider[] overlaps = Physics.OverlapBox(position, new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, 5, 0), LayerMask.GetMask("Selector"));
-        selectedWall = null; index = -1; points = new();
-        foreach (Wall wall in walls)
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        selectedWall = walls.Find(wall => overlapsList.FindIndex(col => col.collider == wall.collider) != -1); 
+        index = -1; points = new();
+        if (selectedWall != null)
         {
-            Collider selector = wall.collider;
-            foreach (Collider hit in overlaps)
+            index = walls.IndexOf(selectedWall);
+            foreach (Vector3 point in selectedWall.points)
             {
-                if (hit == selector)
-                {
-                    selectedWall = wall;
-                    index = walls.IndexOf(wall);
-                    foreach (Vector3 point in wall.points)
-                    {
-                        points.Add(transform.TransformPoint(point));
-                    }
-                }
+                points.Add(transform.TransformPoint(point));
             }
         }
     }
 
-    public void SelectRoad(InputManager input, out Wall selectedWall, out int index, out List<Vector3> points)
+    public void SelectIntersection(InputManager input, out Intersection selectedIntersection, out int index, out List<Wall> walls)
     {
         RaycastHit[] overlaps = input.RayHitAllObjects();
         List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
-        selectedWall = null; index = -1; points = new();
-        foreach (Wall wall in walls)
+        selectedIntersection = intersections.Find(intersection => overlapsList.FindIndex(col => col.collider == intersection.collider) != -1); 
+        index = -1; walls = new();
+        if (selectedIntersection != null)
         {
-            Collider selector = wall.collider;
-            foreach (RaycastHit hit in overlapsList)
+            index = intersections.IndexOf(selectedIntersection);
+            foreach (Intersection.JunctionInfo junction in selectedIntersection.GetJunctions())
             {
-                if (hit.collider == selector)
-                {
-                    selectedWall = wall;
-                    index = walls.IndexOf(wall);
-                    foreach (Vector3 point in wall.points)
-                    {
-                        points.Add(transform.TransformPoint(point));
-                    }
-                }
+                Wall wall = this.walls.Find(item => item.wall == junction.spline);
+                walls.Add(wall);
             }
         }
     }
 
     private Vector3 GetPointCenter(Vector3 origin1, Vector3 tangent1, Vector3 origin2, Vector3 tangent2)
     {
-        float angleA = Vector3.SignedAngle(tangent2, tangent1, Vector3.down);
-        float angleB = Vector3.SignedAngle(origin1 - origin2, tangent1, Vector3.down);
-        float angleC = Vector3.SignedAngle(origin2 - origin1, tangent2, Vector3.up);
-        float sign1 = 1; float sign2 = 1;
+        float t1 = Vector3.Dot(Vector3.Cross(origin2 - origin1, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized)) * Vector3.Dot(Vector3.Cross(tangent1.normalized, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized));
+        float t2 = Vector3.Dot(Vector3.Cross(origin2 - origin1, tangent1.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized)) * Vector3.Dot(Vector3.Cross(tangent1.normalized, tangent2.normalized), Vector3.Cross(tangent1.normalized, tangent2.normalized));
 
-        if (Mathf.Sin(angleA * (Mathf.PI / 180)) == 0)
-        {
-            angleA = 180; sign1 = -1; sign2 = -1;
-        }
-
-        float t1 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleC * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign1;
-        float t2 = Vector3.Distance(origin1, origin2) * Mathf.Sin(angleB * (Mathf.PI / 180)) / Mathf.Sin(angleA * (Mathf.PI / 180)) * sign2;
-
-        Vector3 p1 = placementSystem.SmoothenPosition(origin1 + (t1 * tangent1));
-        Vector3 p2 = placementSystem.SmoothenPosition(origin2 + (t2 * tangent2));
+        Vector3 p1 = origin1 + (t1 * tangent1);
+        Vector3 p2 = origin2 + (t2 * tangent2);
 
         if (Vector3.Distance(p1, p2) < 0.1f)
         {
@@ -2692,6 +2437,17 @@ public class WallMapping : MonoBehaviour
         RaycastHit[] overlaps = input.RayHitAllObjects();
         List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
         if (walls.FindIndex(wall => overlapsList.FindIndex(col => col.collider == wall.collider) != -1) != -1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool CheckIntersection(InputManager input)
+    {
+        RaycastHit[] overlaps = input.RayHitAllObjects();
+        List<RaycastHit> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (intersections.FindIndex(intersection => overlapsList.FindIndex(col => col.collider == intersection.collider) != -1) != -1)
         {
             return true;
         }

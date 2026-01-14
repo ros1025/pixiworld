@@ -8,7 +8,6 @@ public class WallModifyState : IBuildingState
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
     WallMapping wallMapping;
-    SoundFeedback soundFeedback;
     InputManager inputManager;
     private List<Vector3> posList;
     private List<Vector3> originalPosList;
@@ -21,18 +20,16 @@ public class WallModifyState : IBuildingState
                             WallMapping wallMapping,
                             PreviewSystem previewSystem,
                             PlacementSystem placementSystem,
-                            InputManager inputManager,
-                            SoundFeedback soundFeedback)
+                            InputManager inputManager)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.wallMapping = wallMapping;
         this.placementSystem = placementSystem;
-        this.soundFeedback = soundFeedback;
         this.inputManager = inputManager;
         posList = new();
 
-        wallMapping.SelectRoad(inputManager, out selectedWall, out index, out List<Vector3> points);
+        wallMapping.SelectWall(inputManager, out selectedWall, out index, out List<Vector3> points);
         if (index == -1)
             return;
         for (int i = 0; i < points.Count; i++)
@@ -89,11 +86,9 @@ public class WallModifyState : IBuildingState
 
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
 
-        soundFeedback.PlaySound(SoundType.Place);
 
         List<Vector3> displayPos = new();
         for (int i = 0; i < posList.Count; i++)

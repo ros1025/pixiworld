@@ -10,7 +10,6 @@ public class DoorCreateState : IBuildingState
     PlacementSystem placementSystem;
     DoorDatabaseSO database;
     WallMapping wallMapping;
-    SoundFeedback soundFeedback;
     private Vector3 displayPosition;
     private Vector3 position;
     private float rotation;
@@ -21,8 +20,7 @@ public class DoorCreateState : IBuildingState
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
                           DoorDatabaseSO database,
-                          WallMapping wallMapping,
-                          SoundFeedback soundFeedback)
+                          WallMapping wallMapping)
     {
         this.doorsDataObject = doorsDataObject;
         this.grid = grid;
@@ -30,7 +28,6 @@ public class DoorCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.wallMapping = wallMapping;
-        this.soundFeedback = soundFeedback;
 
         //selectedObjectIndex = database.doorsData.IndexOf(doorsDataObject);
         if (database.doorsData.Contains(doorsDataObject))
@@ -66,10 +63,8 @@ public class DoorCreateState : IBuildingState
         bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place);
 
         Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
         displayPosition = grid.LocalToWorld(position);
