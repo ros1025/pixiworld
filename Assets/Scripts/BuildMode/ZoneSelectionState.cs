@@ -13,7 +13,6 @@ public class ZoneSelectionState : IBuildingState
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
     InputManager inputManager;
-    SoundFeedback soundFeedback;
     private Vector3 displayPosition;
     private Vector2Int size;
     private Vector3 pos;
@@ -28,8 +27,7 @@ public class ZoneSelectionState : IBuildingState
                           PlacementSystem placementSystem,
                           ZonesDatabaseSO database,
                           ZonePlacer zonePlacer,
-                          InputManager inputManager,
-                          SoundFeedback soundFeedback)
+                          InputManager inputManager)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
@@ -37,9 +35,7 @@ public class ZoneSelectionState : IBuildingState
         this.database = database;
         this.zonePlacer = zonePlacer;
         this.inputManager = inputManager;
-        this.soundFeedback = soundFeedback;
 
-        soundFeedback.PlaySound(SoundType.Click);
         selectedObject = zonePlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !zonePlacer.HasKey(selectedObject))
             return;
@@ -100,10 +96,8 @@ public class ZoneSelectionState : IBuildingState
         bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place);
         pos = grid.WorldToLocal(previewSystem.previewPos);
         displayPosition = grid.LocalToWorld(pos);
         size = previewSystem.previewSize;

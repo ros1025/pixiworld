@@ -50,6 +50,8 @@ public class PreviewSystem : MonoBehaviour
     public Roads selectedRoad;
     [NonSerialized]
     public Wall selectedWall;
+    [NonSerialized]
+    public Intersection selectedIntersection;
     private Renderer cellIndicatorRenderer;
 
     [NonSerialized] public Vector3 previewPos;
@@ -226,6 +228,30 @@ public class PreviewSystem : MonoBehaviour
         {
             UpdatePointer(points[i], true, i, cost * Mathf.RoundToInt(length), Mathf.RoundToInt(length), width, 0.1f);
         }
+    }
+
+    public void ModifyIntersection(Vector3 point, Intersection intersection, int cost, List<Roads> roads)
+    {
+        previewSelector = Instantiate(previewSelectorObject);
+        previewPos = point;
+        PrepareDynamicCursor(point);
+        MoveCursor(Vector3.zero);
+        RotateCursor(0);
+        selectedIntersection = intersection;
+
+        UpdatePointer(point, true, 0, cost, 0, 0, 0f);
+    }
+
+    public void ModifyIntersection(Vector3 point, Intersection intersection, int cost, List<Wall> walls)
+    {
+        previewSelector = Instantiate(previewSelectorObject);
+        previewPos = point;
+        PrepareDynamicCursor(point);
+        MoveCursor(Vector3.zero);
+        RotateCursor(0);
+        selectedIntersection = intersection;
+
+        UpdatePointer(point, true, 0, cost, 0, 0, 0f);
     }
 
     private void PrepareCursor(Vector2Int size)

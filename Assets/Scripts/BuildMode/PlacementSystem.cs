@@ -120,8 +120,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                                            preview,
                                            this,
                                            database,
-                                           objectPlacer,
-                                           soundFeedback);
+                                           objectPlacer);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
@@ -144,8 +143,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                                             preview,
                                             this,
                                             databaseZones,
-                                            zonePlacer,
-                                            soundFeedback);
+                                            zonePlacer);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
@@ -168,8 +166,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                                             preview,
                                             this,
                                             databaseDoors,
-                                            walls,
-                                            soundFeedback);
+                                            walls);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
@@ -193,8 +190,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                                             preview,
                                             this,
                                             databaseRoads,
-                                            roads,
-                                            soundFeedback);
+                                            roads);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
@@ -214,8 +210,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildingState = new WallCreateState(grid,
                                             walls,
                                             preview,
-                                            this,
-                                            soundFeedback);
+                                            this);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
@@ -297,7 +292,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     {
         if (inputManager.IsPointerOverUI())
             return;
-        if (isSelectable())
+        if (IsSelectable())
         {
             StopPlacement();
             gridVisualization.SetActive(true);
@@ -313,15 +308,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                                        this,
                                        database,
                                        objectPlacer,
-                                       inputManager,
-                                       soundFeedback);
+                                       inputManager);
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
-        else if (isZone())
+        else if (IsZone())
         {
             StopPlacement();
             gridVisualization.SetActive(true);
@@ -337,15 +331,37 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                            this,
                            databaseZones,
                            zonePlacer,
-                           inputManager,
-                           soundFeedback);
+                           inputManager);
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
-        else if (isRoad())
+        else if (IsRoadIntersection())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Road;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            buildingState = new IntersectionModifyState(gridPosition,
+                           grid,
+                           preview,
+                           this,
+                           databaseRoads,
+                           inputManager,
+                           roads);
+            buildToolsUI.Call();
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerLiveUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
+        else if (IsRoad())
         {
             StopPlacement();
             gridVisualization.SetActive(true);
@@ -361,15 +377,36 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                            this,
                            databaseRoads,
                            inputManager,
-                           roads,
-                           soundFeedback);
+                           roads);
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
-        else if (isWall())
+        else if (IsWallIntersection())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Road;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            buildingState = new WallIntersectionModifyState(gridPosition,
+                           grid,
+                           walls,
+                           preview,
+                           this,
+                           inputManager);
+            buildToolsUI.Call();
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerLiveUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
+        else if (IsWall())
         {
             StopPlacement();
             gridVisualization.SetActive(true);
@@ -384,15 +421,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                 walls,
                 preview,
                 this,
-                inputManager,
-                soundFeedback);
+                inputManager);
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
-        else if (isDoor())
+        else if (IsDoor())
         {
             StopPlacement();
             gridVisualization.SetActive(true);
@@ -408,8 +444,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                 this,
                 databaseDoors,
                 walls,
-                inputManager,
-                soundFeedback);
+                inputManager);
             buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
@@ -487,7 +522,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         inputManager.OnRelease += ConfirmPlacement;
     }
 
-    private bool isSelectable()
+    private bool IsSelectable()
     {
         if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
@@ -495,7 +530,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
     }
 
-    private bool isZone()
+    private bool IsZone()
     {
         if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
@@ -541,15 +576,23 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return true;
     }
 
-    private bool isRoad()
+    private bool IsRoad()
     {
-        if (roads != null && roads.CheckRoadSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
+        if (roads != null && roads.CheckRoadSelect(inputManager))
             return true;
         else
             return false;
     }
 
-    private bool isWall()
+    private bool IsRoadIntersection()
+    {
+        if (roads != null && roads.CheckIntersectionSelect(inputManager))
+            return true;
+        else
+            return false;
+    }
+
+    private bool IsWall()
     {
         if (walls != null && walls.CheckWallSelect(inputManager))
             return true;
@@ -557,7 +600,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
     }
 
-    private bool isDoor()
+    private bool IsWallIntersection()
+    {
+        if (walls != null && walls.CheckIntersection(inputManager))
+            return true;
+        else
+            return false;
+    }
+
+    private bool IsDoor()
     {
         if (walls != null && walls.CheckDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
             return true;
@@ -600,15 +651,6 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             cameraController.MoveMouseY(-1);
     }
 
-    //private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
-    //{
-    //    GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ? 
-    //        floorData : 
-    //        furnitureData;
-
-    //    return selectedData.CanPlaceObejctAt(gridPosition, database.objectsData[selectedObjectIndex].Size);
-    //}
-
     private void StopPlacement()
     {
         soundFeedback.PlaySound(SoundType.Click);
@@ -642,7 +684,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     {
         if (preview.gridSnap || itemMode == Wall)
         {
-            return grid.CellToLocal(grid.WorldToCell(pos));
+            return grid.CellToLocal(grid.WorldToCell(pos + new Vector3(0.25f, 0f, 0.25f)));
         }
         else return grid.WorldToLocal(pos);
     }

@@ -198,7 +198,7 @@ public class CameraController : MonoBehaviour
             {
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, -delta.y * posScale));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, 0, -delta.y * posScale));
                 }
                 else
                 {

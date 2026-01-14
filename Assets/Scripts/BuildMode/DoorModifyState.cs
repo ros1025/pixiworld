@@ -12,7 +12,6 @@ public class DoorModifyState : IBuildingState
     PlacementSystem placementSystem;
     DoorDatabaseSO database;
     WallMapping wallMapping;
-    SoundFeedback soundFeedback;
     InputManager inputManager;
     private Vector3 displayPosition;
     private Vector3 position; private Vector3 originalPosition;
@@ -25,15 +24,13 @@ public class DoorModifyState : IBuildingState
                           PlacementSystem placementSystem,
                           DoorDatabaseSO database,
                           WallMapping wallMapping,
-                          InputManager inputManager,
-                          SoundFeedback soundFeedback)
+                          InputManager inputManager)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
         this.database = database;
         this.wallMapping = wallMapping;
-        this.soundFeedback = soundFeedback;
         this.inputManager = inputManager;
 
         Door door = wallMapping.GetDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
@@ -86,10 +83,8 @@ public class DoorModifyState : IBuildingState
         bool placementValidity = CheckPlacementValidity(gridPosition);
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place);
 
         Renderer[] renderers = doorsDataObject.Prefab.GetComponentsInChildren<Renderer>();
 
