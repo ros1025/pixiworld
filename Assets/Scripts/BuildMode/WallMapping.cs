@@ -13,6 +13,7 @@ public class WallMapping : MonoBehaviour
     public List<Wall> walls;
     public List<Room> rooms;
     public List<Door> doors;
+    public List<Window> windows;
     public List<Intersection> intersections;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private GameObject floorParent;
@@ -220,7 +221,15 @@ public class WallMapping : MonoBehaviour
             Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
                 && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution);
             
-            h1 = new Vector3(0, door.height - 0.1f, 0);
+            h1 = new Vector3(0, door.height, 0);
+        }
+        if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
+        {
+            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
+                && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution);
+            
+            h1 = new Vector3(0, window.height + window.point.y, 0);
         }
 
         currentVertsA.AddRange(new List<Vector3>
@@ -266,6 +275,17 @@ public class WallMapping : MonoBehaviour
 
             values.Add((door.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length, 1, door.height));
         }
+        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex]
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution) != -1)
+        {
+            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex]
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution);
+
+            values.Add((window.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * window.length, 1, window.height + window.point.y));
+        }
+
 
         //Find doors or windows in the middle of the wall segment [STARTING]
         if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
@@ -275,6 +295,14 @@ public class WallMapping : MonoBehaviour
         && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
 
             values.Add((door.point, 0, door.height));
+        }
+        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
+        {
+            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
+
+            values.Add((window.point, 0, window.height + window.point.y));
         }
 
         values.Sort((a, b) =>
@@ -329,38 +357,38 @@ public class WallMapping : MonoBehaviour
             {
                 currentVertsA.AddRange(new List<Vector3>
                 {
-                    pointA, pointA + new Vector3(0, value.Item3 - 0.1f, 0)
+                    pointA, pointA + new Vector3(0, value.Item3, 0)
                 });
                 currentVertsB.AddRange(new List<Vector3>
                 {
-                    pointB, pointB + new Vector3(0, value.Item3 - 0.1f, 0)
+                    pointB, pointB + new Vector3(0, value.Item3, 0)
                 });
                 currentUVsA.AddRange(new List<Vector2>
                 {
-                    new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, (value.Item3 - 0.1f)/height)
+                    new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, (value.Item3)/height)
                 });
                 currentUVsB.AddRange(new List<Vector2>
                 {
-                    new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, (value.Item3 - 0.1f)/height)
+                    new Vector2(uvLocalDistance, 0), new Vector2(uvLocalDistance, (value.Item3)/height)
                 });
             }
             else
             {
                 currentVertsA.AddRange(new List<Vector3>
                 {
-                    pointA + new Vector3(0, value.Item3 - 0.1f, 0), pointA
+                    pointA + new Vector3(0, value.Item3, 0), pointA
                 });
                 currentVertsB.AddRange(new List<Vector3>
                 {
-                    pointB + new Vector3(0, value.Item3 - 0.1f, 0), pointB
+                    pointB + new Vector3(0, value.Item3, 0), pointB
                 });
                 currentUVsA.AddRange(new List<Vector2>
                 {
-                    new Vector2(uvLocalDistance, (value.Item3 - 0.1f)/height), new Vector2(uvLocalDistance, 0)
+                    new Vector2(uvLocalDistance, (value.Item3)/height), new Vector2(uvLocalDistance, 0)
                 });
                 currentUVsB.AddRange(new List<Vector2>
                 {
-                    new Vector2(uvLocalDistance, (value.Item3 - 0.1f)/height), new Vector2(uvLocalDistance, 0)
+                    new Vector2(uvLocalDistance, (value.Item3)/height), new Vector2(uvLocalDistance, 0)
                 });
             }
         }
@@ -374,7 +402,15 @@ public class WallMapping : MonoBehaviour
             Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
         && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution);
 
-            h2 = new Vector3(0, door.height - 0.1f, 0);
+            h2 = new Vector3(0, door.height, 0);
+        }
+        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution) != -1)
+        {
+            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
+        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution);
+
+            h2 = new Vector3(0, window.height + window.point.y, 0);
         }
 
         currentVertsA.AddRange(new List<Vector3>
@@ -528,9 +564,7 @@ public class WallMapping : MonoBehaviour
 
         Intersection intersection = intersections[i];
         Vector3 center = new Vector3();
-        List<Intersection.JunctionEdge> junctionEdges = new List<Intersection.JunctionEdge>();
-        List<int> splines = new List<int>();
-        List<int> hand = new List<int>();
+        List<(Intersection.JunctionEdge, int, int)> junctionEdges = new();
 
         foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
         {
@@ -540,15 +574,11 @@ public class WallMapping : MonoBehaviour
             //if knot index is 0 we are facing away from the junction, otherwise we are facing the junction
             if (junction.knotIndex == 0)
             {
-                junctionEdges.Add(new Intersection.JunctionEdge(p1, p2));
-                splines.Add(splineIndex);
-                hand.Add(1);
+                junctionEdges.Add((new Intersection.JunctionEdge(p1, p2), splineIndex, 1));
             }
             else
             {
-                junctionEdges.Add(new Intersection.JunctionEdge(p2, p1));
-                splines.Add(splineIndex);
-                hand.Add(2);
+                junctionEdges.Add((new Intersection.JunctionEdge(p2, p1), splineIndex, 2));
             }
             center += p1;
             center += p2;
@@ -556,54 +586,10 @@ public class WallMapping : MonoBehaviour
 
         center /= (junctionEdges.Count * 2);
 
-        splines.Sort((x, y) =>
-        {
-            Vector3 xDir = junctionEdges[splines.IndexOf(x)].center - center;
-            Vector3 yDir = junctionEdges[splines.IndexOf(y)].center - center;
-
-            float angleA = Vector3.SignedAngle(center.normalized, xDir.normalized, Vector3.up);
-            float angleB = Vector3.SignedAngle(center.normalized, yDir.normalized, Vector3.up);
-
-            if (angleA > angleB)
-            {
-                return -1;
-            }
-            else if (angleA < angleB)
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
-        });
-
-        hand.Sort((x, y) =>
-        {
-            Vector3 xDir = junctionEdges[hand.IndexOf(x)].center - center;
-            Vector3 yDir = junctionEdges[hand.IndexOf(y)].center - center;
-
-            float angleA = Vector3.SignedAngle(center.normalized, xDir.normalized, Vector3.up);
-            float angleB = Vector3.SignedAngle(center.normalized, yDir.normalized, Vector3.up);
-
-            if (angleA > angleB)
-            {
-                return -1;
-            }
-            else if (angleA < angleB)
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
-        });
-
         junctionEdges.Sort((x, y) =>
         {
-            Vector3 xDir = x.center - center;
-            Vector3 yDir = y.center - center;
+            Vector3 xDir = x.Item1.center - center;
+            Vector3 yDir = y.Item1.center - center;
 
             float angleA = Vector3.SignedAngle(center.normalized, xDir.normalized, Vector3.up);
             float angleB = Vector3.SignedAngle(center.normalized, yDir.normalized, Vector3.up);
@@ -642,9 +628,9 @@ public class WallMapping : MonoBehaviour
         {
             if (junctionEdges.Count > 1)
             {
-                Vector3 a = junctionEdges[j].right;
-                Vector3 b = junctionEdges[j].left;
-                Vector3 c = (j < junctionEdges.Count - 1) ? junctionEdges[j + 1].right : junctionEdges[0].right;
+                Vector3 a = junctionEdges[j].Item1.right;
+                Vector3 b = junctionEdges[j].Item1.left;
+                Vector3 c = (j < junctionEdges.Count - 1) ? junctionEdges[j + 1].Item1.right : junctionEdges[0].Item1.right;
 
                 vertices.AddRange(new List<Vector3> { a, b, c });
                 vertices.AddRange(new List<Vector3> { a + new Vector3(0, height, 0), b + new Vector3(0, height, 0), c + new Vector3(0, height, 0) });
@@ -665,13 +651,12 @@ public class WallMapping : MonoBehaviour
                     new Vector2(uvOffset, 1), new Vector2(uvOffset + distanceA, 1), new Vector2(uvOffset + distanceA + distanceB, 1)});
 
                 uvOffset += distanceA + distanceB;
-
-                newMaterials[j + 1] = walls[j].renderer.materials[hand[j]];
+                newMaterials[j + 1] = walls[junctionEdges[j].Item2].renderer.materials[junctionEdges[j].Item3];
             }
             else
             {
-                Vector3 a = junctionEdges[j].right;
-                Vector3 b = junctionEdges[j].left;
+                Vector3 a = junctionEdges[j].Item1.right;
+                Vector3 b = junctionEdges[j].Item1.left;
 
                 vertices.AddRange(new List<Vector3> { a, b, a + new Vector3(0, height, 0), b + new Vector3(0, height, 0) });
                 normals.AddRange(new List<Vector3> { Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized, Vector3.Cross(a - b, Vector3.up).normalized });
@@ -686,7 +671,7 @@ public class WallMapping : MonoBehaviour
 
                 uvOffset += distanceA;
 
-                newMaterials[j + 1] = walls[j].renderer.materials[hand[j]];
+                newMaterials[j + 1] = walls[junctionEdges[j].Item2].renderer.materials[junctionEdges[j].Item3];
             }
         }
 
@@ -798,7 +783,7 @@ public class WallMapping : MonoBehaviour
         }
 
         BuildRoomPoints(roomWalls, 0.02f, points, angle, verts, tris, uvs);
-        BuildRoomPoints(roomWalls, 0.02f, points2, angle, verts2, tris2, uvs2);
+        BuildRoomPoints(roomWalls, -0.02f, points2, angle, verts2, tris2, uvs2);
 
         mesh.subMeshCount = 1;
         mesh.SetVertices(verts);
@@ -946,8 +931,10 @@ public class WallMapping : MonoBehaviour
             {
                 if (intersect.junctions[a].spline == s)
                 {
-                    int indexR = combinedSpline.IndexOf(intersect.junctions[a].knot);
-                    float rT = combinedSpline.ConvertIndexUnit(indexR, PathIndexUnit.Knot, PathIndexUnit.Normalized);
+                    //int indexR = combinedSpline.IndexOf(intersect.junctions[a].knot);
+                    ///float rT = combinedSpline.ConvertIndexUnit(indexR, PathIndexUnit.Knot, PathIndexUnit.Normalized);
+                    float rT = EvaluateT(combinedSpline, intersect.junctions[a].knot.Position);
+                    Debug.Log($"{rT} {sT}");
                     if (rT < sT)
                     {
                         Intersection.JunctionInfo jinfo = new Intersection.JunctionInfo(r, r[intersect.junctions[a].knotIndex]);
@@ -961,35 +948,6 @@ public class WallMapping : MonoBehaviour
                 }
             }
         }
-    }
-
-    private bool IsAngleInterior(List<List<Vector3>> points, int i1, int i2, float totalAngle)
-    {
-        if ((i1 >= 0 && i2 >= 0) || (i1 != i2))
-        {
-            List<Vector3> before = i1 < i2 ? points[i1] : points[i2];
-            List<Vector3> after = i1 < i2 ? points[i2] : points[i1];
-
-            float localAngle = Vector3.SignedAngle(after[1] - after[0], before[^2] - before[^1], Vector3.up);
-            if (totalAngle < 0)
-            {
-                if (localAngle > 0)
-                {
-                    localAngle -= 360;
-                }
-            }
-            else
-            {
-                if (localAngle < 0)
-                {
-                    localAngle += 360;
-                }
-            }
-
-            if (Mathf.Abs(localAngle) > 180) return false;
-            else return true;
-        }
-        else return true;
     }
 
     private bool SplineInIntersection(Intersection i, Spline s, BezierKnot k)
@@ -1291,6 +1249,7 @@ public class WallMapping : MonoBehaviour
         {
             Destroy(deleteWalls[i].collider.gameObject);
             Destroy(deleteWalls[i].mesh.gameObject);
+            DeleteWall(deleteWalls[i]);
             walls.Remove(deleteWalls[i]);
         }
     }
@@ -1371,8 +1330,6 @@ public class WallMapping : MonoBehaviour
                 {
                     if (i != intersection.junctions.FindIndex(item => item.spline == mainSpline && item.knotIndex == knotIndex))
                     {
-                        intersectList.Add(intersection.junctions[i].spline);
-
                         if (walls.FindIndex(item => item.wall == intersection.junctions[i].spline) != -1)
                         {
                             Wall wall = walls.Find(item => item.wall == intersection.junctions[i].spline);
@@ -1380,8 +1337,8 @@ public class WallMapping : MonoBehaviour
                             BuildSplineKnots(wall.wall, wall.points);
                             Intersection.JunctionInfo newInfo = new Intersection.JunctionInfo(wall.wall, wall.wall[intersection.junctions[i].knotIndex]);
                             intersection.junctions[i] = newInfo;
-
                             BuildWall(walls.IndexOf(wall));
+                            intersectList.Add(wall.wall);
                         }
                     }
                 }
@@ -1743,7 +1700,7 @@ public class WallMapping : MonoBehaviour
                     }
                     center /= intersections[j].GetJunctions().Count();
 
-                    Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(center));
+                    Vector3 intersectingSplinePoint = placementSystem.SmoothenPosition(center);
 
                     //determine the direction to move the splines in
                     float t1 = EvaluateT(spline, intersectingSplinePoint);
@@ -1826,18 +1783,18 @@ public class WallMapping : MonoBehaviour
                     List<BezierKnot> internalKnotList = new();
 
                     Unity.Mathematics.float3 thisSplinePoint = new(); Unity.Mathematics.float3 otherSplinePoint = new();
-                    SplineUtility.GetNearestPoint(spline, hit.point, out thisSplinePoint, out float t1, (int)((spline.GetLength() * 2)));
-                    SplineUtility.GetNearestPoint(walls[j].wall, hit.point, out otherSplinePoint, out float t2, walls[j].resolution);
+                    SplineUtility.GetNearestPoint(spline, transform.InverseTransformPoint(hit.point), out thisSplinePoint, out float t1, (int)((spline.GetLength() * 2)));
+                    SplineUtility.GetNearestPoint(walls[j].wall, transform.InverseTransformPoint(hit.point), out otherSplinePoint, out float t2, walls[j].resolution);
                     
                     Vector3 dir1 = (Vector3)SplineUtility.EvaluateTangent(spline, t1);
                     Vector3 dir2 = (Vector3)SplineUtility.EvaluateTangent(walls[j].wall, t2);
-                    Vector3 intersectingSplinePoint = transform.TransformPoint(placementSystem.SmoothenPosition(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized))); //used to prioritise the existing road coordinates in the creation of an intersection
+                    Vector3 intersectingSplinePoint = placementSystem.SmoothenPosition(GetPointCenter(thisSplinePoint, dir1.normalized, otherSplinePoint, dir2.normalized)); //used to prioritise the existing road coordinates in the creation of an intersection
                     t1 = EvaluateT(spline, intersectingSplinePoint);
                     t2 = EvaluateT(walls[j].wall, intersectingSplinePoint);
 
                     if (hitRemoveList.FindIndex(item => Vector3.Distance(item, intersectingSplinePoint) < 0.5f) == -1)
                     {
-                        Debug.Log($"{hit.point} {intersectingSplinePoint}");
+                        Debug.Log($"{hit.point} {intersectingSplinePoint} {thisSplinePoint} {otherSplinePoint}");
                         //insert incoming spline
                         if (EvaluateT(spline, intersectingSplinePoint) == 0f || Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
                         {
@@ -1926,13 +1883,13 @@ public class WallMapping : MonoBehaviour
             Vector3 p2 = points[i];
 
             BezierKnot k1 = new BezierKnot();
-            k1.Position = transform.InverseTransformPoint(p1);
+            k1.Position = p1;
             k1.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
             k1.TangentIn = new Unity.Mathematics.float3(0, 0, 0.1f);
             k1.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
 
             BezierKnot k2 = new BezierKnot();
-            k2.Position = transform.InverseTransformPoint(p2);
+            k2.Position = p2;
             k2.Rotation = Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0);
             k2.TangentIn = new Unity.Mathematics.float3(0, 0, -0.1f);
             k2.TangentOut = new Unity.Mathematics.float3(0, 0, 0.1f);
@@ -1947,17 +1904,16 @@ public class WallMapping : MonoBehaviour
         {
             Spline spline = new Spline();
             List<Vector3> splinePoints = new();
-            //List<int> singleKnot = new();
 
-            Vector3 p1 = points[i - 1];
-            Vector3 p2 = points[i];
-            splinePoints.Add(transform.InverseTransformPoint(p1)); splinePoints.Add(transform.InverseTransformPoint(p2)); //gets only the two points
+            Vector3 p1 = transform.InverseTransformPoint(points[i - 1]);
+            Vector3 p2 = transform.InverseTransformPoint(points[i]);
+            splinePoints.Add(p1); splinePoints.Add(p2); //gets only the two points
             BuildSplineKnots(spline, splinePoints);
 
             List<List<Spline>> wallsList = new();
             List<List<BezierKnot>> knotsList = new();
             List<int> intersectionBuild = new();
-            CreateIntersection(spline, p1, p2, splinePoints, wallsList, knotsList, intersectionBuild, false, null);
+            CreateIntersection(spline, transform.TransformPoint(p1), transform.TransformPoint(p2), splinePoints, wallsList, knotsList, intersectionBuild, false, null);
             
             MakeSpline(spline, splinePoints);
             for (int k = 0; k < wallsList.Count; k++)
@@ -1984,17 +1940,20 @@ public class WallMapping : MonoBehaviour
         List<Vector3> pointsList = points;
         List<Spline> intersectList = new();
 
-        Vector3 p1 = points[0];
-        Vector3 p2 = points[1];
-        BuildSplineKnots(spline, points);
+        pointsList[0] = transform.InverseTransformPoint(points[0]);
+        pointsList[^1] = transform.InverseTransformPoint(points[^1]);
+        Vector3 p1 = pointsList[0];
+        Vector3 p2 = pointsList[^1];
+        BuildSplineKnots(spline, pointsList);
 
-        bool isIntersect1 = EditKnotsInIntersection(spline, 0, transform.InverseTransformPoint(p1), out List<Spline> newIntersectList);
+        bool isIntersect1 = EditKnotsInIntersection(spline, 0, p1, out List<Spline> newIntersectList);
         intersectList.AddRange(newIntersectList);
 
-        bool isIntersect2 = EditKnotsInIntersection(spline, spline.Count - 1, transform.InverseTransformPoint(p2), out List<Spline> newIntersectList2);
+        bool isIntersect2 = EditKnotsInIntersection(spline, spline.Count - 1, p2, out List<Spline> newIntersectList2);
         intersectList.AddRange(newIntersectList2);
 
         wall.wall = spline;
+        List<int> intersectionBuild = new();
         foreach (Intersection intersection in intersections)
         {
             if (intersection.junctions.FindIndex(item => item.spline == wall.wall) != -1)
@@ -2022,8 +1981,8 @@ public class WallMapping : MonoBehaviour
 
         List<List<Spline>> wallsList = new();
         List<List<BezierKnot>> knotsList = new();
-        List<int> intersectionBuild = new();
-        CreateIntersection(spline, p1, p2, pointsList, wallsList, knotsList, intersectionBuild, true, wall);
+        
+        CreateIntersection(spline, transform.TransformPoint(p1), transform.TransformPoint(p2), pointsList, wallsList, knotsList, intersectionBuild, true, wall);
 
         wall.wall = spline;
         wall.points = pointsList;
@@ -2036,26 +1995,32 @@ public class WallMapping : MonoBehaviour
         {
             BuildIntersection(index);
         }
+        BuildWall(walls.IndexOf(wall));
 
         foreach (Spline s in intersectList)
         {
             Wall w = walls.Find(item => item.wall == s);
-            List<Vector3> sPointsList = w.points;
-            List<List<Spline>> wallsList2 = new();
-            List<List<BezierKnot>> knotsList2 = new();
-            List<int> intersectionBuild2 = new();
-            CreateIntersection(s, w.points[0], w.points[^1], sPointsList, wallsList2, knotsList2, intersectionBuild2, true, w);
+            if (w != null)
+            {
+                List<Vector3> sPointsList = w.points;
+                List<List<Spline>> wallsList2 = new();
+                List<List<BezierKnot>> knotsList2 = new();
+                List<int> intersectionBuild2 = new();
+                CreateIntersection(s, transform.TransformPoint(w.points[0]), transform.TransformPoint(w.points[^1]), sPointsList, wallsList2, knotsList2, intersectionBuild2, true, w);
 
-            w.wall = spline;
-            w.points = sPointsList;
-            w.resolution = (int)(spline.GetLength() * 2);
-            for (int k = 0; k < wallsList2.Count; k++)
-            {
-                MakeIntersection(wallsList2[k], knotsList2[k]);
-            }
-            foreach (int index in intersectionBuild2)
-            {
-                BuildIntersection(index);
+                w.wall = s;
+                w.points = sPointsList;
+                w.resolution = (int)(spline.GetLength() * 2);
+                for (int k = 0; k < wallsList2.Count; k++)
+                {
+                    MakeIntersection(wallsList2[k], knotsList2[k]);
+                }
+                foreach (int index in intersectionBuild2)
+                {
+                    BuildIntersection(index);
+                }
+
+                BuildWall(walls.IndexOf(w));
             }
         }
 
@@ -2064,7 +2029,6 @@ public class WallMapping : MonoBehaviour
         CleanIntersections();
         CreateRoom(spline, spline[0], 1, new List<BezierKnot>());
         //CreateRoom(spline, spline[^1], 0, new List<BezierKnot>());
-        BuildWall(walls.IndexOf(wall));
         //MakeWalls();
 
     }
@@ -2082,7 +2046,7 @@ public class WallMapping : MonoBehaviour
             List<List<Spline>> wallsList = new();
             List<List<BezierKnot>> knotsList = new();
             List<int> intersectionBuild = new();
-            CreateIntersection(wall.wall, wall.points[0], wall.points[^1], wall.points, wallsList, knotsList, intersectionBuild, true, wall);
+            CreateIntersection(wall.wall, transform.TransformPoint(wall.points[0]), transform.TransformPoint(wall.points[^1]), wall.points, wallsList, knotsList, intersectionBuild, true, wall);
             for (int k = 0; k < wallsList.Count; k++)
             {
                 MakeIntersection(wallsList[k], knotsList[k]);
@@ -2101,7 +2065,7 @@ public class WallMapping : MonoBehaviour
         BuildIntersection(intersections.IndexOf(intersection));
     }
 
-    public void BuildWindows(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public void BuildDoor(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = transform.TransformPoint(point);
@@ -2128,7 +2092,34 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(targetWall));
     }
 
-    public void BuildWindows(Door loadedDoor)
+    public void BuildWindow(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    {
+        GameObject newObject = Instantiate(prefab);
+        newObject.transform.position = transform.TransformPoint(point);
+        newObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        int index = 0;
+        for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                index++;
+            }
+        }
+        GameObject previewSelector = Instantiate(selectorObject);
+        previewSelector.transform.SetParent(newObject.transform.transform);
+        previewSelector.transform.name = "Selector";
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, -0.5f);
+        previewSelector.transform.localScale = new Vector3(1f, height - 0.1f, length - 0.1f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        windows.Add(new Window(newObject, point, rotation, length, height, ID, targetWall, materials));
+        newObject.transform.SetParent(this.transform);
+
+        BuildWall(walls.IndexOf(targetWall));
+    }
+
+    public void BuildDoor(Door loadedDoor)
     {
         GameObject newObject = Instantiate(placementSystem.GetDoorPrefab(loadedDoor.ID));
         newObject.transform.position = transform.TransformPoint(loadedDoor.point);
@@ -2136,16 +2127,6 @@ public class WallMapping : MonoBehaviour
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            /*
-            List<Material> matList = loadedDoor.materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
-            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
-            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
-            {
-                mats[j] = matList[j];
-            }
-            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
-            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
-            */
             for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
             {
                 newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
@@ -2173,7 +2154,42 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(loadedDoor.targetWall));
     }
 
-    public void MoveWindows(Door door, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public void BuildWindow(Window loadedWindow)
+    {
+        GameObject newObject = Instantiate(placementSystem.GetDoorPrefab(loadedWindow.ID));
+        newObject.transform.position = transform.TransformPoint(loadedWindow.point);
+        newObject.transform.rotation = Quaternion.Euler(0, loadedWindow.rotation, 0);
+        int index = 0;
+        for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+            {
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = loadedWindow.materials[index].color;
+                index++;
+            }
+        }
+        GameObject previewSelector = Instantiate(selectorObject);
+        previewSelector.transform.SetParent(newObject.transform.transform);
+        previewSelector.transform.name = "Selector";
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, -0.5f);
+        previewSelector.transform.localScale = new Vector3(1f, loadedWindow.height - 0.1f, loadedWindow.length - 0.1f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, loadedWindow.rotation, 0);
+        windows.Add(loadedWindow);
+        newObject.transform.SetParent(this.transform);
+
+        loadedWindow.prefab = newObject;
+        if (walls.FindIndex(item => item.wall == loadedWindow.targetWall.wall) == -1)
+        {
+            if (walls.FindIndex(item => (Vector3)item.wall[0].Position == (Vector3)loadedWindow.targetWall.wall[0].Position && (Vector3)item.wall[^1].Position == (Vector3)loadedWindow.targetWall.wall[^1].Position) != -1)
+            {
+                loadedWindow.targetWall = walls.Find(item => (Vector3)item.wall[0].Position == (Vector3)loadedWindow.targetWall.wall[0].Position && (Vector3)item.wall[^1].Position == (Vector3)loadedWindow.targetWall.wall[^1].Position);
+            }
+        }
+        BuildWall(walls.IndexOf(loadedWindow.targetWall));
+    }
+
+    public void MoveDoors(Door door, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
     {
         door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -2215,6 +2231,43 @@ public class WallMapping : MonoBehaviour
         {
             int oldIndex = walls.IndexOf(door.targetWall);
             door.targetWall = targetWall;
+            BuildWall(oldIndex);
+        }
+
+        BuildWall(walls.IndexOf(targetWall));
+    }
+
+    public void MoveWindows(Window window, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    {
+        window.prefab.transform.position = transform.TransformPoint(point);
+        window.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        GameObject previewSelector = window.prefab.transform.Find("Selector").gameObject;
+        previewSelector.transform.localPosition = new Vector3(0.05f, 0f, -0.5f);
+        previewSelector.transform.localScale = new Vector3(1f, height - 0.1f, length - 0.1f);
+        previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        previewSelector.GetComponentInChildren<Renderer>().material = selectorMaterial;
+
+        int index = 0;
+        for (int i = 0; i < window.prefab.GetComponentsInChildren<Renderer>().Length; i++)
+        {
+            if (window.prefab.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
+            {
+                for (int j = 0; j < window.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
+                {
+                    window.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                    index++;
+                }
+            }
+        }
+
+        window.point = point;
+        window.rotation = rotation;
+        window.length = length;
+        window.materials = materials;
+        if (window.targetWall != targetWall)
+        {
+            int oldIndex = walls.IndexOf(window.targetWall);
+            window.targetWall = targetWall;
             BuildWall(oldIndex);
         }
 
@@ -2410,6 +2463,25 @@ public class WallMapping : MonoBehaviour
         return false;
     }
 
+    public Window GetWindowSelect(Vector3 position, Vector2Int size, float rotation)
+    {
+        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        Window window = windows.Find(window => overlapsList.Contains(window.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()));
+        return window;
+    }
+
+    public bool CheckWindowSelect(Vector3 position, Vector2Int size, float rotation)
+    {
+        Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+        List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+        if (windows.FindIndex(window => overlapsList.Contains(window.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>())) != -1)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public bool CheckWallSelect(Vector3 position, Vector2Int size, float rotation)
     {
         Collider[] overlaps = Physics.OverlapBox(new Vector3(position.x, position.y, position.z), new Vector3(size.x / 2f, 0.5f, size.y / 2f), Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
@@ -2498,6 +2570,28 @@ public class WallMapping : MonoBehaviour
         else return false;
     }
 
+    public bool CheckWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window)))
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return true;
+            }
+            return false;
+        }
+        else return false;
+    }
+
     public Wall GetWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
     {
         Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
@@ -2530,6 +2624,28 @@ public class WallMapping : MonoBehaviour
             List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
             List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
             if (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door)))
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return nearestWall;
+            }
+            return null;
+        }
+        else return null;
+    }
+
+    public Wall GetWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window)))
             {
                 if (nearestWall.wall.GetLength() * (1 - t) <= length)
                 {
@@ -2630,7 +2746,7 @@ public class WallMapping : MonoBehaviour
         {
             if (!doors.Contains(data.doors[i]))
             {
-                BuildWindows(data.doors[i]);
+                BuildDoor(data.doors[i]);
             }
         }
     }
@@ -2727,6 +2843,31 @@ public class Door
     public List<MatData> materials;
 
     public Door(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    {
+        this.prefab = prefab;
+        this.point = point;
+        this.rotation = rotation;
+        this.length = length;
+        this.height = height;
+        this.ID = ID;
+        this.targetWall = targetWall;
+        this.materials = materials;
+    }
+}
+
+[System.Serializable]
+public class Window
+{
+    public GameObject prefab;
+    public Vector3 point;
+    public float rotation;
+    public float length;
+    public float height;
+    public long ID;
+    public Wall targetWall;
+    public List<MatData> materials;
+
+    public Window(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
     {
         this.prefab = prefab;
         this.point = point;

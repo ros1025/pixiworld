@@ -1,16 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class DoorModifyState : IBuildingState
+public class WindowModifyState : IBuildingState
 {
     private long selectedObjectIndex = -1;
-    private Door selectedDoor = null;
-    private DoorsData doorsDataObject = null;
+    private Window selectedWindow = null;
+    private WindowsData windowsDataObject = null;
     bool edited;
     Grid grid;
     PreviewSystem previewSystem;
     PlacementSystem placementSystem;
-    DoorDatabaseSO database;
+    WindowsDatabaseSO database;
     WallMapping wallMapping;
     InputManager inputManager;
     private Vector3 displayPosition;
@@ -18,11 +18,11 @@ public class DoorModifyState : IBuildingState
     private float rotation; private float originalRotation;
     List<MatData> materials;
 
-    public DoorModifyState(Vector3 gridPosition,
+    public WindowModifyState(Vector3 gridPosition,
                           Grid grid,
                           PreviewSystem previewSystem,
                           PlacementSystem placementSystem,
-                          DoorDatabaseSO database,
+                          WindowsDatabaseSO database,
                           WallMapping wallMapping,
                           InputManager inputManager)
     {
@@ -33,24 +33,24 @@ public class DoorModifyState : IBuildingState
         this.wallMapping = wallMapping;
         this.inputManager = inputManager;
 
-        Door door = wallMapping.GetDoorSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
-        selectedObjectIndex = door.ID;
+        Window window = wallMapping.GetWindowSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
+        selectedObjectIndex = window.ID;
 
-        if (door != null)
+        if (window != null)
         {
-            doorsDataObject = database.doorsData.Find(data => data.ID == selectedObjectIndex);
+            windowsDataObject = database.windowsData.Find(data => data.ID == selectedObjectIndex);
 
             edited = false;
-            originalPosition = door.point;
-            originalRotation = door.rotation;
-            materials = door.materials;
+            originalPosition = window.point;
+            originalRotation = window.rotation;
+            materials = window.materials;
             rotation = originalRotation;
-            selectedDoor = door;
+            selectedWindow = window;
             previewSystem.StartMovingObjectPreview(
             grid.LocalToWorld(originalPosition),
             originalRotation,
-            door.prefab,
-            new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1),
+            window.prefab,
+            new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1),
             new Vector2(0, -0.5f),
             materials
             );
@@ -64,7 +64,7 @@ public class DoorModifyState : IBuildingState
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveDoors(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials);
+            wallMapping.MoveWindows(selectedWindow, originalPosition, originalRotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, selectedWindow.targetWall, selectedWindow.materials);
         }
     }
 
@@ -86,9 +86,9 @@ public class DoorModifyState : IBuildingState
             return;
         }
 
-        Renderer[] renderers = doorsDataObject.Prefab.GetComponentsInChildren<Renderer>();
+        Renderer[] renderers = windowsDataObject.Prefab.GetComponentsInChildren<Renderer>();
 
-        Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+        Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
 
@@ -98,7 +98,7 @@ public class DoorModifyState : IBuildingState
             materials.Add(previewSystem.materials[i]);
         }
 
-        wallMapping.MoveDoors(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, materials);
+        wallMapping.MoveWindows(selectedWindow, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, materials);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -109,9 +109,9 @@ public class DoorModifyState : IBuildingState
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _))
+        if (wallMapping.CheckWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out _))
         {
-            Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+            Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
             validity = true;
         }
@@ -124,6 +124,6 @@ public class DoorModifyState : IBuildingState
         position = gridPosition;
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, this.rotation);
+        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, this.rotation);
     }
 }

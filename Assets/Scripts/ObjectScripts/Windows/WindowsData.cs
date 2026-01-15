@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DoorsData", menuName = "Scriptable Objects/DoorsData")]
-public class DoorsData : ScriptableObject
+[CreateAssetMenu(fileName = "WindowsData", menuName = "Scriptable Objects/WindowsData")]
+public class WindowsData : ScriptableObject
 {
     [field: SerializeField]
     public string Name { get; private set; }
@@ -10,9 +10,9 @@ public class DoorsData : ScriptableObject
     [field: SerializeField]
     public int Cost { get; private set; }
     [field: SerializeField]
-    public float Length { get; private set; } = 1f;
+    public float Length { get; private set; } = 1;
     [field: SerializeField]
-    public float Height { get; private set; } = 2f;
+    public float Height { get; private set; } = 1;
     [field: SerializeField]
     public GameObject Prefab { get; private set; }
 }

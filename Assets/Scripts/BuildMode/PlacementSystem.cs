@@ -16,7 +16,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     [SerializeField] private ZonesDatabaseSO databaseZones;
     [SerializeField] private RoadsDatabaseSO databaseRoads;
     [SerializeField] private DoorDatabaseSO databaseDoors;
-
+    [SerializeField] private WindowsDatabaseSO databaseWindows;
 
     private GameObject gridVisualization;
 
@@ -174,6 +174,28 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         inputManager.OnExit += StopPlacement;
     }
 
+    public void CreateWindow(WindowsData windowsData)
+    {
+        buildModeUI.isActive(false);
+        gridVisualization.SetActive(true);
+        GetGridPosition();
+        itemMode = Door;
+        isCreate = true;
+        buildToolsUI.Call();
+        selectedPosition = gridPosition;
+        buildingState = new WindowCreateState(gridPosition,
+                                            windowsData,
+                                            grid,
+                                            preview,
+                                            this,
+                                            databaseWindows,
+                                            walls);
+        buildToolsUI.Call();
+        inputManager.ClearActions();
+        inputManager.OnHold += TriggerUpdate;
+        inputManager.OnAction += PlaceStructure;
+        inputManager.OnExit += StopPlacement;
+    }
 
     public void CreateRoad(RoadsData roadsData)
     {
@@ -451,6 +473,29 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
+        else if (IsWindow())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Door;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            buildingState = new WindowModifyState(gridPosition,
+                grid,
+                preview,
+                this,
+                databaseWindows,
+                walls,
+                inputManager);
+            buildToolsUI.Call();
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
     }
 
     private void TriggerUpdate()
@@ -616,6 +661,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
     }
 
+    private bool IsWindow()
+    {
+        if (walls != null && walls.CheckWindowSelect(grid.LocalToWorld(gridPosition), Vector2Int.one, 0))
+            return true;
+        else
+            return false;
+    }
+
     private void PlaceStructure()
     {
         buildingState.OnAction(selectedPosition);
@@ -684,9 +737,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     {
         if (preview.gridSnap || itemMode == Wall)
         {
-            return grid.CellToLocal(grid.WorldToCell(pos + new Vector3(0.25f, 0f, 0.25f)));
+            return grid.CellToLocal(grid.LocalToCell(pos + new Vector3(0.25f, 0f, 0.25f)));
         }
-        else return grid.WorldToLocal(pos);
+        else return pos;
     }
 
     public void SetRotation(float rotation)

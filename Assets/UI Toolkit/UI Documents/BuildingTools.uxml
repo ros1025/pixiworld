@@ -1,27 +1,36 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/buildingtools.uss?fileID=7433441132597879392&amp;guid=beefb56ce72b7314f8b1db0a8959e025&amp;type=3#buildingtools" />
-    <ui:VisualElement focusable="true" style="background-color: rgba(0, 0, 0, 0); position: absolute; flex-direction: row; bottom: 0; margin-left: 5px; margin-bottom: 5px; width: 100%; flex-grow: 1;">
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/buildingtools.uss?fileID=7433441132597879392&amp;guid=beefb56ce72b7314f8b1db0a8959e025&amp;type=3#buildingtools"/>
+    <ui:ScrollView name="ScrollView" mode="Horizontal" touch-scroll-type="Elastic" style="position: absolute; bottom: 0; width: 100%;">
         <ui:VisualElement name="Controls" style="flex-direction: row; flex-grow: 1; height: 90px; width: 100%; min-width: auto;">
             <ui:Button display-tooltip-when-elided="true" name="PlaceButton">
-                <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_confirm.png?fileID=2800000&amp;guid=c26134ce9a42db3469aedae57991df3a&amp;type=3#pixiworld_confirm&quot;); align-items: stretch; flex-direction: row-reverse; justify-content: space-between; align-self: center; width: 100%; height: 100%;" />
+                <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_confirm.png?fileID=2800000&amp;guid=c26134ce9a42db3469aedae57991df3a&amp;type=3#pixiworld_confirm&quot;); align-items: stretch; flex-direction: row-reverse; justify-content: space-between; align-self: center; width: 100%; height: 100%;"/>
             </ui:Button>
             <ui:Button display-tooltip-when-elided="true" name="CancelButton">
-                <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;); height: 100%; align-items: stretch; flex-direction: row-reverse; justify-content: space-between; align-self: center;" />
+                <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;); height: 100%; align-items: stretch; flex-direction: row-reverse; justify-content: space-between; align-self: center;"/>
             </ui:Button>
             <ui:Button display-tooltip-when-elided="true" name="SellButton">
-                <ui:VisualElement style="flex-grow: 1; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_sell.png?fileID=2800000&amp;guid=9c287a123e98e6f4b98584e01baa40fd&amp;type=3#pixiworld_sell&quot;);" />
+                <ui:VisualElement style="flex-grow: 1; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_sell.png?fileID=2800000&amp;guid=9c287a123e98e6f4b98584e01baa40fd&amp;type=3#pixiworld_sell&quot;);"/>
             </ui:Button>
             <ui:Button display-tooltip-when-elided="true" name="InventoryButton">
-                <ui:VisualElement style="flex-grow: 1; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_inventory.png?fileID=2800000&amp;guid=f9c446ba9c264a54c87d14255ba73642&amp;type=3#pixiworld_inventory&quot;);" />
+                <ui:VisualElement style="flex-grow: 1; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_inventory.png?fileID=2800000&amp;guid=f9c446ba9c264a54c87d14255ba73642&amp;type=3#pixiworld_inventory&quot;);"/>
             </ui:Button>
-            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="CostPrice" class="infotext" />
-            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="Size" class="infotext" />
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="CostPrice" class="infotext"/>
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="Size" class="infotext"/>
             <ui:Button name="GridSnap" class="general-button">
-                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_gridon.png?fileID=2800000&amp;guid=2040be84c26c04a4c89b89de5174e277&amp;type=3#pixiworld_gridon&quot;); -unity-background-image-tint-color: rgb(77, 77, 77);" />
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_gridon.png?fileID=2800000&amp;guid=2040be84c26c04a4c89b89de5174e277&amp;type=3#pixiworld_gridon&quot;); -unity-background-image-tint-color: rgb(77, 77, 77);"/>
             </ui:Button>
             <ui:Button name="CustomTexture" class="general-button">
-                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_customisation.png?fileID=2800000&amp;guid=98f67c19752081246834483f8c052029&amp;type=3#pixiworld_customisation&quot;); -unity-background-image-tint-color: rgb(102, 102, 102);" />
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_customisation.png?fileID=2800000&amp;guid=98f67c19752081246834483f8c052029&amp;type=3#pixiworld_customisation&quot;); -unity-background-image-tint-color: rgb(102, 102, 102);"/>
+            </ui:Button>
+            <ui:Button name="RotateLeft" class="general-button">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_arrowleft.png?fileID=2800000&amp;guid=82dfc59d49ad1d8438dcbb7dd86c73b4&amp;type=3#pixiworld_arrowleft&quot;); -unity-background-image-tint-color: rgb(77, 77, 77);"/>
+            </ui:Button>
+            <ui:Button name="RotateRight" class="general-button">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_arrowright.png?fileID=2800000&amp;guid=36a0957f22120e8469ad758e5f287082&amp;type=3#pixiworld_arrowright&quot;); -unity-background-image-tint-color: rgb(77, 77, 77);"/>
+            </ui:Button>
+            <ui:Button name="AdjustHeight" class="general-button">
+                <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_arrowup.png?fileID=2800000&amp;guid=70c075690961edf42a5015827f03c461&amp;type=3#pixiworld_arrowup&quot;); -unity-background-image-tint-color: rgb(77, 77, 77);"/>
             </ui:Button>
         </ui:VisualElement>
-    </ui:VisualElement>
+    </ui:ScrollView>
 </ui:UXML>

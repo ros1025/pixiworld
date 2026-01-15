@@ -20,7 +20,7 @@ public class PreviewTools : MonoBehaviour
 
     VisualElement root; VisualElement controls;
     Button placeButton; Button cancelButton; Button sellButton; Button inventoryButton;
-    Button gridSnap; Button customTexture;
+    Button gridSnap; Button customTexture; Button rotateLeft; Button rotateRight; Button height;
     Label costPrice; Label size;
 
     public bool canPlace;
@@ -40,6 +40,9 @@ public class PreviewTools : MonoBehaviour
         inventoryButton = controls.Q<Button>("InventoryButton");
         gridSnap = controls.Q<Button>("GridSnap");
         customTexture = controls.Q<Button>("CustomTexture");
+        rotateLeft = controls.Q<Button>("RotateLeft");
+        rotateRight = controls.Q<Button>("RotateRight");
+        height = controls.Q<Button>("AdjustHeight");
 
         costPrice = controls.Q<Label>("CostPrice");
         size = controls.Q<Label>("Size");
@@ -73,9 +76,18 @@ public class PreviewTools : MonoBehaviour
         if (placementSystem.itemMode == PlacementSystem.Door || placementSystem.itemMode == PlacementSystem.Object)
         {
             customTexture.SetEnabled(true);
+            rotateLeft.SetEnabled(true);
+            rotateRight.SetEnabled(true);
+            height.SetEnabled(true);
             customTexture.RegisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);
         }
-        else customTexture.SetEnabled(false);
+        else 
+        {
+            customTexture.SetEnabled(false);
+            rotateLeft.SetEnabled(false);
+            rotateRight.SetEnabled(false);
+            height.SetEnabled(false);
+        }
 
         if (placementSystem.itemMode != PlacementSystem.Wall)
         {
