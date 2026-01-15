@@ -21,6 +21,8 @@ public class BuildModeMenu : MonoBehaviour
     [SerializeField]
     private DoorDatabaseSO doorsData;
     [SerializeField]
+    private WindowsDatabaseSO windowsData;
+    [SerializeField]
     private ObjectCategoriesSO objectCategories;
     [SerializeField]
     private ObjectCategoriesSO objectMasterCategories;
@@ -84,7 +86,7 @@ public class BuildModeMenu : MonoBehaviour
         }
         AddCategory("Walls", "Walls", WallCreate);
         AddCategory("Doors", "Doors", DoorCategories);
-
+        AddCategory("Windows", "Windows", WindowCategories);
 
         if (!placementSystem.inMapMode)
         {
@@ -194,6 +196,25 @@ public class BuildModeMenu : MonoBehaviour
         }
     }
 
+    private void WindowCategories(ClickEvent evt)
+    {
+        WindowCategories();
+    }
+
+    private void WindowCategories()
+    {
+        items.Clear();
+        foreach (WindowsData window in windowsData.windowsData)
+        {
+            Button button = new Button();
+            button.name = window.Name;
+            button.text = window.Name;
+            button.AddToClassList("viewport-button");
+            items.Add(button);
+            button.RegisterCallback<ClickEvent, WindowsData>(PlaceWindow, window);
+        }
+    }
+
     private void ShowCategoriesOnClick(ClickEvent evt, ObjectCategory type)
     {
         ShowCategories(type);
@@ -233,6 +254,11 @@ public class BuildModeMenu : MonoBehaviour
     private void PlaceDoor(ClickEvent evt, DoorsData doorsData)
     {
         placementSystem.CreateDoor(doorsData);
+    }
+
+    private void PlaceWindow(ClickEvent evt, WindowsData windowsData)
+    {
+        placementSystem.CreateWindow(windowsData);
     }
 
     private void PlaceWall(ClickEvent evt)
