@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reflection;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Splines;
 using UnityEngine.Splines.ExtrusionShapes;
 
@@ -122,7 +124,7 @@ public class WallMapping : MonoBehaviour
 
     private void BuildWall(int currentSplineIndex)
     {
-        int offset = 0; float uvOffset = 0;
+        float uvOffset = 0;
 
         Mesh wall = new Mesh();
         wall.subMeshCount = 3;
@@ -194,6 +196,88 @@ public class WallMapping : MonoBehaviour
         walls[currentSplineIndex].mesh.mesh = wall;
     }
 
+    private bool DetectDoorPresence(int currentSplineIndex, float minStartT, float maxStartT, float minEndT, float maxEndT, out List<Door> doorsIntersect)
+    {
+        List<Door> doorsWall = doors.FindAll(item => item.targetWall == walls[currentSplineIndex]);
+        doorsIntersect = new();
+        if (doorsWall.Count >= 1)
+        {
+            foreach (Door door in doorsWall)
+            {
+                if (door.isReverse)
+                {
+                    if (
+                        EvaluateT(walls[currentSplineIndex].wall, door.point) >= minEndT && EvaluateT(walls[currentSplineIndex].wall, door.point) <= maxEndT &&
+                        EvaluateT(walls[currentSplineIndex].wall, door.point - ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length))) >= minStartT &&
+                        EvaluateT(walls[currentSplineIndex].wall, door.point - ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length))) <= maxStartT
+                    )
+                    {
+                        Debug.Log($"{EvaluateT(walls[currentSplineIndex].wall, door.point - ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length)))} {EvaluateT(walls[currentSplineIndex].wall, door.point)} {minStartT} {maxStartT} {minEndT} {maxEndT}");
+                        doorsIntersect.Add(door);
+                    }
+                }
+                else
+                {
+                    if (
+                        EvaluateT(walls[currentSplineIndex].wall, door.point) >= minStartT && EvaluateT(walls[currentSplineIndex].wall, door.point) <= maxStartT &&
+                        EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length))) >= minEndT &&
+                        EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length))) <= maxEndT
+                    )
+                    {
+                        Debug.Log($"{EvaluateT(walls[currentSplineIndex].wall, door.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (door.length)))} {EvaluateT(walls[currentSplineIndex].wall, door.point)} {minStartT} {maxStartT} {minEndT} {maxEndT}");
+                        doorsIntersect.Add(door);
+                    }
+                }
+            }
+        }
+
+        if (doorsIntersect.Count >= 1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool DetectWindowPresence(int currentSplineIndex, float minStartT, float maxStartT, float minEndT, float maxEndT, out List<Window> windowsIntersect)
+    {
+        List<Window> windowsWall = windows.FindAll(item => item.targetWall == walls[currentSplineIndex]);
+        windowsIntersect = new();
+        if (windowsWall.Count >= 1)
+        {
+            foreach (Window window in windowsWall)
+            {
+                if (window.isReverse)
+                {
+                    if (
+                        EvaluateT(walls[currentSplineIndex].wall, window.point) >= minEndT && EvaluateT(walls[currentSplineIndex].wall, window.point) <= maxEndT &&
+                        EvaluateT(walls[currentSplineIndex].wall, window.point - ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (window.length))) >= minStartT &&
+                        EvaluateT(walls[currentSplineIndex].wall, window.point - ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (window.length))) <= maxStartT
+                    )
+                    {
+                        windowsIntersect.Add(window);
+                    }
+                }
+                else
+                {
+                    if (
+                        EvaluateT(walls[currentSplineIndex].wall, window.point) >= minStartT && EvaluateT(walls[currentSplineIndex].wall, window.point) <= maxStartT &&
+                        EvaluateT(walls[currentSplineIndex].wall, window.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (window.length))) >= minEndT &&
+                        EvaluateT(walls[currentSplineIndex].wall, window.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (window.length))) <= maxEndT
+                    )
+                    {
+                        windowsIntersect.Add(window);
+                    }
+                }
+            }
+        }
+
+        if (windowsIntersect.Count >= 1)
+        {
+            return true;
+        }
+        return false;
+    }
+
     private void MapWallPoints(int currentSplineIndex, int currentPointIndex, float resolution, 
         List<Vector3> currentVertsA, List<Vector3> currentVertsB, List<List<Vector3>> currentVertsC, List<List<Vector3>> currentVertsS, 
         List<Vector2> currentUVsA, List<Vector2> currentUVsB, float uvOffset, 
@@ -215,21 +299,22 @@ public class WallMapping : MonoBehaviour
         Vector3 h1 = Vector3.zero;
 
         //Start of the wall segment
-        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
+        DetectDoorPresence(currentSplineIndex, 0f, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex - 1) / resolution, 1f, out List<Door> d1);
+        DetectWindowPresence(currentSplineIndex, 0f, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex - 1) / resolution, 1f, out List<Window> w1);
+
+        foreach (Door d in d1)
         {
-            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
-                && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution);
-            
-            h1 = new Vector3(0, door.height, 0);
+            if (d.height > h1.y)
+            {
+                h1 = new Vector3(0, d.height, 0);
+            }
         }
-        if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution) != -1)
+        foreach (Window w in w1)
         {
-            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex - 1) / resolution
-                && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) >= (float)(currentPointIndex - 1) / resolution);
-            
-            h1 = new Vector3(0, window.height + window.point.y, 0);
+            if (w.height > h1.y)
+            {
+                h1 = new Vector3(0, w.height + w.point.y, 0);
+            }
         }
 
         currentVertsA.AddRange(new List<Vector3>
@@ -265,44 +350,68 @@ public class WallMapping : MonoBehaviour
         }
 
         //Find doors or windows in the middle of the wall segment [ENDING]
-        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex]
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution) != -1)
+        bool hasDoorAtEnd = DetectDoorPresence(currentSplineIndex, 0f, 1f, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex) / resolution, out List<Door> d2);
+        bool hasWindowAtEnd = DetectWindowPresence(currentSplineIndex, 0f, 1f, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex) / resolution, out List<Window> w2);
+        if (hasDoorAtEnd)
         {
-            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex]
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution);
-
-            values.Add((door.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * door.length, 1, door.height));
+            foreach (Door d in d2)
+            {
+                if (d.isReverse)
+                {
+                    values.Add((d.point, 1, d.height));
+                }
+                else
+                {
+                    values.Add((d.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * d.length, 1, d.height));
+                }
+            }
         }
-        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex]
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution) != -1)
+        if (hasWindowAtEnd)
         {
-            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex]
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * (item.length))) <= (float)(currentPointIndex) / resolution);
-
-            values.Add((window.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * window.length, 1, window.height + window.point.y));
+            foreach (Window w in w2)
+            {
+                if (w.isReverse)
+                {
+                    values.Add((w.point, 1, w.height + w.point.y));
+                }
+                else
+                {
+                    values.Add((w.point + (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * w.length, 1, w.height + w.point.y));
+                }
+            }
         }
 
-
-        //Find doors or windows in the middle of the wall segment [STARTING]
-        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
+        bool hasDoorAtStart = DetectDoorPresence(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex) / resolution, 0f, 1f, out List<Door> d3);
+        bool hasWindowAtStart = DetectWindowPresence(currentSplineIndex, (float)(currentPointIndex - 1) / resolution, (float)(currentPointIndex) / resolution, 0f, 1f, out List<Window> w3);
+        if (hasDoorAtStart)
         {
-            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
-
-            values.Add((door.point, 0, door.height));
+            foreach (Door d in d3)
+            {
+                if (d.isReverse)
+                {
+                    values.Add((d.point - (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * d.length, 0, d.height));
+                    
+                }
+                else
+                {
+                    values.Add((d.point, 0, d.height));
+                }
+            }
         }
-        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution) != -1)
+        if (hasWindowAtStart)
         {
-            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) >= (float)(currentPointIndex - 1) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point) <= (float)(currentPointIndex) / resolution);
-
-            values.Add((window.point, 0, window.height + window.point.y));
+            foreach (Window w in w3)
+            {
+                if (w.isReverse)
+                {
+                    values.Add((w.point - (walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * w.length, 0, w.height + w.point.y));
+                    
+                }
+                else
+                {
+                    values.Add((w.point, 0, w.height + w.point.y));
+                }
+            }
         }
 
         values.Sort((a, b) =>
@@ -395,22 +504,22 @@ public class WallMapping : MonoBehaviour
 
         Vector3 h2 = Vector3.zero;
 
-        //End of the wall segment
-        if (doors.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution) != -1)
-        {
-            Door door = doors.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution);
+        DetectDoorPresence(currentSplineIndex, 0f, (float)(currentPointIndex) / resolution, (float)(currentPointIndex) / resolution, 1f, out List<Door> d4);
+        DetectWindowPresence(currentSplineIndex, 0f, (float)(currentPointIndex) / resolution, (float)(currentPointIndex) / resolution, 1f, out List<Window> w4);
 
-            h2 = new Vector3(0, door.height, 0);
+        foreach (Door d in d4)
+        {
+            if (d.height > h2.y)
+            {
+                h2 = new Vector3(0, d.height, 0);
+            }
         }
-        else if (windows.FindIndex(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution) != -1)
+        foreach (Window w in w4)
         {
-            Window window = windows.Find(item => item.targetWall == walls[currentSplineIndex] && EvaluateT(walls[currentSplineIndex].wall, item.point) < (float)(currentPointIndex) / resolution
-        && EvaluateT(walls[currentSplineIndex].wall, item.point + ((walls[currentSplineIndex].points[^1] - walls[currentSplineIndex].points[0]).normalized * item.length)) > (float)(currentPointIndex) / resolution);
-
-            h2 = new Vector3(0, window.height + window.point.y, 0);
+            if (w.height > h2.y)
+            {
+                h2 = new Vector3(0, w.height + w.point.y, 0);
+            }
         }
 
         currentVertsA.AddRange(new List<Vector3>
@@ -1945,6 +2054,7 @@ public class WallMapping : MonoBehaviour
         Vector3 p1 = pointsList[0];
         Vector3 p2 = pointsList[^1];
         BuildSplineKnots(spline, pointsList);
+        ModifyWindowsInWall(wall);
 
         bool isIntersect1 = EditKnotsInIntersection(spline, 0, p1, out List<Spline> newIntersectList);
         intersectList.AddRange(newIntersectList);
@@ -2065,7 +2175,65 @@ public class WallMapping : MonoBehaviour
         BuildIntersection(intersections.IndexOf(intersection));
     }
 
-    public void BuildDoor(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    private void ModifyWindowsInWall(Wall wall)
+    {
+        List<Door> wallDoors = doors.FindAll(item => item.targetWall == wall);
+        List<Window> wallWindows = windows.FindAll(item => item.targetWall == wall);
+
+        foreach (Door door in wallDoors)
+        {
+            float t = EvaluateT(wall.wall, door.point);
+            Vector3 pos = wall.wall.EvaluatePosition(t);
+            float rotation = Vector3.SignedAngle(Vector3.right, wall.points[^1] - wall.points[0], Vector3.up);
+            Collider[] overlaps = Physics.OverlapBox(pos, door.prefab.transform.Find("Selector").localScale / 2, Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == wall);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == wall);
+            if ((otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door))) && otherWindows.Count == 0)
+            {
+                if (wall.wall.GetLength() * (1 - t) <= door.length && !door.isReverse)
+                {
+                    RemoveDoor(door.prefab);
+                }
+                else if (wall.wall.GetLength() * t <= door.length && door.isReverse)
+                {
+                    RemoveDoor(door.prefab);
+                }
+            }
+            else
+            {
+                RemoveDoor(door.prefab);
+            }
+        }
+
+        foreach (Window window in wallWindows)
+        {
+            float t = EvaluateT(wall.wall, window.point);
+            Vector3 pos = wall.wall.EvaluatePosition(t);
+            float rotation = Vector3.SignedAngle(Vector3.right, wall.points[^1] - wall.points[0], Vector3.up);
+            Collider[] overlaps = Physics.OverlapBox(pos, window.prefab.transform.Find("Selector").localScale / 2, Quaternion.Euler(0, rotation, 0), LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == wall);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == wall);
+            if (otherDoors.Count == 0 && (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window))))
+            {
+                if (wall.wall.GetLength() * (1 - t) <= window.length && !window.isReverse)
+                {
+                    RemoveDoor(window.prefab);
+                }
+                else if (wall.wall.GetLength() * t <= window.length && window.isReverse)
+                {
+                    RemoveDoor(window.prefab);
+                }
+            }
+            else
+            {
+                RemoveDoor(window.prefab);
+            }
+        }
+    }
+
+    public void BuildDoor(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = transform.TransformPoint(point);
@@ -2086,13 +2254,13 @@ public class WallMapping : MonoBehaviour
         previewSelector.transform.localPosition = new Vector3(0.05f, 0f, -0.5f);
         previewSelector.transform.localScale = new Vector3(1f, height - 0.1f, length - 0.1f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        doors.Add(new Door(newObject, point, rotation, length, height, ID, targetWall, materials));
+        doors.Add(new Door(newObject, point, rotation, length, height, ID, targetWall, materials, isReverse));
         newObject.transform.SetParent(this.transform);
 
         BuildWall(walls.IndexOf(targetWall));
     }
 
-    public void BuildWindow(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public void BuildWindow(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         GameObject newObject = Instantiate(prefab);
         newObject.transform.position = transform.TransformPoint(point);
@@ -2113,7 +2281,7 @@ public class WallMapping : MonoBehaviour
         previewSelector.transform.localPosition = new Vector3(0.05f, 0f, -0.5f);
         previewSelector.transform.localScale = new Vector3(1f, height - 0.1f, length - 0.1f);
         previewSelector.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        windows.Add(new Window(newObject, point, rotation, length, height, ID, targetWall, materials));
+        windows.Add(new Window(newObject, point, rotation, length, height, ID, targetWall, materials, isReverse));
         newObject.transform.SetParent(this.transform);
 
         BuildWall(walls.IndexOf(targetWall));
@@ -2123,7 +2291,6 @@ public class WallMapping : MonoBehaviour
     {
         GameObject newObject = Instantiate(placementSystem.GetDoorPrefab(loadedDoor.ID));
         newObject.transform.position = transform.TransformPoint(loadedDoor.point);
-        newObject.transform.rotation = Quaternion.Euler(0, loadedDoor.rotation, 0);
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
@@ -2189,7 +2356,7 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(loadedWindow.targetWall));
     }
 
-    public void MoveDoors(Door door, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public void MoveDoors(Door door, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         door.prefab.transform.position = transform.TransformPoint(point);
         door.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -2204,17 +2371,6 @@ public class WallMapping : MonoBehaviour
         {
             if (door.prefab.GetComponentsInChildren<Renderer>()[i] != previewSelector.GetComponentInChildren<Renderer>())
             {
-                /*
-                List<Material> matList = materials.GetRange(index, door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
-                Material[] mats = new Material[door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
-                for (int j = 0; j < door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
-                {
-                    mats[j] = matList[j];
-                }
-                door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
-                index += door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
-                */
-
                 for (int j = 0; j < door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
                 {
                     door.prefab.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
@@ -2227,6 +2383,7 @@ public class WallMapping : MonoBehaviour
         door.rotation = rotation;
         door.length = length;
         door.materials = materials;
+        door.isReverse = isReverse;
         if (door.targetWall != targetWall)
         {
             int oldIndex = walls.IndexOf(door.targetWall);
@@ -2237,7 +2394,7 @@ public class WallMapping : MonoBehaviour
         BuildWall(walls.IndexOf(targetWall));
     }
 
-    public void MoveWindows(Window window, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public void MoveWindows(Window window, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         window.prefab.transform.position = transform.TransformPoint(point);
         window.prefab.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -2264,6 +2421,7 @@ public class WallMapping : MonoBehaviour
         window.rotation = rotation;
         window.length = length;
         window.materials = materials;
+        window.isReverse = isReverse;
         if (window.targetWall != targetWall)
         {
             int oldIndex = walls.IndexOf(window.targetWall);
@@ -2283,6 +2441,20 @@ public class WallMapping : MonoBehaviour
             int oldIndex = walls.IndexOf(doors[index].targetWall);
             Destroy(doors[index].prefab);
             doors.Remove(doors[index]);
+
+            BuildWall(oldIndex);
+        }
+    }
+
+    public void RemoveWindow(GameObject prefab)
+    {
+        int index = windows.FindIndex(item => item.prefab == prefab);
+        
+        if (index != -1)
+        {
+            int oldIndex = walls.IndexOf(windows[index].targetWall);
+            Destroy(windows[index].prefab);
+            windows.Remove(windows[index]);
 
             BuildWall(oldIndex);
         }
@@ -2526,7 +2698,7 @@ public class WallMapping : MonoBehaviour
         return false;
     }
 
-    public bool CheckWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    public bool CheckWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
     {
         Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
         if (nearestWall != null)
@@ -2535,55 +2707,16 @@ public class WallMapping : MonoBehaviour
             Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
             List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
             List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherDoors.Count == 0)
-            {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
-                {
-                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
-                }
-                return true;
-            }
-            return false;
-        }
-        else return false;
-    }
-
-    public bool CheckWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
-    {
-        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
-        if (nearestWall != null)
-        {
-            //return true;
-            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
-            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
-            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door)))
-            {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
-                {
-                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
-                }
-                return true;
-            }
-            return false;
-        }
-        else return false;
-    }
-
-    public bool CheckWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
-    {
-        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
-        if (nearestWall != null)
-        {
-            //return true;
-            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
-            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
             List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window)))
+            if (otherDoors.Count == 0 && otherWindows.Count == 0)
             {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
                 {
                     nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
                 }
                 return true;
             }
@@ -2592,7 +2725,7 @@ public class WallMapping : MonoBehaviour
         else return false;
     }
 
-    public Wall GetWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    public bool CheckWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
     {
         Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
         if (nearestWall != null)
@@ -2601,11 +2734,69 @@ public class WallMapping : MonoBehaviour
             Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
             List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
             List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherDoors.Count == 0)
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherWindows.Count == 0 && (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door))))
             {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
                 {
                     nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return true;
+            }
+            return false;
+        }
+        else return false;
+    }
+
+    public bool CheckWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            //return true;
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0 && (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window))))
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                return true;
+            }
+            return false;
+        }
+        else return false;
+    }
+
+    public Wall GetWindowsFit(GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
+    {
+        Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
+        if (nearestWall != null)
+        {
+            Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+            List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherDoors.Count == 0 && otherWindows.Count == 0)
+            {
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
+                {
+                    nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
                 }
                 return nearestWall;
             }
@@ -2614,7 +2805,7 @@ public class WallMapping : MonoBehaviour
         else return null;
     }
 
-    public Wall GetWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    public Wall GetWindowsMove(Door door, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
     {
         Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
         if (nearestWall != null)
@@ -2623,11 +2814,16 @@ public class WallMapping : MonoBehaviour
             Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
             List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
             List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door)))
+            List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
+            if (otherWindows.Count == 0 && (otherDoors.Count == 0 || (otherDoors.Count == 1 && otherDoors.Contains(door))))
             {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
                 {
                     nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
                 }
                 return nearestWall;
             }
@@ -2636,7 +2832,7 @@ public class WallMapping : MonoBehaviour
         else return null;
     }
 
-    public Wall GetWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest)
+    public Wall GetWindowsMove(Window window, GameObject previewSelector, Vector3 position, float length, out Vector3 nearest, bool isReverse)
     {
         Wall nearestWall = GetNearestWall(position, 0.5f, out nearest, out float t);
         if (nearestWall != null)
@@ -2644,12 +2840,17 @@ public class WallMapping : MonoBehaviour
             //return true;
             Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
             List<Collider> overlapsList = new(); overlapsList.AddRange(overlaps);
+            List<Door> otherDoors = doors.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
             List<Window> otherWindows = windows.FindAll(item => overlapsList.Contains(item.prefab.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Collider>()) && item.targetWall == nearestWall);
-            if (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window)))
+            if (otherDoors.Count == 0 && (otherWindows.Count == 0 || (otherWindows.Count == 1 && otherWindows.Contains(window))))
             {
-                if (nearestWall.wall.GetLength() * (1 - t) <= length)
+                if (nearestWall.wall.GetLength() * (1 - t) <= length && !isReverse)
                 {
                     nearest = nearestWall.points[^1] - ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
+                }
+                else if (nearestWall.wall.GetLength() * t <= length && isReverse)
+                {
+                    nearest = nearestWall.points[0] + ((nearestWall.points[^1] - nearestWall.points[0]).normalized * length);
                 }
                 return nearestWall;
             }
@@ -2705,7 +2906,7 @@ public class WallMapping : MonoBehaviour
 
     public WallMapSaveData GetWallMapSaveData()
     {
-        return new WallMapSaveData(walls, intersections, rooms, doors);
+        return new WallMapSaveData(walls, intersections, rooms, doors, windows);
     }
 
     public void LoadSaveData(WallMapSaveData data)
@@ -2747,6 +2948,14 @@ public class WallMapping : MonoBehaviour
             if (!doors.Contains(data.doors[i]))
             {
                 BuildDoor(data.doors[i]);
+            }
+        }
+
+        for (int i = 0; i < data.windows.Count; i++)
+        {
+            if (!windows.Contains(data.windows[i]))
+            {
+                BuildWindow(data.windows[i]);
             }
         }
     }
@@ -2841,8 +3050,9 @@ public class Door
     public long ID;
     public Wall targetWall;
     public List<MatData> materials;
+    public bool isReverse;
 
-    public Door(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public Door(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         this.prefab = prefab;
         this.point = point;
@@ -2852,6 +3062,7 @@ public class Door
         this.ID = ID;
         this.targetWall = targetWall;
         this.materials = materials;
+        this.isReverse = isReverse;
     }
 }
 
@@ -2866,8 +3077,9 @@ public class Window
     public long ID;
     public Wall targetWall;
     public List<MatData> materials;
+    public bool isReverse;
 
-    public Window(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials)
+    public Window(GameObject prefab, Vector3 point, float rotation, float length, float height, long ID, Wall targetWall, List<MatData> materials, bool isReverse)
     {
         this.prefab = prefab;
         this.point = point;
@@ -2877,6 +3089,7 @@ public class Window
         this.ID = ID;
         this.targetWall = targetWall;
         this.materials = materials;
+        this.isReverse = isReverse;
     }
 }
 
@@ -2887,12 +3100,14 @@ public class WallMapSaveData
     public List<Intersection> intersections;
     public List<Room> rooms;
     public List<Door> doors;
+    public List<Window> windows;
 
-    public WallMapSaveData(List<Wall> walls, List<Intersection> intersections, List<Room> rooms, List<Door> doors)
+    public WallMapSaveData(List<Wall> walls, List<Intersection> intersections, List<Room> rooms, List<Door> doors, List<Window> windows)
     {
         this.walls = walls;
         this.intersections = intersections;
         this.rooms = rooms;
         this.doors = doors;
+        this.windows = windows;
     }
 }

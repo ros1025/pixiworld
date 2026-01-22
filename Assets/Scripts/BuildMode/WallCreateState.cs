@@ -55,13 +55,13 @@ public class WallCreateState : IBuildingState
             {
                 posList.RemoveAt(index);
                 CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.RemovePointer(index, CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
                 CalculateLength();
-                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
             }
         }
         else
@@ -94,7 +94,7 @@ public class WallCreateState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition);
+        bool placementValidity = CheckPlacementValidity();
 
         if (placementValidity == false)
         {
@@ -114,7 +114,7 @@ public class WallCreateState : IBuildingState
         previewSystem.ClearPointer();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition)
+    private bool CheckPlacementValidity()
     {
         for (int i = 1; i < posList.Count; i++)
         {
@@ -136,7 +136,7 @@ public class WallCreateState : IBuildingState
 
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition);
+        bool placementValidity = CheckPlacementValidity();
 
         previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }

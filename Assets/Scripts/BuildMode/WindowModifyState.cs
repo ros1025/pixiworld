@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 public class WindowModifyState : IBuildingState
 {
@@ -16,7 +17,8 @@ public class WindowModifyState : IBuildingState
     private Vector3 displayPosition;
     private Vector3 position; private Vector3 originalPosition;
     private float rotation; private float originalRotation;
-    List<MatData> materials;
+    List<MatData> materials;    
+    private bool isReverse;
 
     public WindowModifyState(Vector3 gridPosition,
                           Grid grid,
@@ -38,7 +40,17 @@ public class WindowModifyState : IBuildingState
 
         if (window != null)
         {
-            windowsDataObject = database.windowsData.Find(data => data.ID == selectedObjectIndex);
+            isReverse = window.isReverse;
+            windowsDataObject = database.windowsData.Find(item => item.ID == window.ID);
+
+            if (window.isReverse)
+            {
+                placementSystem.SetRotation(180);
+            }
+            else
+            {
+                placementSystem.SetRotation(0);
+            }
 
             edited = false;
             originalPosition = window.point;
@@ -64,12 +76,21 @@ public class WindowModifyState : IBuildingState
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveWindows(selectedWindow, originalPosition, originalRotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, selectedWindow.targetWall, selectedWindow.materials);
+            wallMapping.MoveWindows(selectedWindow, originalPosition, originalRotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, selectedWindow.targetWall, selectedWindow.materials, selectedWindow.isReverse);
         }
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
+        if (rotation % 360 >= 0 && rotation % 360 < 180)
+        {
+            isReverse = false;
+        }
+        else
+        {
+            isReverse = true;
+        }
+
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
         UpdateState(gridPosition, rotation);
@@ -88,9 +109,10 @@ public class WindowModifyState : IBuildingState
 
         Renderer[] renderers = windowsDataObject.Prefab.GetComponentsInChildren<Renderer>();
 
-        Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
+        Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position, isReverse);
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+        if (isReverse) rotation += 180;
 
         materials.Clear();
         for (int i = 0; i < previewSystem.materials.Count; i++)
@@ -98,7 +120,7 @@ public class WindowModifyState : IBuildingState
             materials.Add(previewSystem.materials[i]);
         }
 
-        wallMapping.MoveWindows(selectedWindow, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, materials);
+        wallMapping.MoveWindows(selectedWindow, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, materials, isReverse);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -109,10 +131,11 @@ public class WindowModifyState : IBuildingState
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out _))
+        if (wallMapping.CheckWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out _, isReverse))
         {
-            Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
+            Wall targetWall = wallMapping.GetWindowsMove(selectedWindow, previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position, isReverse);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+            if (isReverse) rotation += 180;
             validity = true;
         }
 

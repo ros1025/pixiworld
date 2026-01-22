@@ -69,6 +69,8 @@ public class PreviewTools : MonoBehaviour
                 sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveZone, previewSystem.previewObject);
             else if (placementSystem.itemMode == PlacementSystem.Door)
                 sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveDoor, previewSystem.previewObject);
+            else if (placementSystem.itemMode == PlacementSystem.Window)
+                sellButton.RegisterCallback<ClickEvent, GameObject>(RemoveWindow, previewSystem.previewObject);
             else sellButton.SetEnabled(false);
         }
         else sellButton.SetEnabled(false);
@@ -79,6 +81,19 @@ public class PreviewTools : MonoBehaviour
             rotateLeft.SetEnabled(true);
             rotateRight.SetEnabled(true);
             height.SetEnabled(true);
+
+            if (placementSystem.itemMode == PlacementSystem.Door)
+            {
+                rotateLeft.RegisterCallback<ClickEvent>(evt => {placementSystem.ChangeRotation(-180);});
+                rotateRight.RegisterCallback<ClickEvent>(evt => {placementSystem.ChangeRotation(180);});
+                
+            }
+            else
+            {
+                rotateLeft.RegisterCallback<ClickEvent>(evt => {placementSystem.ChangeRotation(-15);});
+                rotateRight.RegisterCallback<ClickEvent>(evt => {placementSystem.ChangeRotation(15);});
+            }
+
             customTexture.RegisterCallback<ClickEvent>(SwitchBackToTextureCustomiser);
         }
         else 
@@ -132,6 +147,11 @@ public class PreviewTools : MonoBehaviour
     public void RemoveDoor(ClickEvent evt, GameObject prefab)
     {
         placementSystem.RemoveDoor(prefab);
+    }
+
+    public void RemoveWindow(ClickEvent evt, GameObject prefab)
+    {
+        placementSystem.RemoveWindow(prefab);
     }
 
     private void InvokeAction(ClickEvent evt)

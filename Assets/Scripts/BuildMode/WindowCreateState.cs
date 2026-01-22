@@ -14,6 +14,7 @@ public class WindowCreateState : IBuildingState
     private Vector3 displayPosition;
     private Vector3 position;
     private float rotation;
+    bool isReverse;
 
     public WindowCreateState(Vector3 gridPosition,
                           WindowsData windowsDataObject,
@@ -50,6 +51,15 @@ public class WindowCreateState : IBuildingState
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
+        if (rotation % 360 >= 0 && rotation % 360 < 180)
+        {
+            isReverse = false;
+        }
+        else
+        {
+            isReverse = true;
+        }
+
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
         UpdateState(gridPosition, rotation);
@@ -66,7 +76,7 @@ public class WindowCreateState : IBuildingState
             return;
         }
 
-        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
+        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position, isReverse);
         displayPosition = grid.LocalToWorld(position);
 
         List<MatData> newMaterials = new();
@@ -76,7 +86,8 @@ public class WindowCreateState : IBuildingState
         }
 
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
-        wallMapping.BuildWindow(windowsDataObject.Prefab, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, newMaterials);
+        if (isReverse) rotation += 180;
+        wallMapping.BuildWindow(windowsDataObject.Prefab, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, newMaterials, isReverse);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, rotation);
     }
@@ -85,10 +96,11 @@ public class WindowCreateState : IBuildingState
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out _))
+        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out _, isReverse))
         {
-            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position);
+            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, windowsDataObject.Length, out position, isReverse);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+            if (isReverse) rotation += 180;
             validity = true;
         }
 

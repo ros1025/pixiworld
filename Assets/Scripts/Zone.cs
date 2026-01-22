@@ -54,7 +54,7 @@ public class Zone : MonoBehaviour
         newZone.transform.SetParent(transform.parent);
         newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
         LevelData level = new LevelData(0, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
-            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), 0);
+            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), newZone.transform.GetComponentInChildren<PoolPlacer>(), 0);
         level.objectPlacer.SetPlacementSystem(placement);
         level.walls.SetPlacementSystem(placement);
         floors.Insert(0, level);
@@ -74,7 +74,7 @@ public class Zone : MonoBehaviour
 
     public void EnterZone()
     {
-        placement.SwitchZone(floors[level - minLevel].cursor, floors[level - minLevel].renderer, floors[level - minLevel].grid, floors[level - minLevel].objectPlacer, floors[level - minLevel].walls);
+        placement.SwitchZone(floors[level - minLevel].cursor, floors[level - minLevel].renderer, floors[level - minLevel].grid, floors[level - minLevel].objectPlacer, floors[level - minLevel].walls, floors[level - minLevel].pools);
         for (int i = 0; i <= level - minLevel; i++)
         {
             floors[i].floor.SetActive(true);
@@ -125,7 +125,7 @@ public class Zone : MonoBehaviour
         newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
 
         LevelData level = new LevelData(maxLevel + 1, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
-            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), floors[maxLevel - minLevel].height + 2f);
+            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), newZone.transform.GetComponentInChildren<PoolPlacer>(), floors[maxLevel - minLevel].height + 2f);
         level.cursor.SetActive(false);
 
         level.objectPlacer.SetPlacementSystem(placement);
@@ -144,7 +144,7 @@ public class Zone : MonoBehaviour
         newZone.transform.SetParent(transform.parent);
         newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
         LevelData level = new LevelData(minLevel - 1, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
-            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), floors[minLevel - minLevel].height - 2f);
+            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), newZone.transform.GetComponentInChildren<PoolPlacer>(), floors[minLevel - minLevel].height - 2f);
         level.cursor.SetActive(false);
 
         level.objectPlacer.SetPlacementSystem(placement);
@@ -160,7 +160,7 @@ public class Zone : MonoBehaviour
         newZone.transform.SetParent(transform.parent);
         newZone.transform.Find("FloorInsert").localScale = new Vector3(size.x, size.y, size.y);
         LevelData level = new LevelData(data.level, newZone, newZone.transform.Find("FloorInsert").GetChild(0).gameObject, newZone.transform.Find("FloorInsert").GetChild(0).GetChild(0).GetComponent<Renderer>(),
-            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), data.height);
+            newZone.transform.GetComponentInChildren<Grid>(), newZone.transform.GetComponentInChildren<ObjectPlacer>(), newZone.transform.GetComponentInChildren<WallMapping>(), newZone.transform.GetComponentInChildren<PoolPlacer>(), data.height);
         level.cursor.SetActive(false);
 
         if (data.level < minLevel)
@@ -205,7 +205,7 @@ public class Zone : MonoBehaviour
             floors[this.level - minLevel].cursor.SetActive(false);
             this.level = level;
             floorLabel.text = $"{this.level}";
-            placement.SwitchZone(floors[level - minLevel].cursor, floors[level - minLevel].renderer, floors[level - minLevel].grid, floors[level - minLevel].objectPlacer, floors[level - minLevel].walls);
+            placement.SwitchZone(floors[level - minLevel].cursor, floors[level - minLevel].renderer, floors[level - minLevel].grid, floors[level - minLevel].objectPlacer, floors[level - minLevel].walls, floors[level - minLevel].pools);
             upButton.RegisterCallback<ClickEvent, int>(SwitchLevel, level + 1);
             downButton.RegisterCallback<ClickEvent, int>(SwitchLevel, level - 1);
             for (int i = 0; i <= level - minLevel; i++)
@@ -316,9 +316,10 @@ public class LevelData
     public Grid grid;
     public ObjectPlacer objectPlacer;
     public WallMapping walls;
+    public PoolPlacer pools;
     public float height;
 
-    public LevelData(int level, GameObject floor, GameObject cursor, Renderer renderer, Grid grid, ObjectPlacer objectPlacer, WallMapping walls, float height)
+    public LevelData(int level, GameObject floor, GameObject cursor, Renderer renderer, Grid grid, ObjectPlacer objectPlacer, WallMapping walls, PoolPlacer pools, float height)
     {
         this.level = level;
         this.floor = floor;
@@ -328,6 +329,7 @@ public class LevelData
         this.objectPlacer = objectPlacer;
         this.walls = walls;
         this.height = height;
+        this.pools = pools;
     }
 }
 

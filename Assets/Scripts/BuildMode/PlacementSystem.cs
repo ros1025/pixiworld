@@ -29,6 +29,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     [SerializeField] private ZonePlacer mainZoneDB;
     [SerializeField] private RoadMapping roadsDBObject;
     [SerializeField] private WallMapping wallsDBObject;
+    [SerializeField] private PoolPlacer mainPoolsDB;
 
     [HideInInspector] public bool inBuildMode;
     [HideInInspector] public bool inMapMode;
@@ -45,6 +46,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     private ZonePlacer zonePlacer;
     private RoadMapping roads;
     private WallMapping walls;
+    private PoolPlacer pools;
 
     public int itemMode;
     public static readonly int Object = 0;
@@ -52,6 +54,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     public static readonly int Zone = 2;
     public static readonly int Road = 3;
     public static readonly int Door = 4;
+    public static readonly int Window = 5;
 
     public bool isCreate;
 
@@ -179,7 +182,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildModeUI.isActive(false);
         gridVisualization.SetActive(true);
         GetGridPosition();
-        itemMode = Door;
+        itemMode = Window;
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
@@ -306,6 +309,20 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         {
             soundFeedback.PlaySound(SoundType.Remove);
             walls.RemoveDoor(prefab);
+            StopPlacement();
+        }
+    }
+
+    public void RemoveWindow(GameObject prefab)
+    {
+        if (walls == null)
+        {
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
+        }
+        else
+        {
+            soundFeedback.PlaySound(SoundType.Remove);
+            walls.RemoveWindow(prefab);
             StopPlacement();
         }
     }
@@ -479,7 +496,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             gridVisualization.SetActive(true);
             buildModeUI.isActive(false);
             GetGridPosition();
-            itemMode = Door;
+            itemMode = Window;
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
@@ -518,7 +535,11 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             preview.dynamic = false;
             cameraController.posAdjustable = false;
             inputManager.OnMoved += PingUpdate;
-            inputManager.OnRightClick += () => { rotation += 15; buildingState.OnModify(selectedPosition, rotation); } ;
+            inputManager.OnRightClick += () => 
+            { 
+            if (itemMode == Door || itemMode == Window)
+                ChangeRotation(180); 
+            else ChangeRotation(15); } ;
         }
         else
             return;
@@ -747,12 +768,18 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         this.rotation = rotation;
     }
 
+    public void ChangeRotation(float delta)
+    {
+        this.rotation += delta;
+        buildingState.OnModify(selectedPosition, rotation);
+    }
+
     public void SetSelectedPosition(Vector3 position)
     {
         this.selectedPosition = position;
     }
 
-    public void SwitchZone(GameObject zone, Renderer zoneRenderer, Grid grid, ObjectPlacer placer, WallMapping walls)
+    public void SwitchZone(GameObject zone, Renderer zoneRenderer, Grid grid, ObjectPlacer placer, WallMapping walls, PoolPlacer pools)
     {
         zone.gameObject.layer = LayerMask.NameToLayer("Grid");
         zoneRenderer.material = gridMaterial;
@@ -761,6 +788,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         objectPlacer = placer;
         zonePlacer = null;
         roads = null;
+        this.pools = pools;
         this.walls = walls;
         inMapMode = false;
     }
@@ -774,6 +802,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         zonePlacer = mainZoneDB;
         roads = roadsDBObject;
         walls = wallsDBObject;
+        pools = mainPoolsDB;
         inMapMode = true;
     }
 
@@ -792,6 +821,11 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     public WallMapping GetCurrentWalls()
     {
         return walls;
+    }
+
+    public PoolPlacer GetCurrentPools()
+    {
+        return pools;
     }
 
     public ObjectPlacer GetCurrentObjectPlacer()

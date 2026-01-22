@@ -17,6 +17,7 @@ public class DoorModifyState : IBuildingState
     private Vector3 position; private Vector3 originalPosition;
     private float rotation; private float originalRotation;
     List<MatData> materials;
+    private bool isReverse;
 
     public DoorModifyState(Vector3 gridPosition,
                           Grid grid,
@@ -39,6 +40,16 @@ public class DoorModifyState : IBuildingState
         if (door != null)
         {
             doorsDataObject = database.doorsData.Find(data => data.ID == selectedObjectIndex);
+            isReverse = door.isReverse;
+
+            if (door.isReverse)
+            {
+                placementSystem.SetRotation(180);
+            }
+            else
+            {
+                placementSystem.SetRotation(0);
+            }
 
             edited = false;
             originalPosition = door.point;
@@ -64,12 +75,21 @@ public class DoorModifyState : IBuildingState
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            wallMapping.MoveDoors(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials);
+            wallMapping.MoveDoors(selectedDoor, originalPosition, originalRotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, selectedDoor.targetWall, selectedDoor.materials, selectedDoor.isReverse);
         }
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
+        if (rotation % 360 >= 0 && rotation % 360 < 180)
+        {
+            isReverse = false;
+        }
+        else
+        {
+            isReverse = true;
+        }
+
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
         UpdateState(gridPosition, rotation);
@@ -88,9 +108,10 @@ public class DoorModifyState : IBuildingState
 
         Renderer[] renderers = doorsDataObject.Prefab.GetComponentsInChildren<Renderer>();
 
-        Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+        Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position, isReverse);
         displayPosition = grid.LocalToWorld(position);
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+        if (isReverse) rotation += 180;
 
         materials.Clear();
         for (int i = 0; i < previewSystem.materials.Count; i++)
@@ -98,7 +119,7 @@ public class DoorModifyState : IBuildingState
             materials.Add(previewSystem.materials[i]);
         }
 
-        wallMapping.MoveDoors(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, materials);
+        wallMapping.MoveDoors(selectedDoor, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, materials, isReverse);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -109,10 +130,11 @@ public class DoorModifyState : IBuildingState
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _))
+        if (wallMapping.CheckWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _, isReverse))
         {
-            Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+            Wall targetWall = wallMapping.GetWindowsMove(selectedDoor, previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position, isReverse);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+            if (isReverse) rotation += 180;
             validity = true;
         }
 
