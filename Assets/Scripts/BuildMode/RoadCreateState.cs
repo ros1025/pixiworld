@@ -38,7 +38,7 @@ public class RoadCreateState : IBuildingState
         {
             width = roadsData.width;
 
-            previewSystem.StartCreatingRoads(grid.LocalToWorld(gridPosition));
+            previewSystem.StartCreatingRoads();
         }
         else
             throw new System.Exception($"No object with ID {roadsData.ID}");

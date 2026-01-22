@@ -19,9 +19,8 @@ public class RoadMapping : MonoBehaviour
     public List<Roads> roads = new();
     [SerializeField] private SplineSampler m_SplineSampler;
     [SerializeField] public SplineContainer m_SplineContainer;
-    [SerializeField] private MeshFilter m_meshFilter;
     [SerializeField] private PlacementSystem placementSystem;
-    [SerializeField] private Texture2D intersectionTex;
+    //[SerializeField] private Texture2D intersectionTex;
     [SerializeField] private Material roadMat;
     [SerializeField] private Material intersectMat;
 

@@ -16,4 +16,5 @@ MonoBehaviour:
   <ID>k__BackingField: 0
   <Cost>k__BackingField: 100
   <Length>k__BackingField: 1
+  <Height>k__BackingField: 1.9
   <Prefab>k__BackingField: {fileID: 6157204220882161820, guid: 33bf15acf5cbb4c4086920a98f7c1a1b, type: 3}

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 public class DoorCreateState : IBuildingState
 {
@@ -13,6 +14,7 @@ public class DoorCreateState : IBuildingState
     private Vector3 displayPosition;
     private Vector3 position;
     private float rotation;
+    private bool isReverse;
 
     public DoorCreateState(Vector3 gridPosition,
                           DoorsData doorsDataObject,
@@ -50,6 +52,15 @@ public class DoorCreateState : IBuildingState
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
+        if (rotation % 360 >= 0 && rotation % 360 < 180)
+        {
+            isReverse = false;
+        }
+        else
+        {
+            isReverse = true;
+        }
+
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
         UpdateState(gridPosition, rotation);
@@ -66,7 +77,7 @@ public class DoorCreateState : IBuildingState
             return;
         }
 
-        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+        Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position, isReverse);
         displayPosition = grid.LocalToWorld(position);
 
         List<MatData> newMaterials = new();
@@ -76,7 +87,9 @@ public class DoorCreateState : IBuildingState
         }
 
         rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
-        wallMapping.BuildDoor(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, newMaterials);
+        if (isReverse) rotation += 180;
+
+        wallMapping.BuildDoor(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, newMaterials, isReverse);
 
         previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, rotation);
     }
@@ -85,10 +98,11 @@ public class DoorCreateState : IBuildingState
     {
         bool validity = false;
 
-        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _))
+        if (wallMapping.CheckWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out _, isReverse))
         {
-            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position);
+            Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position, isReverse);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
+            if (isReverse) rotation += 180;
             validity = true;
         }
 

@@ -188,11 +188,11 @@ public class PreviewSystem : MonoBehaviour
         cellIndicator.SetActive(true);
     }
 
-    public void StartCreatingRoads(Vector3 gridPosition)
+    public void StartCreatingRoads()
     {
         previewSelector = Instantiate(previewSelectorObject);
-        previewPos = gridPosition;
-        PrepareDynamicCursor(gridPosition);
+        previewPos = Vector3.zero;
+        PrepareDynamicCursor(Vector3.zero);
         MoveCursor(Vector3.zero);
         RotateCursor(0);
     }
