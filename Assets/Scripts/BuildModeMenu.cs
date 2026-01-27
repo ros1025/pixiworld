@@ -87,6 +87,8 @@ public class BuildModeMenu : MonoBehaviour
         AddCategory("Walls", "Walls", WallCreate);
         AddCategory("Doors", "Doors", DoorCategories);
         AddCategory("Windows", "Windows", WindowCategories);
+        AddCategory("Pools", "Pools", PoolCreate);
+        AddCategory("Stairs", "Stairs", StairCategories);
 
         if (!placementSystem.inMapMode)
         {
@@ -177,6 +179,22 @@ public class BuildModeMenu : MonoBehaviour
         button.RegisterCallback<ClickEvent>(PlaceWall);
     }
 
+    private void PoolCreate(ClickEvent evt)
+    {
+        PoolCreate();
+    }
+
+    private void PoolCreate()
+    {
+        items.Clear();
+        Button button = new Button();
+        button.name = "Create Pool";
+        button.text = "Create Pool";
+        button.AddToClassList("viewport-button");
+        items.Add(button);
+        button.RegisterCallback<ClickEvent>(PlacePool);
+    }
+
     private void DoorCategories(ClickEvent evt)
     {
         DoorCategories();
@@ -213,6 +231,27 @@ public class BuildModeMenu : MonoBehaviour
             items.Add(button);
             button.RegisterCallback<ClickEvent, WindowsData>(PlaceWindow, window);
         }
+    }
+
+    private void StairCategories(ClickEvent evt)
+    {
+        StairCategories();
+    }
+
+    private void StairCategories()
+    {
+        items.Clear();
+        /*
+        foreach (WindowsData window in windowsData.windowsData)
+        {
+            Button button = new Button();
+            button.name = window.Name;
+            button.text = window.Name;
+            button.AddToClassList("viewport-button");
+            items.Add(button);
+            button.RegisterCallback<ClickEvent, WindowsData>(PlaceWindow, window);
+        }
+        */
     }
 
     private void ShowCategoriesOnClick(ClickEvent evt, ObjectCategory type)
@@ -264,6 +303,11 @@ public class BuildModeMenu : MonoBehaviour
     private void PlaceWall(ClickEvent evt)
     {
         placementSystem.CreateWall();
+    }
+
+    private void PlacePool(ClickEvent evt)
+    {
+        placementSystem.CreatePool();
     }
 
     private void AccountForSafeArea()

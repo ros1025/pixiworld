@@ -6,15 +6,16 @@ public class WallCreateState : IBuildingState
 {
     Grid grid;
     WallMapping wallMapping;
-    PreviewSystem previewSystem;
+    WallCreatePreview previewSystem;
     PlacementSystem placementSystem;
     private List<Vector3> posList;
     float length;
 
     public WallCreateState(Grid grid,
                             WallMapping wallMapping,
-                            PreviewSystem previewSystem,
-                            PlacementSystem placementSystem)
+                            WallCreatePreview previewSystem,
+                            PlacementSystem placementSystem,
+                            InputManager inputManager)
     {
         this.grid = grid;
         this.wallMapping = wallMapping;
@@ -22,7 +23,7 @@ public class WallCreateState : IBuildingState
         this.placementSystem = placementSystem;
 
         posList = new();
-        previewSystem.AddWalls();
+        previewSystem.StartPreview(placementSystem, inputManager, 0.1f, 2f);
     }
 
     public void EndState()
@@ -48,25 +49,25 @@ public class WallCreateState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        if (previewSystem.expand == true)
+        if (previewSystem.GetModifyState() == true)
         {
-            int index = previewSystem.expanders.IndexOf(previewSystem.SelectedCursor);
+            int index = previewSystem.expanders.IndexOf(previewSystem.selectedCursor);
             if ((index > 0 && Vector3.Distance(posList[index - 1], gridPosition) < 0.1f) || (index < posList.Count - 1 && Vector3.Distance(posList[index + 1], gridPosition) < 0.1f))
             {
                 posList.RemoveAt(index);
                 CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.DeletePointer(index);
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
                 CalculateLength();
-                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.ModifyPointer(index, grid.LocalToWorld(gridPosition));
             }
         }
         else
         {
-            if (previewSystem.SelectedCursor == previewSystem.gameObject)
+            if (previewSystem.selectedCursor == previewSystem.GetPreviewObject())
             {
                 if (!(posList.Contains(gridPosition)))
                 {
@@ -75,7 +76,7 @@ public class WallCreateState : IBuildingState
                     {
                         posList.Insert(index, gridPosition);
                         CalculateLength();
-                        UpdateState(gridPosition, 0);
+                        previewSystem.AddPoint(index, gridPosition);
                     }
                 }
             }
@@ -83,10 +84,12 @@ public class WallCreateState : IBuildingState
             {
                 posList.Add(gridPosition);
                 CalculateLength();
-                UpdateState(gridPosition, 0);
+                previewSystem.AddPoint(posList.IndexOf(gridPosition), gridPosition);
             }
         }
 
+        previewSystem.ApplyFeedback(CheckPlacementValidity());
+        placementSystem.GetBuildToolsUI().AdjustLabels(5 * Mathf.RoundToInt(length), new Vector2Int(Mathf.RoundToInt(length), 1));
     }
 
     public void OnAction(Vector3 gridPosition)
@@ -131,13 +134,5 @@ public class WallCreateState : IBuildingState
             return false;
 
         return true;
-    }
-
-
-    public void UpdateState(Vector3 gridPosition, float rotation = 0)
-    {
-        bool placementValidity = CheckPlacementValidity();
-
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }
 }

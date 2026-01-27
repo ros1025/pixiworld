@@ -9,7 +9,7 @@ public class WindowModifyState : IBuildingState
     private WindowsData windowsDataObject = null;
     bool edited;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectSelectionPreview previewSystem;
     PlacementSystem placementSystem;
     WindowsDatabaseSO database;
     WallMapping wallMapping;
@@ -22,7 +22,7 @@ public class WindowModifyState : IBuildingState
 
     public WindowModifyState(Vector3 gridPosition,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectSelectionPreview previewSystem,
                           PlacementSystem placementSystem,
                           WindowsDatabaseSO database,
                           WallMapping wallMapping,
@@ -58,21 +58,24 @@ public class WindowModifyState : IBuildingState
             materials = window.materials;
             rotation = originalRotation;
             selectedWindow = window;
-            previewSystem.StartMovingObjectPreview(
+            previewSystem.StartPreview(
             grid.LocalToWorld(originalPosition),
             originalRotation,
             window.prefab,
             new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1),
             new Vector2(0, -0.5f),
-            materials
+            materials, placementSystem, inputManager
             );
+            placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveWindow(selectedWindow.prefab));
+            placementSystem.GetBuildToolsUI().EnableCustomTexture(previewSystem.materials, () => previewSystem.RefreshColors());
         }
         else return;
     }
 
     public void EndState()
     {
-        previewSystem.StopMovingObject();
+        previewSystem.previewObject = null;
+        previewSystem.StopPreview();
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
@@ -147,6 +150,8 @@ public class WindowModifyState : IBuildingState
         position = gridPosition;
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, this.rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, this.rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

@@ -1,25 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-public class PlacementState : IBuildingState
+public class ObjectPlacementState : IBuildingState
 {
     //private int selectedObjectIndex = -1;
     ObjectData objectData;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectPlacementPreview previewSystem;
     PlacementSystem placementSystem;
     ObjectsDatabaseSO database;
     ObjectPlacer objectPlacer;
     private Vector3 displayPosition;
     private float rotation;
 
-    public PlacementState(Vector3 gridPosition,
+    public ObjectPlacementState(Vector3 gridPosition,
                           ObjectData objectData,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectPlacementPreview previewSystem,
                           PlacementSystem placementSystem,
                           ObjectsDatabaseSO database,
-                          ObjectPlacer objectPlacer)
+                          ObjectPlacer objectPlacer,
+                          InputManager inputManager)
     {
         this.objectData = objectData;
         this.grid = grid;
@@ -27,15 +29,20 @@ public class PlacementState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.objectPlacer = objectPlacer;
+        List<MatData> materials = new();
 
         //selectedObjectIndex = database.objectsData.IndexOf(objectData);
         if (database.objectsData.Contains(objectData))
         {
-            previewSystem.StartShowingPlacementPreview(
+            previewSystem.StartPreview(
                 objectData.Prefab,
                 objectData.Size,
-                Vector3.zero);
+                Vector3.zero,
+                placementSystem,
+                inputManager,
+                materials);
             UpdateState(gridPosition);
+            placementSystem.GetBuildToolsUI().EnableCustomTexture(materials, () => previewSystem.RefreshColors());
         }
         else
             throw new System.Exception($"No object with {objectData.name}");
@@ -44,7 +51,7 @@ public class PlacementState : IBuildingState
 
     public void EndState()
     {
-        previewSystem.StopShowingPreview();
+        previewSystem.StopPreview();
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
@@ -76,7 +83,9 @@ public class PlacementState : IBuildingState
         objectPlacer.PlaceObject(objectData.Prefab, gridPosition,
             displayPosition, objectData.Size, objectData.ID, rotation, newMaterials);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), false, objectData.Size, objectData.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), objectData.Size, objectData.Cost, rotation);
+        previewSystem.ApplyFeedback(false);
+        placementSystem.GetBuildToolsUI().canPlace = false;
     }
 
     private bool CheckPlacementValidity(Vector3 gridPosition)
@@ -102,6 +111,8 @@ public class PlacementState : IBuildingState
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, objectData.Size, objectData.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), objectData.Size, objectData.Cost, rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

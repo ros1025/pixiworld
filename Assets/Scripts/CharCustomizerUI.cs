@@ -29,6 +29,11 @@ public class CharCustomizerUI : MonoBehaviour
     private void Awake()
     {
         root = document.rootVisualElement;
+        StartCustomizerUI();
+    }
+
+    public void StartCustomizerUI()
+    {
         StartCoroutine(Initialise());
     }
 

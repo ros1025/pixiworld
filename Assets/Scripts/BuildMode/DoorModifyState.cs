@@ -8,7 +8,7 @@ public class DoorModifyState : IBuildingState
     private DoorsData doorsDataObject = null;
     bool edited;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectSelectionPreview previewSystem;
     PlacementSystem placementSystem;
     DoorDatabaseSO database;
     WallMapping wallMapping;
@@ -21,7 +21,7 @@ public class DoorModifyState : IBuildingState
 
     public DoorModifyState(Vector3 gridPosition,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectSelectionPreview previewSystem,
                           PlacementSystem placementSystem,
                           DoorDatabaseSO database,
                           WallMapping wallMapping,
@@ -57,21 +57,25 @@ public class DoorModifyState : IBuildingState
             materials = door.materials;
             rotation = originalRotation;
             selectedDoor = door;
-            previewSystem.StartMovingObjectPreview(
+            previewSystem.StartPreview(
             grid.LocalToWorld(originalPosition),
             originalRotation,
             door.prefab,
             new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1),
             new Vector2(0, -0.5f),
-            materials
+            materials, placementSystem, inputManager
             );
+
+            placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveDoor(selectedDoor.prefab));
+            placementSystem.GetBuildToolsUI().EnableCustomTexture(previewSystem.materials, () => previewSystem.RefreshColors());
         }
         else return;
     }
 
     public void EndState()
     {
-        previewSystem.StopMovingObject();
+        previewSystem.previewObject = null;
+        previewSystem.StopPreview();
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
@@ -146,6 +150,8 @@ public class DoorModifyState : IBuildingState
         position = gridPosition;
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, this.rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, this.rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

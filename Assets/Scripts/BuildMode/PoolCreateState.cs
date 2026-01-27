@@ -5,24 +5,27 @@ using UnityEngine;
 public class PoolCreateState : IBuildingState
 {
     private Grid grid;
-    private PreviewSystem previewSystem;
+    private PoolCreatePreview previewSystem;
     private PlacementSystem placementSystem;
+    private InputManager inputManager;
     private PoolPlacer poolPlacer;
     private List<Vector3> posList;
     private float length;
 
     public PoolCreateState (Grid grid,
                             PoolPlacer poolPlacer,
-                            PreviewSystem previewSystem,
-                            PlacementSystem placementSystem)
+                            PoolCreatePreview previewSystem,
+                            PlacementSystem placementSystem,
+                            InputManager inputManager)
     {
         this.grid = grid;
         this.poolPlacer = poolPlacer;
         this.previewSystem = previewSystem;
         this.placementSystem = placementSystem;
+        this.inputManager = inputManager;
 
         posList = new();
-        previewSystem.AddWalls();
+        previewSystem.StartPreview(placementSystem, inputManager);
     }
 
 
@@ -70,6 +73,9 @@ public class PoolCreateState : IBuildingState
 
     private bool CheckPlacementValidity()
     {
+        if (posList.Count < 3)
+            return false;
+
         for (int i = 1; i < posList.Count; i++)
         {
             Vector3 p1 = grid.LocalToWorld(posList[i - 1]);
@@ -81,8 +87,10 @@ public class PoolCreateState : IBuildingState
             }
         }
 
-        if (posList.Count < 3)
+        if (!poolPlacer.CheckPoolCollisions(posList))
+        {
             return false;
+        }
 
         return true;
     }
@@ -91,25 +99,25 @@ public class PoolCreateState : IBuildingState
     {
         grid = placementSystem.GetCurrentGrid();
 
-        if (previewSystem.expand == true)
+        if (previewSystem.GetModifyState() == true)
         {
-            int index = previewSystem.expanders.IndexOf(previewSystem.SelectedCursor);
+            int index = previewSystem.expanders.IndexOf(previewSystem.selectedCursor);
             if ((index > 0 && Vector3.Distance(posList[index - 1], gridPosition) < 0.1f) || (index < posList.Count - 1 && Vector3.Distance(posList[index + 1], gridPosition) < 0.1f))
             {
                 posList.RemoveAt(index);
                 CalculateLength();
-                previewSystem.RemovePointer(index, CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.DeletePointer(index);
             }
             else if (index >= 0)
             {
                 posList[index] = gridPosition;
                 CalculateLength();
-                previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+                previewSystem.ModifyPointer(index, grid.LocalToWorld(gridPosition));
             }
         }
         else
         {
-            if (previewSystem.SelectedCursor == previewSystem.gameObject)
+            if (previewSystem.selectedCursor == previewSystem.GetPreviewObject())
             {
                 if (!posList.Contains(gridPosition))
                 {
@@ -118,7 +126,7 @@ public class PoolCreateState : IBuildingState
                     {
                         posList.Insert(index, gridPosition);
                         CalculateLength();
-                        UpdateState(gridPosition, 0);
+                        previewSystem.AddPoint(index, gridPosition);
                     }
                 }
             }
@@ -126,15 +134,12 @@ public class PoolCreateState : IBuildingState
             {
                 posList.Add(gridPosition);
                 CalculateLength();
-                UpdateState(gridPosition, 0);
+                previewSystem.AddPoint(posList.IndexOf(gridPosition), gridPosition);
             }
         }
-    }
 
-    public void UpdateState(Vector3 gridPosition, float rotation = 0)
-    {
-        bool placementValidity = CheckPlacementValidity();
+        previewSystem.ApplyFeedback(CheckPlacementValidity());
+        placementSystem.GetBuildToolsUI().AdjustLabels(5 * Mathf.RoundToInt(length), new Vector2Int(Mathf.RoundToInt(length), 1));
 
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Splines;
 using UnityEngine.UI;
 
 public class PlacementSystem : MonoBehaviour, IDataPersistence
@@ -34,7 +36,18 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     [HideInInspector] public bool inBuildMode;
     [HideInInspector] public bool inMapMode;
 
-    [SerializeField] private PreviewSystem preview;
+    //[SerializeField] private PreviewSystem preview2;
+    private IPreviewSystem preview;
+    [SerializeField] public Material previewMaterialPrefab;
+    [SerializeField] public GameObject previewSelectorObject;
+    [SerializeField] public GameObject expandingCursor;
+    [SerializeField] public GameObject pointerCursor;
+    [SerializeField] public SplineContainer dynamicCursor;
+    [SerializeField] public MeshFilter dynamicMesh;
+    [SerializeField] public  MeshRenderer dynamicRenderer;
+    [SerializeField] public MeshCollider dynamicCollider;
+    [SerializeField] public GameObject expanderParent;
+    public GameObject cellIndicator;
 
     private Vector3 gridPosition = Vector3.zero;
     private Vector3 selectedPosition = Vector3.zero;
@@ -57,6 +70,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     public static readonly int Window = 5;
 
     public bool isCreate;
+    public bool gridSnap;
 
     [SerializeField]
     private CameraController cameraController;
@@ -70,12 +84,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     {
         grid = mainGrid;
         gridVisualization = mainGridPlane;
-        objectPlacer = mainObjectDB;
-        zonePlacer = mainZoneDB;
-        roads = roadsDBObject;
-        walls = wallsDBObject;
+        GoToMainMap();
         inMapMode = true;
-        preview.gridSnap = true;
+        gridSnap = true;
     }
 
     public void EnterBuildMode()
@@ -117,14 +128,16 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
-        buildingState = new PlacementState(gridPosition,
-                                           objectData,
-                                           grid,
-                                           preview,
-                                           this,
-                                           database,
-                                           objectPlacer);
-        buildToolsUI.Call();
+        ObjectPlacementPreview placementPreview = new ObjectPlacementPreview();
+        preview = placementPreview;
+        buildingState = new ObjectPlacementState(gridPosition,
+                                                objectData,
+                                                grid,
+                                                placementPreview,
+                                                this,
+                                                database,
+                                                objectPlacer,
+                                                inputManager);
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
@@ -140,14 +153,16 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
+        ZonePlacementPreview placementPreview = new();
+        preview = placementPreview;
         buildingState = new ZoneCreateState(gridPosition,
                                             zonesData,
                                             grid,
-                                            preview,
+                                            placementPreview,
                                             this,
                                             databaseZones,
-                                            zonePlacer);
-        buildToolsUI.Call();
+                                            zonePlacer,
+                                            inputManager);
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
@@ -163,13 +178,16 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
+        ObjectPlacementPreview placementPreview = new ObjectPlacementPreview();
+        preview = placementPreview;
         buildingState = new DoorCreateState(gridPosition,
                                             doorsData,
                                             grid,
-                                            preview,
+                                            placementPreview,
                                             this,
                                             databaseDoors,
-                                            walls);
+                                            walls,
+                                            inputManager);
         buildToolsUI.Call();
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
@@ -186,14 +204,16 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
+        ObjectPlacementPreview placementPreview = new ObjectPlacementPreview();
+        preview = placementPreview;
         buildingState = new WindowCreateState(gridPosition,
                                             windowsData,
                                             grid,
-                                            preview,
+                                            placementPreview,
                                             this,
                                             databaseWindows,
-                                            walls);
-        buildToolsUI.Call();
+                                            walls,
+                                            inputManager);
         inputManager.ClearActions();
         inputManager.OnHold += TriggerUpdate;
         inputManager.OnAction += PlaceStructure;
@@ -209,14 +229,16 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
+        RoadCreatePreview roadCreatePreview = new();
+        preview = roadCreatePreview;
         buildingState = new RoadCreateState(gridPosition,
                                             roadsData,
                                             grid,
-                                            preview,
+                                            roadCreatePreview,
                                             this,
                                             databaseRoads,
-                                            roads);
-        buildToolsUI.Call();
+                                            roads,
+                                            inputManager);
         inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
@@ -232,11 +254,35 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         isCreate = true;
         buildToolsUI.Call();
         selectedPosition = gridPosition;
+        WallCreatePreview wallCreatePreview = new();
+        preview = wallCreatePreview;
         buildingState = new WallCreateState(grid,
                                             walls,
-                                            preview,
-                                            this);
+                                            wallCreatePreview,
+                                            this,
+                                            inputManager);
+        inputManager.ClearActions();
+        inputManager.OnHold += TriggerLiveUpdate;
+        inputManager.OnAction += PlaceStructure;
+        inputManager.OnExit += StopPlacement;
+    }
+
+    public void CreatePool()
+    {
+        buildModeUI.isActive(false);
+        gridVisualization.SetActive(true);
+        GetGridPosition();
+        itemMode = Wall;
+        isCreate = true;
         buildToolsUI.Call();
+        selectedPosition = gridPosition;
+        PoolCreatePreview poolCreatePreview = new();
+        preview = poolCreatePreview;
+        buildingState = new PoolCreateState(grid,
+                                            pools,
+                                            poolCreatePreview,
+                                            this,
+                                            inputManager);
         inputManager.ClearActions();
         inputManager.OnHold += TriggerLiveUpdate;
         inputManager.OnAction += PlaceStructure;
@@ -341,14 +387,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
-            buildingState = new SelectionState(gridPosition,
+            ObjectSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
+            buildingState = new ObjectSelectionState(gridPosition,
                                        grid,
-                                       preview,
+                                       selectionPreview,
                                        this,
                                        database,
                                        objectPlacer,
                                        inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -364,14 +411,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            ZoneSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
             buildingState = new ZoneSelectionState(gridPosition,
                            grid,
-                           preview,
+                           selectionPreview,
                            this,
                            databaseZones,
                            zonePlacer,
                            inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -387,9 +435,11 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
-            buildingState = new IntersectionModifyState(gridPosition,
+            RoadIntersectionModifyPreview modifyPreview = new();
+            preview = modifyPreview;
+            buildingState = new RoadIntersectionModifyState(gridPosition,
                            grid,
-                           preview,
+                           modifyPreview,
                            this,
                            databaseRoads,
                            inputManager,
@@ -410,14 +460,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            RoadModifyPreview roadModifyPreview = new();
+            preview = roadModifyPreview;
             buildingState = new RoadModifyState(gridPosition,
                            grid,
-                           preview,
+                           roadModifyPreview,
                            this,
                            databaseRoads,
                            inputManager,
                            roads);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -433,13 +484,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            WallIntersectionModifyPreview modifyPreview = new();
+            preview = modifyPreview;
             buildingState = new WallIntersectionModifyState(gridPosition,
                            grid,
                            walls,
-                           preview,
+                           modifyPreview,
                            this,
                            inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -455,13 +507,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            WallModifyPreview wallModifyPreview = new();
+            preview = wallModifyPreview;
             buildingState = new WallModifyState(gridPosition,
                 grid,
                 walls,
-                preview,
+                wallModifyPreview,
                 this,
                 inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -477,14 +530,15 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            ObjectSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
             buildingState = new DoorModifyState(gridPosition,
                 grid,
-                preview,
+                selectionPreview,
                 this,
                 databaseDoors,
                 walls,
                 inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
@@ -500,16 +554,39 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             isCreate = false;
             buildToolsUI.Call();
             selectedPosition = gridPosition;
+            ObjectSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
             buildingState = new WindowModifyState(gridPosition,
                 grid,
-                preview,
+                selectionPreview,
                 this,
                 databaseWindows,
                 walls,
                 inputManager);
-            buildToolsUI.Call();
             inputManager.ClearActions();
             inputManager.OnHold += TriggerUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
+        else if (IsPool())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Window;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            PoolModifyPreview poolModifyPreview = new();
+            preview = poolModifyPreview;
+            buildingState = new PoolModifyState(grid,
+                pools,
+                poolModifyPreview,
+                this,
+                inputManager);
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerLiveUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
@@ -522,24 +599,26 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         if (inputManager.IsPointerOverUI())
             return;
         GetGridPosition();
-        if (preview.CheckExpansionHandle() == true)
+        if (preview is IStaticPreviewSystem)
         {
-            preview.expand = true;
-            preview.dynamic = false;
-            cameraController.posAdjustable = false;
-            inputManager.OnMoved += PingUpdate;
-        }
-        else if (preview.CheckPreviewPositions() == true)
-        {
-            preview.expand = false;
-            preview.dynamic = false;
-            cameraController.posAdjustable = false;
-            inputManager.OnMoved += PingUpdate;
-            inputManager.OnRightClick += () => 
-            { 
-            if (itemMode == Door || itemMode == Window)
-                ChangeRotation(180); 
-            else ChangeRotation(15); } ;
+            IStaticPreviewSystem staticPreview = (IStaticPreviewSystem)preview;
+            if (staticPreview.CheckExpansionHandles() == true)
+            {
+                staticPreview.SetExpansionState(true);
+                cameraController.posAdjustable = false;
+                inputManager.OnMoved += PingUpdate;
+            }
+            else if (staticPreview.CheckPreviewObject() == true)
+            {
+                staticPreview.SetExpansionState(false);
+                cameraController.posAdjustable = false;
+                inputManager.OnMoved += PingUpdate;
+                inputManager.OnRightClick += () => 
+                { 
+                if (itemMode == Door || itemMode == Window)
+                    ChangeRotation(180); 
+                else ChangeRotation(15); } ;
+            }
         }
         else
             return;
@@ -552,26 +631,27 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         if (inputManager.IsPointerOverUI())
             return;
         GetGridPosition();
-        if (preview.CheckExpansionHandle() == true)
+        if (preview is IDynamicPreviewSystem)
         {
-            preview.expand = true;
-            preview.dynamic = true;
-            cameraController.posAdjustable = false;
-            inputManager.OnMoved += PingUpdate;
-        }
-        else if (preview.CheckPreviewSpline() == true)
-        {
-            preview.expand = false;
-            preview.dynamic = true;
-            cameraController.posAdjustable = false;
-            PingUpdate();
-        }
-        else
-        {
-            preview.expand = false;
-            preview.dynamic = true;
-            cameraController.posAdjustable = false;
-            PingUpdate();
+            IDynamicPreviewSystem dynamicPreview = (IDynamicPreviewSystem)preview;
+            if (dynamicPreview.CheckExpansionHandles() == true)
+            {
+                dynamicPreview.SetModifyState(true);
+                cameraController.posAdjustable = false;
+                inputManager.OnMoved += PingUpdate;
+            }
+            else if (dynamicPreview.CheckPreviewSplines() == true)
+            {
+                dynamicPreview.SetModifyState(false);
+                cameraController.posAdjustable = false;
+                PingUpdate();
+            }
+            else
+            {
+                dynamicPreview.SetModifyState(false);
+                cameraController.posAdjustable = false;
+                PingUpdate();
+            }
         }
     }
 
@@ -590,7 +670,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
 
     private bool IsSelectable()
     {
-        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -598,7 +678,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
 
     private bool IsZone()
     {
-        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
+        if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0) == false)
             return true;
         else
             return false;
@@ -620,9 +700,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
         else if (walls != null && walls.CheckWallSelect(pos + new Vector3(size.x / 2f, 0, size.y / 2f), size, rotation))
             return false;
-        else if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
+        else if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(previewSelectorObject, pos, size, rotation) == false)
             return false;
-        else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(preview.previewSelectorObject, pos, size, rotation) == false)
+        else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(previewSelectorObject, pos, size, rotation) == false)
             return false;
         else
             return true;
@@ -634,9 +714,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
         else if (walls != null && walls.CheckWallSelect(previewObject))
             return false;
-        else if (zonePlacer != null && zonePlacer.CanMoveObjectAt(previewObject, preview.previewSelector) == false)
+        else if (zonePlacer != null && zonePlacer.CanMoveObjectAt(previewObject, previewSelectorObject) == false)
             return false;
-        else if (objectPlacer != null && objectPlacer.CanMoveObjectAt(previewObject, preview.previewSelector) == false)
+        else if (objectPlacer != null && objectPlacer.CanMoveObjectAt(previewObject, previewSelectorObject) == false)
             return false;
         else
             return true;
@@ -690,6 +770,14 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
     }
 
+    private bool IsPool()
+    {
+        if (pools != null && pools.SelectPool(inputManager) != null)
+            return true;
+        else
+            return false;
+    }
+
     private void PlaceStructure()
     {
         buildingState.OnAction(selectedPosition);
@@ -704,8 +792,8 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return;
         cameraController.posAdjustable = true;
         buildToolsUI.PlaceCheck();
-        cameraController.MoveCameraToPos(preview.previewPos, preview.previewSize);
-        preview.deSelect();
+        cameraController.MoveCameraToPos(preview.GetPreviewPosition(), preview.GetPreviewSize());
+        preview.Deselect();
         //DataPersistenceManager.instance.SaveGame();
         inputManager.OnMoved -= PingUpdate;
         inputManager.OnRelease -= ConfirmPlacement;
@@ -739,6 +827,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildToolsUI.Hide();
         selectedPosition = Vector3Int.zero;
         buildingState = null;
+        preview = null;
         rotation = 0;
         itemMode = -1;
     }
@@ -747,7 +836,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     {
         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
         pointerPosition = inputManager.GetMousePosition();
-        if (preview.gridSnap || itemMode == Wall)
+        if (gridSnap || itemMode == Wall)
         {
             gridPosition = grid.CellToLocal(grid.WorldToCell(mousePosition));
         }
@@ -756,7 +845,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
 
     public Vector3 SmoothenPosition(Vector3 pos)
     {
-        if (preview.gridSnap || itemMode == Wall)
+        if (gridSnap || itemMode == Wall)
         {
             return grid.CellToLocal(grid.LocalToCell(pos + new Vector3(0.25f, 0f, 0.25f)));
         }
@@ -833,6 +922,11 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         return objectPlacer;
     }
 
+    public PreviewTools GetBuildToolsUI()
+    {
+        return this.buildToolsUI;
+    }
+
     public GameObject GetObjectPrefab(long ID)
     {
         ObjectData data = database.objectsData.Find(item => item.ID == ID);
@@ -848,7 +942,8 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     private void Update()
     {
         GetGridPosition();
-        screenSelectPosition = cameraController.GetScreenPos(preview.previewPos);
+        if (preview != null)
+            screenSelectPosition = cameraController.GetScreenPos(preview.GetPreviewPosition());
         if (rotation >= 360) rotation -= 360;
     }
 

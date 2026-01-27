@@ -8,7 +8,7 @@ public class ZoneSelectionState : IBuildingState
     private GameObject selectedObject;
     private ZonesData zonesDataObject = null;
     Grid grid;
-    PreviewSystem previewSystem;
+    ZoneSelectionPreview previewSystem;
     PlacementSystem placementSystem;
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
@@ -23,7 +23,7 @@ public class ZoneSelectionState : IBuildingState
 
     public ZoneSelectionState(Vector3 gridPosition,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ZoneSelectionPreview previewSystem,
                           PlacementSystem placementSystem,
                           ZonesDatabaseSO database,
                           ZonePlacer zonePlacer,
@@ -36,7 +36,7 @@ public class ZoneSelectionState : IBuildingState
         this.zonePlacer = zonePlacer;
         this.inputManager = inputManager;
 
-        selectedObject = zonePlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
+        selectedObject = zonePlacer.GetObject(placementSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !zonePlacer.HasKey(selectedObject))
             return;
         edited = false;
@@ -51,22 +51,25 @@ public class ZoneSelectionState : IBuildingState
         size = originalSize;
         rotation = originalRotation;
         placementSystem.SetRotation(rotation);
-        previewSystem.StartMovingZones(
+        previewSystem.StartPreview(
             grid.LocalToWorld(pos),
             rotation,
             selectedObject,
-            size
+            size,
+            placementSystem, inputManager
         );
+        placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveZone(selectedObject));
+        
         UpdateState(pos, rotation);
     }
 
     public void EndState()
     {
-        previewSystem.StopMovingObject();
+        previewSystem.StopPreview();
         if (edited == false)
         {
             displayPosition = grid.LocalToWorld(originalPosition);
-            zonePlacer.MoveZoneAt(selectedObject, pos, zonesDataObject.ID, displayPosition, size, rotation);
+            zonePlacer.MoveZoneAt(selectedObject, originalPosition, zonesDataObject.ID, displayPosition, originalSize, originalRotation);
         }
         else
         {
@@ -76,11 +79,11 @@ public class ZoneSelectionState : IBuildingState
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
-        if (previewSystem.expand == true)
+        if (previewSystem.GetExpansionState() == true)
         {
             previewSystem.UpdateSize(grid.LocalToWorld(gridPosition));
-            size = previewSystem.previewSize;
-            pos = grid.WorldToLocal(previewSystem.previewPos);
+            size = previewSystem.GetPreviewSize();
+            pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
             UpdateState(pos, rotation);
         }
         else
@@ -98,13 +101,13 @@ public class ZoneSelectionState : IBuildingState
         {
             return;
         }
-        pos = grid.WorldToLocal(previewSystem.previewPos);
+        pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
         displayPosition = grid.LocalToWorld(pos);
-        size = previewSystem.previewSize;
+        size = previewSystem.GetPreviewSize();
 
         zonePlacer.MoveZoneAt(selectedObject, pos, zonesDataObject.ID, displayPosition, size, rotation);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(pos), true, size, (zonesDataObject.Cost * (size.x * size.y)) - (zonesDataObject.Cost * (originalSize.x * originalSize.y)), rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(pos), size, (zonesDataObject.Cost * (size.x * size.y)) - (zonesDataObject.Cost * (originalSize.x * originalSize.y)), rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -128,6 +131,8 @@ public class ZoneSelectionState : IBuildingState
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition);
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, size, (zonesDataObject.Cost * (size.x * size.y)) - (zonesDataObject.Cost * (originalSize.x * originalSize.y)), rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), size, (zonesDataObject.Cost * (size.x * size.y)) - (zonesDataObject.Cost * (originalSize.x * originalSize.y)), rotation);
+        previewSystem.ApplyFeedback(validity);
+        placementSystem.GetBuildToolsUI().canPlace = validity;
     }
 }

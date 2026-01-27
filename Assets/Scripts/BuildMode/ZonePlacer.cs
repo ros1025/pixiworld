@@ -70,7 +70,7 @@ public class ZonePlacer : MonoBehaviour
         GameObject m_Object = prefab;
         m_Object.transform.position = position;
         m_Object.transform.rotation = Quaternion.Euler(0, rotation, 0);
-        m_Object.transform.Find("Selector").localScale = new Vector3(size.x - 0.1f, 0.3f, size.y);
+        m_Object.transform.Find("Selector").localScale = new Vector3(size.x - 0.1f, 0.3f, size.y - 0.1f);
         m_Object.transform.Find("Selector").position = new Vector3(position.x, position.y, position.z);
         m_Object.transform.Find("Selector").GetChild(0).gameObject.GetComponent<Renderer>().material = selectorObjectMaterial;
         Zone zoneComponent = m_Object.GetComponentInChildren<Zone>();
@@ -78,6 +78,7 @@ public class ZonePlacer : MonoBehaviour
 
         data.occupiedPosition = gridPos;
         data.rotation = rotation;
+        data.size = size;
     }
 
     public void RemoveZoneAt(GameObject prefab)

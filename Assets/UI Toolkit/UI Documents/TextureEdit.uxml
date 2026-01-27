@@ -1,21 +1,29 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/textures.uss?fileID=7433441132597879392&amp;guid=03747e40e709d9447b8ec474c983f99e&amp;type=3#textures" />
+    <Style src="project://database/Assets/UI%20Toolkit/CSS%20Styles/textures.uss?fileID=7433441132597879392&amp;guid=03747e40e709d9447b8ec474c983f99e&amp;type=3#textures"/>
     <engine:VisualElement enabled="true" name="Main" style="flex-grow: 1; border-top-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-bottom-left-radius: 20px; background-color: rgba(193, 229, 229, 0.4); max-width: 400px; max-height: 500px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; min-height: 500px; min-width: 400px; align-self: stretch; justify-content: flex-start;">
         <engine:VisualElement name="heading" style="flex-grow: 1; max-height: 48px; min-height: 48px; flex-direction: row;">
-            <engine:Label text="Textures" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&amp;guid=b3eaed79ecc3c1d499d9dac52d6040b9&amp;type=3#Gotham Rounded Medium&quot;); font-size: 32px; padding-left: 2px; margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px; min-width: 320px; max-width: 320px;" />
+            <engine:Label text="Textures" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&amp;guid=b3eaed79ecc3c1d499d9dac52d6040b9&amp;type=3#Gotham Rounded Medium&quot;); font-size: 32px; padding-left: 2px; margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px; min-width: 320px; max-width: 320px;"/>
             <engine:Button name="CancelButton">
-                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;);" />
+                <engine:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/Icons/pixiworld_cancel.png?fileID=2800000&amp;guid=4f558fc1147250347b14c123f08df6ef&amp;type=3#pixiworld_cancel&quot;);"/>
             </engine:Button>
         </engine:VisualElement>
         <engine:ScrollView vertical-page-size="1" touch-scroll-type="Elastic" name="content" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" style="max-height: 432px; min-height: 432px;">
             <engine:VisualElement class="texture-parent" style="flex-grow: 1;">
-                <engine:Label text="Texture" class="texture-label" />
-                <engine:Button name="Colour" class="texture-button" />
-                <engine:Button name="Texture" class="texture-button" />
+                <engine:Label text="Texture" class="texture-label"/>
+                <engine:Button name="Colour" class="texture-button"/>
+                <engine:Button name="Texture" class="texture-button"/>
             </engine:VisualElement>
             <engine:VisualElement class="color-picker" style="flex-grow: 1;">
-                <engine:VisualElement class="color-picker-bg" style="flex-grow: 1;" />
-                <engine:Slider label="Slider" value="42" show-input-field="true" />
+                <engine:VisualElement class="color-picker-wrapper">
+                    <engine:Image class="color-picker-bg">
+                        <engine:VisualElement class="color-picker-widget" style="flex-grow: 1;"/>
+                    </engine:Image>
+                    <engine:Image class="color-picker-side">
+                        <engine:VisualElement class="color-picker-widget" style="flex-grow: 1;"/>
+                    </engine:Image>
+                    <engine:Image class="color-picker-side"/>
+                </engine:VisualElement>
+                <engine:Slider label="Slider" value="42" show-input-field="true"/>
             </engine:VisualElement>
         </engine:ScrollView>
     </engine:VisualElement>

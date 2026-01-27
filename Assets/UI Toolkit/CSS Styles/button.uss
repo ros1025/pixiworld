@@ -15,7 +15,6 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -23,8 +22,8 @@
     -unity-font-style: normal;
     background-color: rgb(255, 255, 255);
     font-size: 22px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .viewport-button:hover {
@@ -44,7 +43,6 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -52,8 +50,8 @@
     -unity-font-style: normal;
     background-color: rgb(202, 202, 202);
     font-size: 22px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .viewport-button:active {
@@ -73,7 +71,6 @@
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium%20Italic%20SDF.asset?fileID=11400000&guid=a423c924a400ae84d823b038778094a5&type=2#Gotham Rounded Medium Italic SDF");
     width: 300px;
     min-height: 300px;
     -unity-text-align: lower-center;
@@ -82,7 +79,7 @@
     background-color: rgb(168, 168, 168);
     font-size: 22px;
     letter-spacing: -5px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .unity-scroller {
@@ -206,7 +203,6 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -217,8 +213,8 @@
     max-height: 55px;
     min-width: 100px;
     color: rgb(255, 255, 255);
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .tools-button:hover {
@@ -238,7 +234,6 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -270,7 +265,6 @@
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: auto;
     -unity-text-align: middle-center;
@@ -301,8 +295,6 @@
     padding-right: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;
@@ -312,6 +304,7 @@
     font-size: 24px;
     min-width: 70px;
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .sections-button:hover {
@@ -331,8 +324,6 @@
     padding-right: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;
@@ -342,6 +333,7 @@
     font-size: 24px;
     min-width: 70px;
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
 
 .sections-button:active {
@@ -361,8 +353,6 @@
     padding-right: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
-    -unity-font: url('Assets/TextMesh Pro/Gotham Rounded Medium Italic SDF.asset');
     width: auto;
     min-height: 70px;
     -unity-text-align: middle-center;
@@ -372,4 +362,5 @@
     font-size: 24px;
     min-width: 70px;
     letter-spacing: -5px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Medium.otf?fileID=12800000&guid=b3eaed79ecc3c1d499d9dac52d6040b9&type=3#Gotham Rounded Medium");
 }
