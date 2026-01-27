@@ -15,12 +15,12 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.9215687, g: 0.9176471, b: 0.8352942, a: 1}
+  m_FogColor: {r: 0.31764707, g: 0.2627451, b: 0.25490198, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.003
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.9215687, g: 0.9176471, b: 0.8352942, a: 1}
+  m_AmbientSkyColor: {r: 0.31764707, g: 0.2627451, b: 0.25490198, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 2
@@ -212,6 +212,7 @@ GameObject:
   m_Component:
   - component: {fileID: 149153311}
   - component: {fileID: 149153310}
+  - component: {fileID: 149153312}
   m_Layer: 0
   m_Name: TexturePreview
   m_TagString: Untagged
@@ -257,6 +258,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 874038261}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &149153312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 149153309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68ae7b5696e014ee798547acb667156e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ColorPicker
+  TexturesMenu: {fileID: 149153310}
 --- !u!1 &201287203
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,12 +573,23 @@ MonoBehaviour:
   mainZoneDB: {fileID: 422809866}
   roadsDBObject: {fileID: 702089111}
   wallsDBObject: {fileID: 1900266889}
+  mainPoolsDB: {fileID: 921490121}
   inBuildMode: 0
   inMapMode: 0
-  preview: {fileID: 727195804}
+  previewMaterialPrefab: {fileID: 2100000, guid: 356b16fa4b64cbb47b94f36a847bc9ac, type: 2}
+  previewSelectorObject: {fileID: 3706936160302216349, guid: ba3e99b26bb2c5c44ad3733a8b360744, type: 3}
+  expandingCursor: {fileID: 7813196849824801433, guid: e7dca5a1b7f3abe43ae34630b75c026d, type: 3}
+  pointerCursor: {fileID: 7813196849824801433, guid: 93c2238499d80df48bc81d6944f78676, type: 3}
+  dynamicCursor: {fileID: 727195806}
+  dynamicMesh: {fileID: 727195808}
+  dynamicRenderer: {fileID: 727195807}
+  dynamicCollider: {fileID: 727195809}
+  expanderParent: {fileID: 806249152}
+  cellIndicator: {fileID: 1347465344}
   screenSelectPosition: {x: 0, y: 0, z: 0}
   itemMode: 0
   isCreate: 0
+  gridSnap: 0
   cameraController: {fileID: 2027412268}
   soundFeedback: {fileID: 1732914424}
 --- !u!1 &330585543
@@ -801,14 +826,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 0.8505593, g: 0.8505593, b: 0.8505593, a: 1}
-  m_Intensity: 1
+  m_Color: {r: 0.4135096, g: 0.4135096, b: 0.4135096, a: 1}
+  m_Intensity: 0.2
   m_Range: 10
   m_SpotAngle: 32.951843
   m_InnerSpotAngle: 24.753927
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 0.8
@@ -864,7 +889,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.074707106, y: 0.5130782, z: -0.85390556, w: 0.044888556}
+  m_LocalRotation: {x: 0.08650616, y: -0.12140554, z: -0.98876923, w: -0.010621616}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1016,6 +1041,7 @@ Transform:
   - {fileID: 422809867}
   - {fileID: 702089106}
   - {fileID: 1900266888}
+  - {fileID: 921490122}
   m_Father: {fileID: 891633490}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!156049354 &649952435
@@ -1738,7 +1764,7 @@ Transform:
   m_GameObject: {fileID: 806249152}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6516061, y: 10.213734, z: -17.23058}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1895,8 +1921,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
-  minutes: 832
-  time: {x: 13, y: 52}
+  minutes: 1136
+  time: {x: 18, y: 56}
   acceleration: 1
   paused: 0
 --- !u!4 &827732168
@@ -2033,10 +2059,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SettingsMenu: {fileID: 874038260}
-  TexturesMenu: {fileID: 149153310}
+  colorPicker: {fileID: 149153312}
   settingsMenuObject: {fileID: 874038259}
   inputManager: {fileID: 107182440}
-  previewSystem: {fileID: 727195804}
   placementSystem: {fileID: 275286407}
   canPlace: 0
 --- !u!1 &891633489
@@ -2071,6 +2096,53 @@ Transform:
   - {fileID: 1803802497}
   - {fileID: 649952434}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &921490120
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 921490122}
+  - component: {fileID: 921490121}
+  m_Layer: 0
+  m_Name: PoolPlacer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &921490121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921490120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226da2977fb004fa1b2ee5ecee59bf06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PoolPlacer
+  pools: []
+  water: {fileID: 2100000, guid: 248f78dce9de7413693ba626d346ee97, type: 2}
+  depth: 2
+--- !u!4 &921490122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921490120}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 649952434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &975606232
 GameObject:

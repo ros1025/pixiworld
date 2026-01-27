@@ -7,10 +7,11 @@ public class DoorCreateState : IBuildingState
     //private int selectedObjectIndex = -1;
     DoorsData doorsDataObject;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectPlacementPreview previewSystem;
     PlacementSystem placementSystem;
     DoorDatabaseSO database;
     WallMapping wallMapping;
+    private InputManager inputManager;
     private Vector3 displayPosition;
     private Vector3 position;
     private float rotation;
@@ -19,10 +20,11 @@ public class DoorCreateState : IBuildingState
     public DoorCreateState(Vector3 gridPosition,
                           DoorsData doorsDataObject,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectPlacementPreview previewSystem,
                           PlacementSystem placementSystem,
                           DoorDatabaseSO database,
-                          WallMapping wallMapping)
+                          WallMapping wallMapping,
+                          InputManager inputManager)
     {
         this.doorsDataObject = doorsDataObject;
         this.grid = grid;
@@ -30,14 +32,19 @@ public class DoorCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.wallMapping = wallMapping;
+        List<MatData> materials = new();
 
         //selectedObjectIndex = database.doorsData.IndexOf(doorsDataObject);
         if (database.doorsData.Contains(doorsDataObject))
         {
-            previewSystem.StartShowingPlacementPreview(
+            previewSystem.StartPreview(
                 doorsDataObject.Prefab,
                 new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1),
-                new Vector2(0, -0.5f));
+                new Vector2(0, -0.5f),
+                placementSystem,
+                inputManager,
+                materials);
+            placementSystem.GetBuildToolsUI().EnableCustomTexture(materials, () => previewSystem.RefreshColors());
             UpdateState(gridPosition);
         }
         else
@@ -47,7 +54,7 @@ public class DoorCreateState : IBuildingState
 
     public void EndState()
     {
-        previewSystem.StopShowingPreview();
+        previewSystem.StopPreview();
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
@@ -91,7 +98,9 @@ public class DoorCreateState : IBuildingState
 
         wallMapping.BuildDoor(doorsDataObject.Prefab, position, rotation, doorsDataObject.Length, doorsDataObject.Height, doorsDataObject.ID, targetWall, newMaterials, isReverse);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, rotation);
+        previewSystem.ApplyFeedback(false);
+        placementSystem.GetBuildToolsUI().canPlace = false;
     }
 
     private bool CheckPlacementValidity(Vector3 gridPosition)
@@ -102,7 +111,10 @@ public class DoorCreateState : IBuildingState
         {
             Wall targetWall = wallMapping.GetWindowsFit(previewSystem.previewSelector, gridPosition, doorsDataObject.Length, out position, isReverse);
             rotation = Vector3.SignedAngle(Vector3.right, targetWall.points[^1] - targetWall.points[0], Vector3.up);
-            if (isReverse) rotation += 180;
+            if (isReverse) 
+            {
+                rotation += 180;
+            }
             validity = true;
         }
 
@@ -114,6 +126,8 @@ public class DoorCreateState : IBuildingState
         position = gridPosition;
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, this.rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(doorsDataObject.Length), 1), doorsDataObject.Cost, this.rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

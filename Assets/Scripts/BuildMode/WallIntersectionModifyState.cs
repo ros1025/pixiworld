@@ -5,7 +5,7 @@ using UnityEngine.Splines;
 public class WallIntersectionModifyState : IBuildingState
 {
     Grid grid;
-    PreviewSystem previewSystem;
+    WallIntersectionModifyPreview previewSystem;
     PlacementSystem placementSystem;
     WallMapping wallMapping;
     InputManager inputManager;
@@ -19,7 +19,7 @@ public class WallIntersectionModifyState : IBuildingState
     public WallIntersectionModifyState(Vector3 gridPosition,
                             Grid grid,
                             WallMapping wallMapping,
-                            PreviewSystem previewSystem,
+                            WallIntersectionModifyPreview previewSystem,
                             PlacementSystem placementSystem,
                             InputManager inputManager)
     {
@@ -37,7 +37,7 @@ public class WallIntersectionModifyState : IBuildingState
         position = wallMapping.CalculateIntersectionCenter(selectedIntersection);
         originalPosition = position;
 
-        previewSystem.ModifyIntersection(originalPosition, selectedIntersection, GetCost(), walls);
+        previewSystem.StartPreview(originalPosition, selectedIntersection, walls, placementSystem, inputManager);
     }
 
     public void EndState()
@@ -50,11 +50,10 @@ public class WallIntersectionModifyState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        if (previewSystem.expand == true)
-        {
-            position = gridPosition;
-            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), GetCost(), 0, 0, 0);
-        }
+        position = gridPosition;
+        previewSystem.ModifyPointer(0,grid.LocalToWorld(gridPosition));
+        previewSystem.ApplyFeedback(CheckPlacementValidity());
+        placementSystem.GetBuildToolsUI().AdjustLabels(GetCost(), Vector2Int.one);
     }
 
     public void OnAction(Vector3 gridPosition)
@@ -70,7 +69,7 @@ public class WallIntersectionModifyState : IBuildingState
         }
 
 
-        Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
+        Vector3 pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
 
         wallMapping.ModifyIntersection(selectedIntersection, position);
 
@@ -146,12 +145,5 @@ public class WallIntersectionModifyState : IBuildingState
         }
 
         return true;
-    }
-
-    public void UpdateState(Vector3 gridPosition, float rotation = 0)
-    {
-        bool placementValidity = CheckPlacementValidity();
-
-        previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), GetCost(), 0, 0, 0);    
     }
 }

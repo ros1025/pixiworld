@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
 
-public class IntersectionModifyState : IBuildingState
+public class RoadIntersectionModifyState : IBuildingState
 {
     Grid grid;
-    PreviewSystem previewSystem;
+    RoadIntersectionModifyPreview previewSystem;
     PlacementSystem placementSystem;
     RoadsDatabaseSO database;
     RoadMapping roadMapping;
@@ -17,9 +17,9 @@ public class IntersectionModifyState : IBuildingState
     private Vector3 position;
     private Vector3 originalPosition;
 
-    public IntersectionModifyState(Vector3 gridPosition,
+    public RoadIntersectionModifyState(Vector3 gridPosition,
                                     Grid grid,
-                                    PreviewSystem previewSystem,
+                                    RoadIntersectionModifyPreview previewSystem,
                                     PlacementSystem placementSystem,
                                     RoadsDatabaseSO database,
                                     InputManager inputManager,
@@ -42,12 +42,12 @@ public class IntersectionModifyState : IBuildingState
         position = roadMapping.CalculateIntersectionCenter(selectedIntersection);
         originalPosition = position;
         
-        previewSystem.ModifyIntersection(originalPosition, selectedIntersection, GetCost(), junctions);
+        previewSystem.StartPreview(originalPosition, selectedIntersection, junctions, placementSystem, inputManager);
     }
 
     public void EndState()
     {
-        previewSystem.StopShowingPreview();
+        previewSystem.StopPreview();
         if (edited == false)
         {
             position = originalPosition;
@@ -63,7 +63,7 @@ public class IntersectionModifyState : IBuildingState
             return;
         }
 
-        Vector3 pos = grid.WorldToLocal(previewSystem.previewPos);
+        Vector3 pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
 
         roadMapping.ModifyIntersection(selectedIntersection, pos);
 
@@ -74,17 +74,11 @@ public class IntersectionModifyState : IBuildingState
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
-        if (previewSystem.expand == true)
-        {
-            position = gridPosition;
-            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), GetCost(), 0, 0, 0);
-        }
-    }
-
-    public void UpdateState(Vector3 gridPosition, float rotation = 0)
-    {
         position = gridPosition;
-        previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(), GetCost(), 0, 0, 0);    
+        previewSystem.ModifyPointer(0,grid.LocalToWorld(gridPosition));
+        previewSystem.ApplyFeedback(CheckPlacementValidity());
+        placementSystem.GetBuildToolsUI().AdjustLabels(GetCost(), Vector2Int.one);
+        placementSystem.GetBuildToolsUI().canPlace = CheckPlacementValidity();
     }
 
     private bool CheckPlacementValidity()

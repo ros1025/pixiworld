@@ -7,10 +7,11 @@ public class WindowCreateState : IBuildingState
     //private int selectedObjectIndex = -1;
     WindowsData windowsDataObject;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectPlacementPreview previewSystem;
     PlacementSystem placementSystem;
     WindowsDatabaseSO database;
     WallMapping wallMapping;
+    private InputManager inputManager;
     private Vector3 displayPosition;
     private Vector3 position;
     private float rotation;
@@ -19,10 +20,11 @@ public class WindowCreateState : IBuildingState
     public WindowCreateState(Vector3 gridPosition,
                           WindowsData windowsDataObject,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectPlacementPreview previewSystem,
                           PlacementSystem placementSystem,
                           WindowsDatabaseSO database,
-                          WallMapping wallMapping)
+                          WallMapping wallMapping,
+                          InputManager inputManager)
     {
         this.windowsDataObject = windowsDataObject;
         this.grid = grid;
@@ -30,14 +32,21 @@ public class WindowCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.wallMapping = wallMapping;
+        this.inputManager = inputManager;
+        List<MatData> materials = new();
 
         if (database.windowsData.Contains(windowsDataObject))
         {
-            previewSystem.StartShowingPlacementPreview(
+            previewSystem.StartPreview(
                 windowsDataObject.Prefab,
                 new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1),
-                new Vector2(0, -0.5f));
+                new Vector2(0, -0.5f),
+                placementSystem,
+                inputManager,
+                materials);
             UpdateState(gridPosition);
+
+            placementSystem.GetBuildToolsUI().EnableCustomTexture(materials, () => previewSystem.RefreshColors());
         }
         else
             throw new System.Exception($"No object with ID {windowsDataObject.ID}");
@@ -46,7 +55,7 @@ public class WindowCreateState : IBuildingState
 
     public void EndState()
     {
-        previewSystem.StopShowingPreview();
+        previewSystem.StopPreview();
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
@@ -89,7 +98,9 @@ public class WindowCreateState : IBuildingState
         if (isReverse) rotation += 180;
         wallMapping.BuildWindow(windowsDataObject.Prefab, position, rotation, windowsDataObject.Length, windowsDataObject.Height, windowsDataObject.ID, targetWall, newMaterials, isReverse);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), false, new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, rotation);
+        previewSystem.ApplyFeedback(false);
+        placementSystem.GetBuildToolsUI().canPlace = false;
     }
 
     private bool CheckPlacementValidity(Vector3 gridPosition)
@@ -112,6 +123,8 @@ public class WindowCreateState : IBuildingState
         position = gridPosition;
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(position), placementValidity, new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, this.rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(position), new Vector2Int(Mathf.RoundToInt(windowsDataObject.Length), 1), windowsDataObject.Cost, this.rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

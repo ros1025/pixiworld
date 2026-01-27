@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class SelectionState : IBuildingState
+public class ObjectSelectionState : IBuildingState
 {
     private long gameObjectIndex = -1;
     private GameObject selectedObject = null;
     private ObjectData gameObjectData = null;
     Grid grid;
-    PreviewSystem previewSystem;
+    ObjectSelectionPreview previewSystem;
     PlacementSystem placementSystem;
     ObjectsDatabaseSO database;
     ObjectPlacer objectPlacer;
@@ -20,9 +20,9 @@ public class SelectionState : IBuildingState
     bool edited;
     private Vector3 originalPosition;
 
-    public SelectionState(Vector3 gridPosition,
+    public ObjectSelectionState(Vector3 gridPosition,
                           Grid grid,
-                          PreviewSystem previewSystem,
+                          ObjectSelectionPreview previewSystem,
                           PlacementSystem placementSystem,
                           ObjectsDatabaseSO database,
                           ObjectPlacer objectPlacer,
@@ -35,7 +35,7 @@ public class SelectionState : IBuildingState
         this.objectPlacer = objectPlacer;
         this.inputManager = inputManager;
 
-        selectedObject = objectPlacer.GetObject(previewSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
+        selectedObject = objectPlacer.GetObject(placementSystem.previewSelectorObject, grid.LocalToWorld(gridPosition), Vector2Int.one, 0);
         if (selectedObject == null || !objectPlacer.HasKey(selectedObject))
             return;
         edited = false;
@@ -49,23 +49,27 @@ public class SelectionState : IBuildingState
         rotation = originalRotation;
         placementSystem.SetRotation(originalRotation);
         placementSystem.SetSelectedPosition(originalPosition);
-        previewSystem.StartMovingObjectPreview(
+        previewSystem.StartPreview(
             grid.LocalToWorld(objectPlacer.GetObjectCoordinate(selectedObject)),
             objectPlacer.GetObjectRotation(selectedObject),
             selectedObject,
             gameObjectData.Size,
             Vector2.zero,
-            materials
+            materials,
+            placementSystem,
+            inputManager
         );
+        placementSystem.GetBuildToolsUI().EnableCustomTexture(previewSystem.materials, () => previewSystem.RefreshColors());
+        placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveObject(selectedObject));
         UpdateState(originalPosition, rotation);
     }
 
     public void EndState()
     {
-        previewSystem.StopMovingObject();
+        previewSystem.previewObject = null;
+        previewSystem.StopPreview();
         if (edited == false)
         {
-            
             displayPosition = grid.LocalToWorld(originalPosition);
             objectPlacer.MoveObjectAt(selectedObject, originalPosition, displayPosition, gameObjectData.Size, gameObjectData.ID, originalRotation, materials);
         }
@@ -98,7 +102,7 @@ public class SelectionState : IBuildingState
         }
         objectPlacer.MoveObjectAt(selectedObject, gridPosition, displayPosition, gameObjectData.Size, gameObjectData.ID, rotation, materials);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), true, gameObjectData.Size, gameObjectData.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), gameObjectData.Size, gameObjectData.Cost, rotation);
         originalPosition = gridPosition;
         originalRotation = rotation;
         edited = true;
@@ -125,6 +129,8 @@ public class SelectionState : IBuildingState
     public void UpdateState(Vector3 gridPosition, float rotation = 0)
     {
         bool validity = CheckPlacementValidity(gridPosition, gameObjectData);
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), validity, gameObjectData.Size, gameObjectData.Cost, rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), gameObjectData.Size, gameObjectData.Cost, rotation);
+        previewSystem.ApplyFeedback(validity);
+        placementSystem.GetBuildToolsUI().canPlace = validity;
     }
 }

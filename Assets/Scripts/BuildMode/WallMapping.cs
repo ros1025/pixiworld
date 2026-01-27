@@ -853,7 +853,7 @@ public class WallMapping : MonoBehaviour
             mesh.SetTriangles(trisA[m - 1], m);
         }
         mesh.SetUVs(0, uvs);
-        collider.gameObject.GetComponent<MeshFilter>().mesh = mesh;
+        intersection.mesh.mesh = mesh;
 
         col.SetVertices(colVert);
         //trisC.AddRange(trisS);

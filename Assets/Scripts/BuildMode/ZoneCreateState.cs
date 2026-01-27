@@ -6,10 +6,11 @@ public class ZoneCreateState : IBuildingState
 {
     ZonesData zonesDataObject = null;
     Grid grid;
-    PreviewSystem previewSystem;
+    ZonePlacementPreview previewSystem;
     PlacementSystem placementSystem;
     ZonesDatabaseSO database;
     ZonePlacer zonePlacer;
+    private InputManager inputManager;
     private Vector2Int size;
     private Vector3 pos;
     private Vector3 displayPosition; 
@@ -18,10 +19,11 @@ public class ZoneCreateState : IBuildingState
     public ZoneCreateState(Vector3 gridPosition,
                            ZonesData zonesDataObject,
                            Grid grid,
-                           PreviewSystem previewSystem,
+                           ZonePlacementPreview previewSystem,
                            PlacementSystem placementSystem,
                            ZonesDatabaseSO database,
-                           ZonePlacer zonePlacer)
+                           ZonePlacer zonePlacer,
+                           InputManager inputManager)
     {
         this.zonesDataObject = zonesDataObject;
         this.grid = grid;
@@ -29,6 +31,7 @@ public class ZoneCreateState : IBuildingState
         this.placementSystem = placementSystem;
         this.database = database;
         this.zonePlacer = zonePlacer;
+        this.inputManager = inputManager;
         size = new Vector2Int(10, 10);
 
         //selectedObjectIndex = database.zonesData.IndexOf(zonesDataObject);
@@ -36,7 +39,7 @@ public class ZoneCreateState : IBuildingState
         {
             pos = gridPosition;
 
-            previewSystem.StartCreatingZones(grid.LocalToWorld(pos), size, new Vector2Int(5,5));
+            previewSystem.StartPreview(grid.LocalToWorld(pos), size, new Vector2Int(5,5), placementSystem, inputManager);
 
             UpdateState(pos, 0);
         }
@@ -46,16 +49,16 @@ public class ZoneCreateState : IBuildingState
 
     public void EndState()
     {
-        previewSystem.StopShowingPreview();
+        previewSystem.StopPreview();
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
     {
-        if (previewSystem.expand == true)
+        if (previewSystem.GetExpansionState() == true)
         {
             previewSystem.UpdateSize(grid.LocalToWorld(gridPosition));
-            size = previewSystem.previewSize;
-            pos = grid.WorldToLocal(previewSystem.previewPos);
+            size = previewSystem.GetPreviewSize();
+            pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
             UpdateState(pos, rotation);
         }
         else
@@ -75,13 +78,15 @@ public class ZoneCreateState : IBuildingState
             return;
         }
 
-        pos = grid.WorldToLocal(previewSystem.previewPos);
-        size = previewSystem.previewSize;
+        pos = grid.WorldToLocal(previewSystem.GetPreviewPosition());
+        size = previewSystem.GetPreviewSize();
         displayPosition = grid.LocalToWorld(pos);
 
         zonePlacer.PlaceZones(displayPosition, pos, zonesDataObject.ID, size, 0.05f, rotation);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(pos), false, size, (zonesDataObject.Cost * (size.x * size.y)), 0);
+        previewSystem.UpdatePreview(grid.LocalToWorld(pos), size, (zonesDataObject.Cost * (size.x * size.y)), 0);
+        previewSystem.ApplyFeedback(false);
+        placementSystem.GetBuildToolsUI().canPlace = false;
     }
     
     private bool CheckPlacementValidity(Vector3 gridPosition)
@@ -103,6 +108,8 @@ public class ZoneCreateState : IBuildingState
     {
         bool placementValidity = CheckPlacementValidity(gridPosition);
 
-        previewSystem.UpdatePosition(grid.LocalToWorld(gridPosition), placementValidity, size, (zonesDataObject.Cost * (size.x * size.y)), rotation);
+        previewSystem.UpdatePreview(grid.LocalToWorld(gridPosition), size, (zonesDataObject.Cost * (size.x * size.y)), rotation);
+        previewSystem.ApplyFeedback(placementValidity);
+        placementSystem.GetBuildToolsUI().canPlace = placementValidity;
     }
 }

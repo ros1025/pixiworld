@@ -5,7 +5,7 @@ using UnityEngine;
 public class WallModifyState : IBuildingState
 {
     Grid grid;
-    PreviewSystem previewSystem;
+    WallModifyPreview previewSystem;
     PlacementSystem placementSystem;
     WallMapping wallMapping;
     InputManager inputManager;
@@ -18,7 +18,7 @@ public class WallModifyState : IBuildingState
     public WallModifyState(Vector3 gridPosition,
                             Grid grid,
                             WallMapping wallMapping,
-                            PreviewSystem previewSystem,
+                            WallModifyPreview previewSystem,
                             PlacementSystem placementSystem,
                             InputManager inputManager)
     {
@@ -39,12 +39,14 @@ public class WallModifyState : IBuildingState
         originalPosList = posList;
         CalculateLength();
 
-        previewSystem.ModifyWalls(selectedWall);
+        previewSystem.StartPreview(selectedWall, placementSystem, inputManager, 0.1f, 2f);
 
         for (int i = 0; i < posList.Count; i++)
         {
-            previewSystem.UpdatePointer(grid.LocalToWorld(posList[i]), true, posList.IndexOf(posList[i]), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+            previewSystem.AddPoint(i, posList[i]);
         }
+
+        placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveWall(selectedWall));
     }
 
     public void EndState()
@@ -57,11 +59,15 @@ public class WallModifyState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        if (previewSystem.expand == true)
+        if (previewSystem.GetModifyState() == true)
         {
-            posList[previewSystem.expanders.IndexOf(previewSystem.SelectedCursor)] = gridPosition;
+            int index = previewSystem.expanders.IndexOf(previewSystem.selectedCursor);
+            posList[index] = gridPosition;
             CalculateLength();
-            previewSystem.MovePointer(grid.LocalToWorld(gridPosition), CheckPlacementValidity(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
+            previewSystem.ModifyPointer(index, grid.LocalToWorld(gridPosition));
+
+            previewSystem.ApplyFeedback(CheckPlacementValidity());
+            placementSystem.GetBuildToolsUI().AdjustLabels(5 * Mathf.RoundToInt(length), new Vector2Int(Mathf.RoundToInt(length), 1));
         }
     }
 
@@ -82,7 +88,7 @@ public class WallModifyState : IBuildingState
         grid = placementSystem.GetCurrentGrid();
         wallMapping = placementSystem.GetCurrentWalls();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition);
+        bool placementValidity = CheckPlacementValidity();
 
         if (placementValidity == false)
         {
@@ -103,7 +109,7 @@ public class WallModifyState : IBuildingState
         inputManager.InvokeExit();
     }
 
-    private bool CheckPlacementValidity(Vector3 gridPosition)
+    private bool CheckPlacementValidity()
     {
         for (int i = 1; i < posList.Count; i++)
         {
@@ -120,13 +126,5 @@ public class WallModifyState : IBuildingState
             return false;
 
         return true;
-    }
-
-
-    public void UpdateState(Vector3 gridPosition, float rotation = 0)
-    {
-        bool placementValidity = CheckPlacementValidity(gridPosition);
-
-        previewSystem.UpdatePointer(grid.LocalToWorld(gridPosition), placementValidity, posList.IndexOf(gridPosition), 5 * Mathf.RoundToInt(length), length, 0.1f, 2f);
     }
 }
