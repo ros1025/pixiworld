@@ -1312,7 +1312,25 @@ public class WallMapping : MonoBehaviour
         return selectedWall;
     }
 
-    private static Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point)
+    private Vector3 GetNearestPoint(Vector3 compPoint, List<Vector3> boundPoints)
+    {
+        Vector3 nearest = new();
+        float nearestDist = -1;
+        for (int i = 0; i < boundPoints.Count; i++)
+        {
+            Vector3 np = GetNearestPoint(boundPoints[i], boundPoints[(i + 1) % boundPoints.Count], compPoint);
+
+            if (nearestDist < 0 || Vector3.Distance(np, compPoint) < nearestDist)
+            {
+                nearestDist = Vector3.Distance(np, compPoint);
+                nearest = np;
+            }
+        }
+
+        return nearest;
+    }
+
+    private Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point)
     {
         var wander = point - start;
         var span = end - start;
@@ -1327,7 +1345,7 @@ public class WallMapping : MonoBehaviour
         return nearest;
     }
 
-    private static Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point, out float t)
+    private Vector3 GetNearestPoint(Vector3 start, Vector3 end, Vector3 point, out float t)
     {
         var wander = point - start;
         var span = end - start;
@@ -2674,6 +2692,75 @@ public class WallMapping : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public bool CheckWallSelect(List<Vector3> points)
+    {
+        float angle = GetAngle(points, Vector3.up);
+
+        if (points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in points)
+            {
+                boundBox.Encapsulate(point);
+            }
+            Collider[] overlaps = Physics.OverlapBox(boundBox.center, boundBox.extents / 2f, Quaternion.identity, LayerMask.GetMask("Selector"));
+
+            foreach (Collider overlap in overlaps)
+            {
+                if (walls.FindIndex(item => item.collider == overlap) != -1)
+                {
+                    Wall selectedWall = walls.Find(item => item.collider == overlap);
+
+                    for (int j = 0; j < points.Count; j++)
+                    {
+                        Vector3 p1 = points[j];
+                        Vector3 p2 = points[(j + 1) % points.Count];
+
+                        Vector3 c1 = GetNearestPoint(p1, selectedWall.points);
+                        if (!CheckPointEncapsulated(c1, points, angle))
+                        {
+                            RaycastHit[] hits1 = Physics.RaycastAll(p1, (p2 - p1).normalized, Vector3.Distance(p1, p2), LayerMask.GetMask("Selector"));
+                            foreach (RaycastHit hit in hits1)
+                            {
+                                if (hit.collider == selectedWall.collider)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            
+            return true;
+        }
+        return false;
+    }
+
+    private bool CheckPointEncapsulated(Vector3 selectedPoint, List<Vector3> points, float angle)
+    {
+        for (int j = 0; j < points.Count; j++)
+        {
+            Vector3 p1 = points[j];
+            Vector3 p2 = points[(j + 1) % points.Count];
+
+            Vector3 crossVector = Vector3.Cross((p2 - p1).normalized, Vector3.up).normalized;
+            if (angle > 0) crossVector *= -1;
+
+            if (Vector3.Angle(selectedPoint - p1, crossVector) > 90 && Vector3.Angle(selectedPoint - p2, crossVector) > 90)
+            {                
+                return false;
+            }
+        }
+
+        return true;    
     }
 
     public bool CheckWallSelect(InputManager input)

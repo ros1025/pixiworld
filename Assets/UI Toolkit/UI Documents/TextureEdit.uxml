@@ -19,7 +19,7 @@
                         <engine:VisualElement class="color-picker-widget" style="flex-grow: 1;"/>
                     </engine:Image>
                     <engine:Image class="color-picker-side">
-                        <engine:VisualElement class="color-picker-widget" style="flex-grow: 1;"/>
+                        <engine:VisualElement class="hue-picker-widget" style="flex-grow: 1;"/>
                     </engine:Image>
                     <engine:Image class="color-picker-side"/>
                 </engine:VisualElement>

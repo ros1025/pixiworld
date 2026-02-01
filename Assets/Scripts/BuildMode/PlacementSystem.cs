@@ -684,11 +684,29 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
     }
 
+    public bool CanPlaceOnArea(List<Vector3> points)
+    {
+        if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(points) == false)
+            return false;
+        else if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(points) == false)
+            return false;
+        else if (walls != null && walls.CheckWallSelect(points) == false)
+            return false;
+        else if (roads != null && roads.CheckRoadSelect(points) == false)
+            return false;
+        else if (pools != null && pools.CheckPoolCollisions(points) == false)
+            return false;
+        else
+            return true;
+    }
+
     public bool CanPlaceOnArea(Vector3 p1, Vector3 p2, float width, float height)
     {
         if (zonePlacer != null && zonePlacer.CanPlaceObjectAt(p1, p2, width, height) == false)
             return false;
         else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(p1, p2, width, height) == false)
+            return false;
+        else if (pools != null && pools.CanPlaceObjectAt(p1, p2, width, height) == false)
             return false;
         else
             return true;
@@ -704,6 +722,8 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             return false;
         else if (objectPlacer != null && objectPlacer.CanPlaceObjectAt(previewSelectorObject, pos, size, rotation) == false)
             return false;
+        else if (pools != null && pools.CheckPoolCollisions(previewSelectorObject, pos, size, rotation) == false)
+            return false;
         else
             return true;
     }
@@ -717,6 +737,8 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         else if (zonePlacer != null && zonePlacer.CanMoveObjectAt(previewObject, previewSelectorObject) == false)
             return false;
         else if (objectPlacer != null && objectPlacer.CanMoveObjectAt(previewObject, previewSelectorObject) == false)
+            return false;
+        else if (pools != null && pools.CheckPoolCollisions(previewSelectorObject) == false)
             return false;
         else
             return true;
@@ -953,6 +975,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         data.zones = mainZoneDB.zoneData;
         data.roads = roadsDBObject.GetRoadMapSaveData();
         data.mapWalls = wallsDBObject.GetWallMapSaveData();
+        data.pools = pools.pools;
      }
 
     public void LoadData(WorldSaveData data)
@@ -961,5 +984,6 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         mainZoneDB.LoadData(data.zones);
         roadsDBObject.LoadSaveData(data.roads);
         wallsDBObject.LoadSaveData(data.mapWalls);
+        pools.LoadData(data.pools);
     }
 }

@@ -1348,6 +1348,119 @@ public class RoadMapping : MonoBehaviour
         return false;
     }
 
+    public bool CheckRoadSelect(List<Vector3> points)
+    {
+        float angle = GetAngle(points, Vector3.up);
+
+        if (points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in points)
+            {
+                boundBox.Encapsulate(point);
+            }
+            Collider[] overlaps = Physics.OverlapBox(boundBox.center, boundBox.extents / 2f, Quaternion.identity, LayerMask.GetMask("Selector"));
+
+            foreach (Collider overlap in overlaps)
+            {
+                if (roads.FindIndex(item => item.collider == overlap) != -1)
+                {
+                    Roads selectedRoad = roads.Find(item => item.collider == overlap);
+
+                    for (int j = 0; j < points.Count; j++)
+                    {
+                        Vector3 p1 = points[j];
+                        Vector3 p2 = points[(j + 1) % points.Count];
+
+                        SplineUtility.GetNearestPoint(selectedRoad.road, p1, out Unity.Mathematics.float3 c1, out float tx, (int)((selectedRoad.road.GetLength() * 2)));
+                        if (!CheckPointEncapsulated(c1, points, angle))
+                        {
+                            RaycastHit[] hits1 = Physics.RaycastAll(p1, (p2 - p1).normalized, Vector3.Distance(p1, p2), LayerMask.GetMask("Selector"));
+                            foreach (RaycastHit hit in hits1)
+                            {
+                                if (hit.collider == selectedRoad.collider)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            
+            return true;
+        }
+        return false;
+    }
+
+    private bool CheckPointEncapsulated(Vector3 selectedPoint, List<Vector3> points, float angle)
+    {
+        for (int j = 0; j < points.Count; j++)
+        {
+            Vector3 p1 = points[j];
+            Vector3 p2 = points[(j + 1) % points.Count];
+
+            Vector3 crossVector = Vector3.Cross((p2 - p1).normalized, Vector3.up).normalized;
+            if (angle > 0) crossVector *= -1;
+
+            if (Vector3.Angle(selectedPoint - p1, crossVector) > 90 && Vector3.Angle(selectedPoint - p2, crossVector) > 90)
+            {                
+                return false;
+            }
+        }
+
+        return true;    
+    }
+
+    private float GetAngle(List<Vector3> points, Vector3 cross)
+    {
+        float angle = 0;
+        float angler = 0;
+        for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
+        {
+            angler += Vector3.SignedAngle(points[(pointIndex + 2) % points.Count] - points[(pointIndex + 1) % points.Count], points[(pointIndex + 0) % points.Count] - points[(pointIndex + 1) % points.Count], cross);
+        }
+        if (Mathf.Abs(angler - (180 * (points.Count - 2))) < 0.1f)
+            angle = angler;
+        else if (Mathf.Abs(angler - (-(180 * (points.Count - 2)))) < 0.1f)
+            angle = angler;
+        else
+        {
+            float angleA = 0;
+            float angleB = 0;
+            for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
+            {
+                float localAngle = Vector3.SignedAngle(points[(pointIndex + 2) % points.Count] - points[(pointIndex + 1) % points.Count], points[(pointIndex + 0) % points.Count] - points[(pointIndex + 1) % points.Count], cross);
+                if (localAngle < 0)
+                {
+                    angleA += 360 + localAngle;
+                    angleB += localAngle;
+                }
+                else
+                {
+                    angleA += localAngle;
+                    angleB += localAngle - 360;
+                }
+            }
+
+            if (Mathf.Abs(angleA - (180 * (points.Count - 2))) < 0.1f)
+            {
+                angle = angleA;
+            }
+            else if (Mathf.Abs(angleB - (-(180 * (points.Count - 2)))) < 0.1f)
+            {
+                angle = angleB;
+            }
+        }
+
+        return angle;
+    }
+
     public bool CheckIntersectionSelect(InputManager input)
     {
         RaycastHit[] overlaps = input.RayHitAllObjects();

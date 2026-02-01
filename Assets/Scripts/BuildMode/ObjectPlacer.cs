@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 public class ObjectPlacer : MonoBehaviour
@@ -196,6 +197,110 @@ public class ObjectPlacer : MonoBehaviour
         }
 
         return true;
+    }
+
+    private float GetAngle(List<Vector3> points, Vector3 cross)
+    {
+        float angle = 0;
+        float angler = 0;
+        for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
+        {
+            angler += Vector3.SignedAngle(points[(pointIndex + 2) % points.Count] - points[(pointIndex + 1) % points.Count], points[(pointIndex + 0) % points.Count] - points[(pointIndex + 1) % points.Count], cross);
+        }
+        if (Mathf.Abs(angler - (180 * (points.Count - 2))) < 0.1f)
+            angle = angler;
+        else if (Mathf.Abs(angler - (-(180 * (points.Count - 2)))) < 0.1f)
+            angle = angler;
+        else
+        {
+            float angleA = 0;
+            float angleB = 0;
+            for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
+            {
+                float localAngle = Vector3.SignedAngle(points[(pointIndex + 2) % points.Count] - points[(pointIndex + 1) % points.Count], points[(pointIndex + 0) % points.Count] - points[(pointIndex + 1) % points.Count], cross);
+                if (localAngle < 0)
+                {
+                    angleA += 360 + localAngle;
+                    angleB += localAngle;
+                }
+                else
+                {
+                    angleA += localAngle;
+                    angleB += localAngle - 360;
+                }
+            }
+
+            if (Mathf.Abs(angleA - (180 * (points.Count - 2))) < 0.1f)
+            {
+                angle = angleA;
+            }
+            else if (Mathf.Abs(angleB - (-(180 * (points.Count - 2)))) < 0.1f)
+            {
+                angle = angleB;
+            }
+        }
+
+        return angle;
+    }
+
+    public bool CanPlaceObjectAt(List<Vector3> points)
+    {
+        float angle = GetAngle(points, Vector3.up);
+
+        if (points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in points)
+            {
+                boundBox.Encapsulate(point);
+            }
+            Collider[] overlaps = Physics.OverlapBox(boundBox.center, boundBox.extents / 2f, Quaternion.identity, LayerMask.GetMask("Selector"));
+
+            foreach (Collider overlap in overlaps)
+            {
+                if (furnitureData.FindIndex(item => item.prefab.transform.Find("Selector").GetChild(0).GetComponent<Collider>() == overlap) != -1)
+                {
+                    Collider objCollider = furnitureData.Find(item => item.prefab.transform.Find("Selector").GetChild(0).GetComponent<Collider>() == overlap).prefab.transform.Find("Selector").GetChild(0).GetComponent<Collider>();
+
+                    for (int i = 0; i < points.Count; i++)
+                    {
+                        Vector3 nearestPoint = objCollider.ClosestPoint(points[i]);
+                        bool isInBound = true;
+
+                        for (int j = 0; j < points.Count; j++)
+                        {
+                            Vector3 p1 = points[j];
+                            Vector3 p2 = points[(j + 1) % points.Count];
+
+                            Vector3 crossVector = Vector3.Cross((p2 - p1).normalized, Vector3.up).normalized;
+                            if (angle > 0) crossVector *= -1;
+
+                            if (Vector3.Angle(nearestPoint - p1, crossVector) > 90 && Vector3.Angle(nearestPoint - p2, crossVector) > 90)
+                            {                
+                                isInBound = false;
+
+                                RaycastHit[] hits1 = Physics.RaycastAll(p1, (p2 - p1).normalized, Vector3.Distance(p1, p2), LayerMask.GetMask("Selector"));
+                                foreach (RaycastHit hit in hits1)
+                                {
+                                    if (hit.collider == objCollider)
+                                    {
+                                        return false;
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (isInBound) return false;
+                    }
+                }           
+            }
+            
+            return true;
+        }
+        return false;
     }
 
     public bool CanMoveObjectAt(GameObject selectedObject, GameObject previewSelector)

@@ -76,15 +76,9 @@ public class PoolCreateState : IBuildingState
         if (posList.Count < 3)
             return false;
 
-        for (int i = 1; i < posList.Count; i++)
+        if (!placementSystem.CanPlaceOnArea(posList))
         {
-            Vector3 p1 = grid.LocalToWorld(posList[i - 1]);
-            Vector3 p2 = grid.LocalToWorld(posList[i]);
-
-            if (!placementSystem.CanPlaceOnArea(p1, p2, 0.04f, 2f))
-            {
-                return false;
-            }
+            return false;
         }
 
         if (!poolPlacer.CheckPoolCollisions(posList))
