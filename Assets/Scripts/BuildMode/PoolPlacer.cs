@@ -240,6 +240,23 @@ public class PoolPlacer : MonoBehaviour
         RenderPool(pool);
     }
 
+    public void RemovePool(Pool pool)
+    {
+        Destroy(pool.mesh.gameObject);
+        pools.Remove(pool);
+    }
+
+    public void RemovePoolAt(GameObject prefab)
+    {
+        int index = pools.FindIndex(item => item.collider.gameObject == prefab);
+        if (index == -1)
+            return;
+        else
+        {
+            RemovePool(pools[index]);
+        }
+    }
+
     public bool CheckPoolCollisions(List<Vector3> points)
     {
         float angle = GetAngle(points, Vector3.up);
@@ -326,6 +343,45 @@ public class PoolPlacer : MonoBehaviour
         return false;
     }
 
+    public bool CheckPoolCollisions(GameObject cursor, Vector3 position, Vector2Int size, float rotation)
+    {
+        bool ans = true;
+        GameObject previewSelector = GameObject.Instantiate(cursor, position, Quaternion.Euler(0, rotation, 0));
+        previewSelector.name = "Intersector";
+        previewSelector.transform.localScale = new Vector3Int(size.x, size.y, size.y);
+        Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+
+        if (pools.FindIndex(item => overlaps.Contains(item.collider)) != -1)
+            ans = false;
+
+        GameObject.Destroy(previewSelector);
+        return ans;
+    }  
+
+    public bool CheckPoolCollisions(GameObject previewSelector)
+    {
+        bool ans = true;
+        Collider[] overlaps = Physics.OverlapBox(previewSelector.transform.GetChild(0).position, previewSelector.transform.localScale / 2, previewSelector.transform.rotation, LayerMask.GetMask("Selector"));
+
+        if (pools.FindIndex(item => overlaps.Contains(item.collider)) != -1)
+            ans = false;
+
+        return ans;
+    } 
+
+    public bool CanPlaceObjectAt(Vector3 p1, Vector3 p2, float width, float height)
+    {
+        RaycastHit[] hits = Physics.BoxCastAll(p1 + new Vector3(0, height / 2f, 0), new Vector3(width - 0.05f, height / 2f, width - 0.05f), p2 - p1, Quaternion.Euler(0, Vector3.SignedAngle(p2 - p1, Vector3.forward, Vector3.down), 0), Vector3.Distance(p1, p2), LayerMask.GetMask("Selector"));
+        List<RaycastHit> hitList = new(); hitList.AddRange(hits);
+
+        if (pools.FindIndex(item => hitList.FindIndex(col => col.collider == item.collider) != -1) != -1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public Pool SelectPool(InputManager input)
     {
         RaycastHit[] overlaps = input.RayHitAllObjects();
@@ -390,6 +446,25 @@ public class PoolPlacer : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void LoadData(List<Pool> loadData)
+    {
+        foreach (Pool pool in pools)
+        {
+            if (!loadData.Contains(pool))
+            {
+                RemovePool(pool);
+            }
+        }
+
+        foreach (Pool pool in loadData)
+        {
+            if (!pools.Contains(pool))
+            {
+                AddPool(pool.points);
+            }
+        }
     }
 }
 

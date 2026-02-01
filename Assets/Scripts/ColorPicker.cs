@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class ColorPicker : MonoBehaviour
@@ -16,6 +17,8 @@ public class ColorPicker : MonoBehaviour
     private Image previewImage, hueImage; 
     private VisualElement outputImage;
     private VisualElement colorCursor, hueCursor;
+    private Slider hue, saturation, value;
+    private bool svDragModifyState, hueDragModifyState;
 
     public void TransferMaterialData(List<MatData> matData, Action changeColorFunction, Func<float> xMin, Func<float> yMin)
     {
@@ -33,6 +36,11 @@ public class ColorPicker : MonoBehaviour
         return TexturesMenu.rootVisualElement;
     }
 
+    public void CustomiseTexture(ClickEvent evt)
+    {
+        CustomiseTexture();
+    }
+
     public void CustomiseTexture()
     {
         VisualElement rootT = TexturesMenu.rootVisualElement;
@@ -41,8 +49,8 @@ public class ColorPicker : MonoBehaviour
         rootT.style.top = calcYMin();
 
         Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
-        tCancel.UnregisterCallback<ClickEvent>((evt) => HideTexturePopup());
-        tCancel.RegisterCallback<ClickEvent>((evt) => CustomiseTexture());
+        tCancel.UnregisterCallback<ClickEvent>(CustomiseTexture);
+        tCancel.RegisterCallback<ClickEvent>(HideTexturePopup);
 
         VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
         textureList.Clear();
@@ -79,8 +87,8 @@ public class ColorPicker : MonoBehaviour
         rootT.style.visibility = Visibility.Visible;
 
         Button tCancel = rootT.Q<VisualElement>("heading").Q<Button>("CancelButton");
-        tCancel.UnregisterCallback<ClickEvent>((evt) => {HideTexturePopup();});
-        tCancel.RegisterCallback<ClickEvent>((evt) => {CustomiseTexture();});
+        tCancel.UnregisterCallback<ClickEvent>(HideTexturePopup);
+        tCancel.RegisterCallback<ClickEvent>(CustomiseTexture);
 
         VisualElement textureList = rootT.Q("content").Q<VisualElement>("unity-content-container");
         textureList.Clear();
@@ -120,9 +128,12 @@ public class ColorPicker : MonoBehaviour
         colorCursor.AddToClassList("color-picker-widget");
         previewImage.Add(colorCursor);
 
-        GenerateImages(H, S, V);
+        hueCursor = new();
+        hueCursor.name = $"Hue Cursor";
+        hueCursor.AddToClassList("hue-picker-widget");
+        hueImage.Add(hueCursor);
 
-        Slider hue = new();
+        hue = new();
         hue.name = "Hue";
         hue.label = "Hue";
         hue.value = H;
@@ -131,7 +142,7 @@ public class ColorPicker : MonoBehaviour
         hue.showInputField = true;
         parent.Add(hue);
 
-        Slider saturation = new();
+        saturation = new();
         saturation.name = "Saturation";
         saturation.label = "Saturation";
         saturation.value = S;
@@ -140,7 +151,7 @@ public class ColorPicker : MonoBehaviour
         saturation.showInputField = true;
         parent.Add(saturation);
 
-        Slider value = new();
+        value = new();
         value.name = "Value";
         value.label = "Value";
         value.value = V;
@@ -149,9 +160,47 @@ public class ColorPicker : MonoBehaviour
         value.showInputField = true;
         parent.Add(value);
 
-        hue.RegisterValueChangedCallback(evt => SetHSV(evt.newValue, saturation.value, value.value, mat, preview));
-        saturation.RegisterValueChangedCallback(evt => SetHSV(hue.value, evt.newValue, value.value, mat, preview));
-        value.RegisterValueChangedCallback(evt => SetHSV(hue.value, saturation.value, evt.newValue, mat, preview));
+        hue.RegisterValueChangedCallback(evt => SetHSV(evt.newValue, saturation.value, value.value, mat));
+        saturation.RegisterValueChangedCallback(evt => SetHSV(hue.value, evt.newValue, value.value, mat));
+        value.RegisterValueChangedCallback(evt => SetHSV(hue.value, saturation.value, evt.newValue, mat));
+        previewImage.RegisterCallback<PointerDownEvent>(evt => {
+            svDragModifyState = true;
+        });
+        previewImage.RegisterCallback<PointerMoveEvent>(evt => {
+            if (svDragModifyState)
+            {
+                SetHSVByPreview(hue.value, evt.localPosition.x, evt.localPosition.y, mat);
+            }
+        });
+        previewImage.RegisterCallback<PointerLeaveEvent>(evt => {
+            if (svDragModifyState)
+            {
+                SetHSVByPreview(hue.value, evt.localPosition.x, evt.localPosition.y, mat);
+            }
+        });
+
+        hueImage.RegisterCallback<PointerDownEvent>(evt => {
+            hueDragModifyState = true;
+        });
+        hueImage.RegisterCallback<PointerMoveEvent>(evt => {
+            if (hueDragModifyState)
+            {
+                SetHSVByHueSlider(evt.localPosition.y, saturation.value, value.value, mat);
+            }
+        });
+        hueImage.RegisterCallback<PointerLeaveEvent>(evt => {
+            if (hueDragModifyState)
+            {
+                SetHSVByHueSlider(evt.localPosition.y, saturation.value, value.value, mat);
+            }
+        });
+
+        rootT.RegisterCallback<PointerUpEvent>(evt => {
+            hueDragModifyState = false;
+            svDragModifyState = false;
+        });
+
+        SetHSV(H, S, V, mat);
     }
 
     private void GenerateImages(float H, float S, float V)
@@ -173,6 +222,8 @@ public class ColorPicker : MonoBehaviour
 
         hueTexture.Apply();
         hueImage.image = hueTexture;
+        float height = hueImage.resolvedStyle.height - hueCursor.resolvedStyle.height - hueImage.resolvedStyle.marginBottom - hueImage.resolvedStyle.marginTop;
+        hueCursor.style.top = (float) (height) - (H * (height));
     }
 
     private void GenerateSVImage(float H, float S, float V)
@@ -191,8 +242,16 @@ public class ColorPicker : MonoBehaviour
 
         svTexture.Apply();
         previewImage.image = svTexture;
-        colorCursor.style.left = (float) S * (previewImage.resolvedStyle.width - colorCursor.resolvedStyle.width);
-        colorCursor.style.top = (float) (previewImage.resolvedStyle.height - colorCursor.resolvedStyle.height) - (V * (previewImage.resolvedStyle.height - colorCursor.resolvedStyle.height));
+
+        float height = previewImage.resolvedStyle.height - colorCursor.resolvedStyle.height - previewImage.resolvedStyle.marginBottom - previewImage.resolvedStyle.marginTop;
+        float width = previewImage.resolvedStyle.width - colorCursor.resolvedStyle.width;
+        colorCursor.style.left = (float) S * (width);
+        colorCursor.style.top = (float) (height) - (V * (height));
+    }
+
+    public void HideTexturePopup(ClickEvent evt)
+    {
+        HideTexturePopup();
     }
 
     public void HideTexturePopup()
@@ -203,13 +262,33 @@ public class ColorPicker : MonoBehaviour
         rootT.style.visibility = Visibility.Hidden;
     }
 
-    public void SetHSV(float H, float S, float V, MatData mat, VisualElement preview)
+    private void SetHSVByPreview(float H, float mouseX, float mouseY, MatData mat)
+    {
+        float height = previewImage.resolvedStyle.height - colorCursor.resolvedStyle.height - previewImage.resolvedStyle.marginBottom - previewImage.resolvedStyle.marginTop;
+        float width = previewImage.resolvedStyle.width - colorCursor.resolvedStyle.width;
+
+        float S = Mathf.Clamp(mouseX / width, 0, 1);
+        float V = Mathf.Clamp((height - mouseY) / height, 0, 1);
+
+        SetHSV(H, S, V, mat);
+    }
+
+    private void SetHSVByHueSlider(float mouseY, float S, float V, MatData mat)
+    {
+        float height = hueImage.resolvedStyle.height - hueCursor.resolvedStyle.height - hueImage.resolvedStyle.marginBottom - hueImage.resolvedStyle.marginTop;
+
+        float H = Mathf.Clamp((height - mouseY) / height, 0, 1);
+        SetHSV(H, S, V, mat);
+    }
+
+    public void SetHSV(float H, float S, float V, MatData mat)
     {
         Color c = Color.HSVToRGB(H, S, V);
         mat.color = c;
         outputImage.style.backgroundColor = c;
+        hue.value = H; saturation.value = S; value.value = V;
 
-        changeColorFunction();
         GenerateImages(H, S, V);
+        changeColorFunction();
     }
 }
