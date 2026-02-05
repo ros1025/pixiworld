@@ -76,7 +76,7 @@ public class WallCreateState : IBuildingState
                     {
                         posList.Insert(index, gridPosition);
                         CalculateLength();
-                        previewSystem.AddPoint(index, gridPosition);
+                        previewSystem.AddPoint(index, grid.LocalToWorld(gridPosition));
                     }
                 }
             }
@@ -84,7 +84,7 @@ public class WallCreateState : IBuildingState
             {
                 posList.Add(gridPosition);
                 CalculateLength();
-                previewSystem.AddPoint(posList.IndexOf(gridPosition), gridPosition);
+                previewSystem.AddPoint(posList.IndexOf(gridPosition), grid.LocalToWorld(gridPosition));
             }
         }
 

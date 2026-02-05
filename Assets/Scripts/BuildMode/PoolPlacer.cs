@@ -257,6 +257,48 @@ public class PoolPlacer : MonoBehaviour
         }
     }
 
+    public void DetectOverlappingPools(List<Vector3> points, float angle, List<(Pool, Vector3, Vector3)> overlappingPools)
+    {
+        if (points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in points)
+            {
+                boundBox.Encapsulate(transform.TransformPoint(point));
+            }
+            List<Pool> collidePools = pools.FindAll(p => ObjectValidation(boundBox, p.collider.bounds));
+            foreach (Pool collidePool in collidePools)
+            {
+                Vector3 nearestPoint = new();
+                Vector3 roomAnchorPoint = points[0];
+                bool isEncapsulated = false;
+
+                for (int j = 0; j < points.Count; j++)
+                {
+                    Vector3 p1 = points[j];
+                    Vector3 p2 = points[(j + 1) % points.Count];
+
+                    Vector3 c1 = GetNearestPoint(p1, collidePool.points);
+                    if (PointInPool(c1, points, angle))
+                    {
+                        isEncapsulated = true;
+                        if (p1 == points[0] || Vector3.Distance(p1, c1) < Vector3.Distance(nearestPoint, roomAnchorPoint))
+                        {
+                            nearestPoint = c1;
+                            roomAnchorPoint = p1;
+                        }
+                    }
+                }
+
+                if (isEncapsulated)
+                {
+                    overlappingPools.Add((collidePool, nearestPoint, roomAnchorPoint));
+                }
+            }
+        }
+    }
+
     public bool CheckPoolCollisions(List<Vector3> points)
     {
         float angle = GetAngle(points, Vector3.up);
