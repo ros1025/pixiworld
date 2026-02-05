@@ -18,6 +18,7 @@ public class WallModifyPreview : IDynamicPreviewSystem
     private float height;
     private bool expand;
     private Wall selectedWall;
+    public List<MatData> materials;
 
 
     public void StartPreview(Wall wall, PlacementSystem system, InputManager input, float width, float height)
@@ -30,6 +31,17 @@ public class WallModifyPreview : IDynamicPreviewSystem
 
         PrepareDynamicCursor(wall.points[0]);
         selectedWall = wall;
+
+        materials = new();
+        for (int i = 0; i < wall.materials.Count; i++)
+        {
+            materials.Add(new MatData(wall.materials[i]));
+        }
+
+        for (int i = 0; i < wall.renderer.sharedMaterials.Length; i++)
+        {
+            wall.renderer.sharedMaterials[i].color = materials[i].color;
+        }
     }
 
     private void PrepareDynamicCursor(Vector3 originPos)
@@ -291,6 +303,14 @@ public class WallModifyPreview : IDynamicPreviewSystem
     public bool GetModifyState()
     {
         return expand;
+    }
+
+    public void RefreshColors()
+    {
+        for (int i = 0; i < selectedWall.renderer.sharedMaterials.Length; i++)
+        {
+            selectedWall.renderer.sharedMaterials[i].color = materials[i].color;
+        }
     }
 
     public void StopPreview()

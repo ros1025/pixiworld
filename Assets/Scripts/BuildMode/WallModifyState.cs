@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 
 public class WallModifyState : IBuildingState
@@ -11,9 +12,11 @@ public class WallModifyState : IBuildingState
     InputManager inputManager;
     private List<Vector3> posList;
     private List<Vector3> originalPosList;
+    private List<MatData> materials;
     private Wall selectedWall;
     private float length;
     private int index;
+    private bool isEdit = false;
 
     public WallModifyState(Vector3 gridPosition,
                             Grid grid,
@@ -40,6 +43,7 @@ public class WallModifyState : IBuildingState
         CalculateLength();
 
         previewSystem.StartPreview(selectedWall, placementSystem, inputManager, 0.1f, 2f);
+        materials = selectedWall.materials;
 
         for (int i = 0; i < posList.Count; i++)
         {
@@ -47,11 +51,20 @@ public class WallModifyState : IBuildingState
         }
 
         placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemoveWall(selectedWall));
+        placementSystem.GetBuildToolsUI().EnableCustomTexture(previewSystem.materials, () => previewSystem.RefreshColors());
     }
 
     public void EndState()
     {
         previewSystem.ClearPointer();
+
+        if (!isEdit)
+        {
+            for (int i = 0; i < selectedWall.renderer.sharedMaterials.Length; i++)
+            {
+                selectedWall.renderer.sharedMaterials[i].color = materials[i].color;
+            }
+        }
     }
 
     public void OnModify(Vector3 gridPosition, float rotation = 0)
@@ -102,9 +115,15 @@ public class WallModifyState : IBuildingState
             displayPos.Add(grid.LocalToWorld(posList[i]));
         }
 
-        wallMapping.ModifyWalls(selectedWall, displayPos);
+        materials.Clear();
+        for (int i = 0; i < previewSystem.materials.Count; i++)
+        {
+            materials.Add(previewSystem.materials[i]);
+        }
+        wallMapping.ModifyWalls(selectedWall, displayPos, materials);
         posList.Clear();
         length = 0;
+        isEdit = true;
         previewSystem.ClearPointer();
         inputManager.InvokeExit();
     }

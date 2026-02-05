@@ -31,6 +31,7 @@ public class PoolModifyState : IBuildingState
             posList.Add(pos);
         }    
         previewSystem.StartPreview(selectedPool, placementSystem, inputManager);
+        placementSystem.GetBuildToolsUI().EnableSellButton(() => placementSystem.RemovePool(selectedPool));
         CalculateLength();
     }
 
@@ -97,11 +98,17 @@ public class PoolModifyState : IBuildingState
                 if (!posList.Contains(gridPosition))
                 {
                     int index = previewSystem.GetSplineIndex(gridPosition);
-                    if (index >= 0)
+                    if (index >= 0 && index < posList.Count)
                     {
                         posList.Insert(index, gridPosition);
                         CalculateLength();
-                        previewSystem.AddPoint(index, gridPosition);
+                        previewSystem.AddPoint(index, grid.LocalToWorld(gridPosition));
+                    }
+                    else if (index >= posList.Count)
+                    {
+                        posList.Add(gridPosition);
+                        CalculateLength();
+                        previewSystem.AddPoint(posList.IndexOf(gridPosition), grid.LocalToWorld(gridPosition));
                     }
                 }
             }

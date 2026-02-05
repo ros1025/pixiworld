@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using TMPro;
+using UnityEditor.Build.Pipeline;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -28,45 +30,10 @@ public class WallMapping : MonoBehaviour
     [SerializeField] private Material selectorMaterial;
     [SerializeField] private PlacementSystem placementSystem;
     public float height;
-    //[SerializeField] private GameObject gizmos;
 
     public void MakeWalls()
     {
         BuildMesh();
-    }
-
-    private void GetVerts(int index, float d, out List<Vector3> vertsP1, out List<Vector3> vertsP2)
-    {
-        vertsP1 = new List<Vector3>();
-        vertsP2 = new List<Vector3>();
-
-        Vector3 p1;
-        Vector3 p2;
-        //int resolution = (int)(walls[j].wall.GetLength() * 2);
-        int resolution = walls[index].resolution;
-        float step = 1f / (float)resolution;
-        for (int i = 0; i < resolution; i++)
-        {
-            float t = step * i;
-
-            m_SplineSampler.SampleSplineWidth(index, t, d, out p1, out p2);
-            vertsP1.Add(p1);
-            vertsP2.Add(p2);
-        }
-
-        m_SplineSampler.SampleSplineWidth(index, 1f, d, out p1, out p2);
-        vertsP1.Add(p1);
-        vertsP2.Add(p2);
-    }
-
-    private int calculateRes(int index)
-    {
-        int res = 0;
-        for (int i = 0; i < index; i++)
-        {
-            res += walls[i].resolution;
-        }
-        return res;
     }
 
     private bool HitsContainCollider(List<RaycastHit> hitList, RaycastHit hit)
@@ -622,11 +589,11 @@ public class WallMapping : MonoBehaviour
             if (localAngle == 0 || Math.Abs(localAngle) == 180)
             {
                 tris.AddRange(new List<int> {totalVerts.IndexOf(point1), totalVerts.IndexOf(point2), totalVerts.IndexOf(point3)});
-                remainingVerts.Remove(point2);
+                remainingVerts.RemoveAt((i + 1) % remainingVerts.Count);
             }
             else if (point1 == point2 || point2 == point3)
             {
-                remainingVerts.Remove(point2);
+                remainingVerts.RemoveAt((i + 1) % remainingVerts.Count);
             }
             else if (Math.Sign(localAngle) == Math.Sign(angle))
             {
@@ -647,7 +614,7 @@ public class WallMapping : MonoBehaviour
                     if (j == vertSteps - 1)
                     {
                         tris.AddRange(new List<int> {totalVerts.IndexOf(point1), totalVerts.IndexOf(point2), totalVerts.IndexOf(point3)});
-                        remainingVerts.Remove(point2);
+                        remainingVerts.RemoveAt((i + 1) % remainingVerts.Count);
                     }
                 }
             }
@@ -884,13 +851,122 @@ public class WallMapping : MonoBehaviour
 
         List<Vector3> points = new();
         List<Vector3> points2 = new();
+        List<(Room, Vector3, Vector3)> encapsulatedRooms = new();
+        List<(Pool, Vector3, Vector3)> encapsulatedPools = new();
+        DetectEncapsulatedRoomsInRoom(rooms[i], angle, encapsulatedRooms);
+        placementSystem.GetCurrentPools().DetectOverlappingPools(rooms[i].points, angle, encapsulatedPools);
 
         foreach (Vector3 point in rooms[i].points)
         {
             points.Add(transform.TransformPoint(point));
-            points2.Add(transform.TransformPoint(point) + new Vector3(0, height, 0));
+            for (int k = 0; k < encapsulatedRooms.Count; k++)
+            {
+                if (encapsulatedRooms[k].Item3 == point)
+                {
+                    List<Vector3> encapsulatedPoints = new();
+                    int startingIndex = 0;
+                    for (int j = 0; j < encapsulatedRooms[k].Item1.points.Count; j++)
+                    {
+                        encapsulatedPoints.Add(transform.TransformPoint(encapsulatedRooms[k].Item1.points[j]));
+                        if (Vector3.Distance(transform.TransformPoint(encapsulatedRooms[k].Item1.points[j]), transform.TransformPoint(encapsulatedRooms[k].Item2)) < Vector3.Distance(encapsulatedPoints[startingIndex], transform.TransformPoint(encapsulatedRooms[k].Item2)))
+                        {
+                            startingIndex = encapsulatedPoints.Count - 1;
+                        }
+                    }
+
+                    if (Mathf.Sign(GetAngle(encapsulatedRooms[k].Item1.points, Vector3.up)) == Mathf.Sign(angle))
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points.Add(encapsulatedPoints[(((startingIndex - j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count]);
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points.Add(encapsulatedPoints[(((startingIndex + j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count]);
+                        }
+                    }
+
+                    points.Add(transform.TransformPoint(point));
+                }
+            }
+
+            for (int k = 0; k < encapsulatedPools.Count; k++)
+            {
+                if (encapsulatedPools[k].Item3 == point)
+                {
+                    List<Vector3> encapsulatedPoints = new();
+                    int startingIndex = 0;
+                    for (int j = 0; j < encapsulatedPools[k].Item1.points.Count; j++)
+                    {
+                        encapsulatedPoints.Add(transform.TransformPoint(encapsulatedPools[k].Item1.points[j]));
+                        if (Vector3.Distance(transform.TransformPoint(encapsulatedPools[k].Item1.points[j]), transform.TransformPoint(encapsulatedPools[k].Item2)) < Vector3.Distance(encapsulatedPoints[startingIndex], transform.TransformPoint(encapsulatedPools[k].Item2)))
+                        {
+                            startingIndex = encapsulatedPoints.Count - 1;
+                        }
+                    }
+
+                    if (Mathf.Sign(GetAngle(encapsulatedPools[k].Item1.points, Vector3.up)) == Mathf.Sign(angle))
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points.Add(encapsulatedPoints[(((startingIndex - j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count]);
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points.Add(encapsulatedPoints[(((startingIndex + j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count]);
+                        }
+                    }
+
+                    points.Add(transform.TransformPoint(point));
+                }
+            }
         }
 
+        foreach (Vector3 point in rooms[i].points)
+        {
+            Vector3 np = transform.TransformPoint(point + new Vector3(0, height, 0));
+            points2.Add(np);
+            for (int k = 0; k < encapsulatedRooms.Count; k++)
+            {
+                if (encapsulatedRooms[k].Item3 == point)
+                {
+                    List<Vector3> encapsulatedPoints = new();
+                    int startingIndex = 0;
+                    for (int j = 0; j < encapsulatedRooms[k].Item1.points.Count; j++)
+                    {
+                        encapsulatedPoints.Add(transform.TransformPoint(encapsulatedRooms[k].Item1.points[j]));
+                        if (Vector3.Distance(transform.TransformPoint(encapsulatedRooms[k].Item1.points[j]), transform.TransformPoint(encapsulatedRooms[k].Item2)) < Vector3.Distance(encapsulatedPoints[startingIndex], transform.TransformPoint(encapsulatedRooms[k].Item2)))
+                        {
+                            startingIndex = encapsulatedPoints.Count - 1;
+                        }
+                    }
+
+                    if (Mathf.Sign(GetAngle(encapsulatedRooms[k].Item1.points, Vector3.up)) == Mathf.Sign(angle))
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points2.Add(encapsulatedPoints[(((startingIndex - j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count] + new Vector3(0, height, 0));
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j <= encapsulatedPoints.Count; j++)
+                        {
+                            points2.Add(encapsulatedPoints[(((startingIndex + j) % encapsulatedPoints.Count) + encapsulatedPoints.Count) % encapsulatedPoints.Count] + new Vector3(0, height, 0));
+                        }
+                    }
+
+                    points2.Add(np);
+                }
+            }
+        }
+        
         BuildRoomPoints(roomWalls, 0.02f, points, angle, verts, tris, uvs);
         BuildRoomPoints(roomWalls, -0.02f, points2, angle, verts2, tris2, uvs2);
 
@@ -912,6 +988,101 @@ public class WallMapping : MonoBehaviour
         rooms[i].mesh.mesh = mesh;
         rooms[i].ceilingMesh.mesh = ceilingMesh;
         rooms[i].collider.sharedMesh = colliderMesh;
+
+        List<Room> overlappingRooms = new();
+        DetectOverlappingRooms(rooms[i], angle, overlappingRooms);
+        foreach (Room room in overlappingRooms)
+        {
+            BuildRoom(rooms.IndexOf(room));
+        }
+    }
+
+    private void DetectEncapsulatedRoomsInRoom(Room room, float angle, List<(Room, Vector3, Vector3)> encapsulatedRooms)
+    {
+        if (room.points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((room.points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in room.points)
+            {
+                boundBox.Encapsulate(transform.TransformPoint(point));
+            }
+            Collider[] overlaps = Physics.OverlapBox(boundBox.center, boundBox.extents, Quaternion.identity, LayerMask.GetMask("Selector"));
+
+            foreach (Collider overlap in overlaps)
+            {
+                if (rooms.FindIndex(item => item.collider == overlap) != -1)
+                {
+                    Room selectedRoom = rooms.Find(item => item.collider == overlap);
+
+                    if (selectedRoom != room)
+                    {
+                        if (selectedRoom.collider.bounds.max.x < boundBox.max.x || selectedRoom.collider.bounds.max.z < boundBox.max.z
+                        || selectedRoom.collider.bounds.min.x > boundBox.min.x || selectedRoom.collider.bounds.min.z > boundBox.min.z)
+                        {
+                            Vector3 nearestPoint = new();
+                            Vector3 roomAnchorPoint = room.points[0];
+                            bool isEncapsulated = false;
+
+                            for (int j = 0; j < room.points.Count; j++)
+                            {
+                                Vector3 p1 = room.points[j];
+                                Vector3 p2 = room.points[(j + 1) % room.points.Count];
+
+                                Vector3 c1 = GetNearestPoint(p1, selectedRoom.points);
+                                if (CheckPointEncapsulated(c1, room.points, angle))
+                                {
+                                    isEncapsulated = true;
+                                    if (p1 == room.points[0] || Vector3.Distance(p1, c1) < Vector3.Distance(nearestPoint, roomAnchorPoint))
+                                    {
+                                        nearestPoint = c1;
+                                        roomAnchorPoint = p1;
+                                    }
+                                }
+                            }
+
+                            if (isEncapsulated)
+                            {
+                                encapsulatedRooms.Add((selectedRoom, nearestPoint, roomAnchorPoint));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void DetectOverlappingRooms(Room room, float angle, List<Room> overlappingRooms)
+    {
+        if (room.points.Count > 2 && Mathf.Abs(Mathf.Abs(angle) - ((room.points.Count - 2) * 180)) < 0.1f) 
+        {
+            Bounds boundBox = new();
+
+            foreach (Vector3 point in room.points)
+            {
+                boundBox.Encapsulate(transform.TransformPoint(point));
+            }
+            Collider[] overlaps = Physics.OverlapBox(boundBox.center, boundBox.extents, Quaternion.identity, LayerMask.GetMask("Selector"));
+
+            foreach (Collider overlap in overlaps)
+            {
+                if (rooms.FindIndex(item => item.collider == overlap) != -1)
+                {
+                    Room selectedRoom = rooms.Find(item => item.collider == overlap);
+                    Debug.Log(rooms.IndexOf(selectedRoom));
+
+                    if (selectedRoom != room)
+                    {
+                        if (selectedRoom.collider.bounds.max.x > boundBox.max.x || selectedRoom.collider.bounds.max.z > boundBox.max.z
+                        || selectedRoom.collider.bounds.min.x < boundBox.min.x || selectedRoom.collider.bounds.min.z < boundBox.min.z)
+                        {
+                            Debug.Log(rooms.IndexOf(selectedRoom));
+                            overlappingRooms.Add(selectedRoom);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void BuildMesh()
@@ -1043,7 +1214,7 @@ public class WallMapping : MonoBehaviour
                     //int indexR = combinedSpline.IndexOf(intersect.junctions[a].knot);
                     ///float rT = combinedSpline.ConvertIndexUnit(indexR, PathIndexUnit.Knot, PathIndexUnit.Normalized);
                     float rT = EvaluateT(combinedSpline, intersect.junctions[a].knot.Position);
-                    Debug.Log($"{rT} {sT}");
+                    //Debug.Log($"{rT} {sT}");
                     if (rT < sT)
                     {
                         Intersection.JunctionInfo jinfo = new Intersection.JunctionInfo(r, r[intersect.junctions[a].knotIndex]);
@@ -1697,7 +1868,7 @@ public class WallMapping : MonoBehaviour
 
                 if (!HasRoomWithPoints(newKnotList) && newKnotList.Count >= 3 && IsRoomMeshContinuous(newKnotList))
                 {
-                    Debug.Log(string.Join(",", newKnotList));
+                    //Debug.Log(string.Join(",", newKnotList));
                     MakeRoom(newKnotList);
                 }
             }
@@ -1729,7 +1900,7 @@ public class WallMapping : MonoBehaviour
         {
             if (SplineInIntersection(intersections[i], spline, knot))
             {
-                Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
+                //Debug.Log($"Current spline in intersection with {i} at {knot.Position}");
                 nextJunctions.Add(intersections[i]);
             }
         }
@@ -1831,11 +2002,11 @@ public class WallMapping : MonoBehaviour
 
                     //determine the direction to move the splines in
                     float t1 = EvaluateT(spline, intersectingSplinePoint);
-                    Debug.Log($"{center} {intersectingSplinePoint} {placementSystem.SmoothenPosition(center)}");
+                    //Debug.Log($"{center} {intersectingSplinePoint} {placementSystem.SmoothenPosition(center)}");
 
                     if (intersections[j].junctions.FindIndex(item => item.spline == spline) == -1)
                     {
-                        Debug.Log(intersectingSplinePoint);
+                        //Debug.Log(intersectingSplinePoint);
                         //insert incoming spline
                         if (EvaluateT(spline, intersectingSplinePoint) == 0f || Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
                         {
@@ -1890,7 +2061,7 @@ public class WallMapping : MonoBehaviour
 
                     hitRemoveList.Add(intersectingSplinePoint);
                     intersectionBuild.Add(j);
-                    Debug.Log(j);
+                    //Debug.Log(j);
                 }
             }
         }
@@ -1921,7 +2092,7 @@ public class WallMapping : MonoBehaviour
 
                     if (hitRemoveList.FindIndex(item => Vector3.Distance(item, intersectingSplinePoint) < 0.5f) == -1)
                     {
-                        Debug.Log($"{hit.point} {intersectingSplinePoint} {thisSplinePoint} {otherSplinePoint}");
+                        //Debug.Log($"{hit.point} {intersectingSplinePoint} {thisSplinePoint} {otherSplinePoint}");
                         //insert incoming spline
                         if (EvaluateT(spline, intersectingSplinePoint) == 0f || Vector3.Distance(splinePoints[0], intersectingSplinePoint) < 0.5f)
                         {
@@ -1939,7 +2110,7 @@ public class WallMapping : MonoBehaviour
 
                             BuildSplineKnots(spline, splinePoints);
                             BuildSplineKnots(spline2, spline2Points);
-                            Debug.Log($"{string.Join(",", splinePoints)} {string.Join(",", spline2Points)}");
+                            //Debug.Log($"{string.Join(",", splinePoints)} {string.Join(",", spline2Points)}");
 
                             for (int filterWallList = 0; filterWallList < wallsList.Count; filterWallList++)
                             {
@@ -1979,7 +2150,7 @@ public class WallMapping : MonoBehaviour
                             BuildSplineKnots(walls[j].wall, walls[j].points);
                             BuildSplineKnots(spline3, spline3Points);
                             walls[j].resolution = (int)(walls[j].wall.GetLength() * 2);
-                            Debug.Log($"{string.Join(",", walls[j].points)} {string.Join(",", spline3Points)}");
+                            //Debug.Log($"{string.Join(",", walls[j].points)} {string.Join(",", spline3Points)}");
 
                             MakeSpline(spline3, spline3Points);
                             FilterIntersections(walls[j].wall, spline3, t2);
@@ -2061,7 +2232,7 @@ public class WallMapping : MonoBehaviour
         }
     }
 
-    public void ModifyWalls(Wall wall, List<Vector3> points)
+    public void ModifyWalls(Wall wall, List<Vector3> points, List<MatData> materials)
     {
         Spline spline = wall.wall;
         List<Vector3> pointsList = points;
@@ -2071,6 +2242,7 @@ public class WallMapping : MonoBehaviour
         pointsList[^1] = transform.InverseTransformPoint(points[^1]);
         Vector3 p1 = pointsList[0];
         Vector3 p2 = pointsList[^1];
+
         BuildSplineKnots(spline, pointsList);
         ModifyWindowsInWall(wall);
 
@@ -2156,9 +2328,12 @@ public class WallMapping : MonoBehaviour
         CleanRooms();
         CleanIntersections();
         CreateRoom(spline, spline[0], 1, new List<BezierKnot>());
-        //CreateRoom(spline, spline[^1], 0, new List<BezierKnot>());
-        //MakeWalls();
 
+        wall.materials = materials;
+        for (int i = 0; i < wall.renderer.sharedMaterials.Length; i++)
+        {
+            wall.renderer.sharedMaterials[i].color = materials[i].color;
+        }
     }
 
     public void ModifyIntersection(Intersection intersection, Vector3 position)
@@ -3062,6 +3237,7 @@ public class Wall
     public MeshCollider collider;
     public MeshFilter mesh;
     public MeshRenderer renderer;
+    public List<MatData> materials;
 
     public Wall(Spline wall, List<Vector3> points, int resolution, MeshCollider collider, MeshRenderer renderer, MeshFilter mesh, Material defaultWallMaterial)
     {
@@ -3073,13 +3249,17 @@ public class Wall
         this.mesh = mesh;
 
         Material[] newMaterials = new Material[3];
+        materials = new();
         for (int i = 0; i < renderer.sharedMaterials.Length; i++)
         {
             newMaterials[i] = renderer.sharedMaterials[i];
         }
-        newMaterials[0] = defaultWallMaterial;
-        newMaterials[1] = defaultWallMaterial;
-        newMaterials[2] = defaultWallMaterial;
+        for (int i = 0; i < newMaterials.Length; i++)
+        {
+            newMaterials[i] = Material.Instantiate(defaultWallMaterial);
+            MatData newMat = new(defaultWallMaterial.color);
+            materials.Add(newMat);
+        }
 
         renderer.sharedMaterials = newMaterials;
     }

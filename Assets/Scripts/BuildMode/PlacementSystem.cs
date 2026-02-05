@@ -373,6 +373,20 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         }
     }
 
+    public void RemovePool(Pool pool)
+    {
+        if (pools == null)
+        {
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
+        }
+        else
+        {
+            soundFeedback.PlaySound(SoundType.Remove);
+            pools.RemovePool(pool);
+            StopPlacement();
+        }
+    }
+
     public void SelectObject()
     {
         if (inputManager.IsPointerOverUI())
