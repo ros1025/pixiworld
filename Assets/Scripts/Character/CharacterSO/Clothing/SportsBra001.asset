@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2b6d40aa5c02f42b71fb7a226d6b18, type: 3}
   m_Name: SportsBra001
   m_EditorClassIdentifier: 
-  <name>k__BackingField: Sports Bra 001
-  <mesh>k__BackingField: {fileID: 4300000, guid: 2ae6c4578422d4d178a08196aa8a093b, type: 2}
+  <Name>k__BackingField: Sports Bra 001
+  <ID>k__BackingField: 4
+  <mesh>k__BackingField: {fileID: 4122068504148866560, guid: c2b8c34ce451843ba819bcedbfae63d3, type: 3}
+  <clothingPreference>k__BackingField: 1
+  <ageGroup>k__BackingField: {fileID: 0}
   <clothingCategory>k__BackingField:
   - {fileID: 11400000, guid: 0b512139a1d2f8d4fab510707f4bd2da, type: 2}
   - {fileID: 11400000, guid: cd3ebf70ee1da7d4594f7d77bddbf7c7, type: 2}

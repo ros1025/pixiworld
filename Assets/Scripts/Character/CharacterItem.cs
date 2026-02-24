@@ -4,11 +4,13 @@ using UnityEngine;
 public class CharacterItem
 {
     public ClothingSO clothingItem;
-    public SkinnedMeshRenderer renderer;
+    //public SkinnedMeshRenderer renderer;
+    public MatData matData;
 
-    public CharacterItem(ClothingSO clothingItem, SkinnedMeshRenderer renderer)
+    public CharacterItem(ClothingSO clothingItem, MatData matData)
     {
         this.clothingItem = clothingItem;
-        this.renderer = renderer;
+        //this.renderer = renderer;
+        this.matData = matData;
     }
 }

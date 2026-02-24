@@ -150,7 +150,7 @@ public class CameraController : MonoBehaviour
                 Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, 0, -touchDelta.y * touchPosScale));
+                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, -touchDelta.y * touchPosScale, 0));
                 }
                 else
                 {
@@ -198,7 +198,7 @@ public class CameraController : MonoBehaviour
             {
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, 0, -delta.y * posScale));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, -delta.y * posScale, 0));
                 }
                 else
                 {

@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2b6d40aa5c02f42b71fb7a226d6b18, type: 3}
   m_Name: Underpants001
   m_EditorClassIdentifier: 
-  <name>k__BackingField: Underpants 001
-  <mesh>k__BackingField: {fileID: 4300000, guid: bf26522336b0d41d4a868748eb3c9f13, type: 2}
+  <Name>k__BackingField: Underpants 001
+  <ID>k__BackingField: 10
+  <mesh>k__BackingField: {fileID: -2154900996830194889, guid: ac31c1e4b12cb466bb3fa3180afba4c2, type: 3}
+  <clothingPreference>k__BackingField: 2
+  <ageGroup>k__BackingField: {fileID: 0}
   <clothingCategory>k__BackingField:
   - {fileID: 11400000, guid: 3bf0d940addc85148b960ac6244e0efa, type: 2}

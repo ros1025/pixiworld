@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb0db3408d4b04c27878d0a1bc3acad8, type: 3}
+  m_Name: CharacterRulesSO
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterRulesSO
+  <clothingCategories>k__BackingField: {fileID: 11400000, guid: c1393ce289ce74fe0b1b0210bf6583be, type: 2}
+  <bodyFeatureCategories>k__BackingField: {fileID: 11400000, guid: 85fe345fc517748269a618eb8256cf09, type: 2}
+  <outfitTypes>k__BackingField: {fileID: 11400000, guid: 0c1429f7261d74b179c9043ab33333e5, type: 2}
+  <ageGroups>k__BackingField: {fileID: 11400000, guid: 66b29ae93e5e24c28966252c46c397e6, type: 2}
+  <defaultAgeGroup>k__BackingField: {fileID: 11400000, guid: a1a206dee8d0747b7a7d1b973c36e85f, type: 2}
+  <defaultGenders>k__BackingField: {fileID: 11400000, guid: 7ad9029c81e464d24a19f3b205ccd02e, type: 2}
+  <clothingMaterial>k__BackingField: {fileID: 2100000, guid: 311b99e3afb524bf380702c6a5bdd143, type: 2}
+  <hairMaterial>k__BackingField: {fileID: 2100000, guid: cb85587c6ebf9964db6b445bd0d2c915, type: 2}

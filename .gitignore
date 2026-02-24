@@ -101,6 +101,10 @@ InitTestScene*.unity*
 # MacOS System Generated Files
 # General
 .DS_Store
+**/.DS_Store
+*.DS_Store
+*/.DS_Store
+Assets/.DS_Store
 __MACOSX/
 .AppleDouble
 .LSOverride
@@ -600,4 +604,3 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-**/.DS_Store

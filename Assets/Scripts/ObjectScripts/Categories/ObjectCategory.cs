@@ -6,4 +6,6 @@ public class ObjectCategory : ScriptableObject
 {
     [field: SerializeField]
     public string Name { get; private set; }
+    [field: SerializeField]
+    public Texture2D icon {get; private set; }
 }

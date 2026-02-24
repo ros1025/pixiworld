@@ -212,14 +212,30 @@ public class DataPersistenceManager : MonoBehaviour
 
     public string GenerateNewId()
     {
-        int newId = 0;
         Dictionary<string, WorldSaveData>  data = GetAllProfilesGameData();
         List<string> ids = data.Keys.ToList();
-        while (ids.FindIndex(str => str == newId.ToString()) != -1)
+
+        // String that contain both alphabets and numbers
+        string possibleChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        System.Random random = new System.Random();
+        int size = random.Next(4, 32);
+
+        // Initializing the empty string
+        string randomstring = "";
+
+        while (randomstring.Length == 0 || ids.Contains(randomstring))
         {
-            newId++;
+            randomstring = "";
+
+            for (int i = 0; i < size; i++)
+            {
+                //get random character index and add
+                int index = random.Next(possibleChars.Length);
+                randomstring += possibleChars[index];
+            }
         }
-        return newId.ToString();
+
+        return randomstring;
     }
 
     public bool HasGameData()

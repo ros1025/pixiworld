@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2b6d40aa5c02f42b71fb7a226d6b18, type: 3}
   m_Name: TShirt001
   m_EditorClassIdentifier: 
-  <name>k__BackingField: T-Shirt 001
-  <mesh>k__BackingField: {fileID: 4300000, guid: d8d8de3d5df3f4bce8c8f1e448a4bfd3, type: 2}
+  <Name>k__BackingField: T Shirt 001
+  <ID>k__BackingField: 7
+  <mesh>k__BackingField: {fileID: 7040901865637272632, guid: 1b34c46075f7445b290fc2c07ffde1c4, type: 3}
+  <clothingPreference>k__BackingField: 2
+  <ageGroup>k__BackingField: {fileID: 0}
   <clothingCategory>k__BackingField:
   - {fileID: 11400000, guid: 84daf7e13afaa3149bb21fd3527ddf34, type: 2}

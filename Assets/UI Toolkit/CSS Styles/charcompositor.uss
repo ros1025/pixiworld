@@ -24,15 +24,15 @@
 }
 
 .category-button {
-    width: 100px;
-    height: 100px;
-    border-top-left-radius: 50px;
-    border-top-right-radius: 50px;
-    border-bottom-right-radius: 50px;
-    border-bottom-left-radius: 50px;
+    width: 75px;
+    height: 75px;
+    border-top-left-radius: 37.5px;
+    border-top-right-radius: 37.5px;
+    border-bottom-right-radius: 37.5px;
+    border-bottom-left-radius: 37.5px;
     margin-top: 0;
     margin-right: 0;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     margin-left: 0;
     padding-top: 25px;
     padding-right: 25px;
@@ -59,7 +59,7 @@
     margin-bottom: 10px;
     margin-left: 10px;
     height: 250px;
-    width: 200px;
+    width: 230px;
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
     border-bottom-right-radius: 30px;
@@ -82,22 +82,31 @@
 .content-group {
     flex-grow: 1;
     flex-direction: row;
-    width: 440px;
+    width: 100%;
+    padding-top: 0;
+    padding-right: 10px;
+    padding-bottom: 0;
+    padding-left: 0;
 }
 
 .content-group-vertical {
     flex-grow: 1;
     flex-direction: column;
-    width: 440px;
+    width: 100%;
+    padding-top: 0;
+    padding-right: 10px;
+    padding-bottom: 0;
+    padding-left: 0;
+    margin-right: 0;
 }
 
 .topic-button {
-    width: 115px;
-    height: 70px;
-    border-top-left-radius: 35px;
-    border-top-right-radius: 35px;
-    border-bottom-right-radius: 35px;
-    border-bottom-left-radius: 35px;
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 45px;
+    border-top-right-radius: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
     margin-top: 0;
     margin-right: 5px;
     margin-bottom: 0;
@@ -122,7 +131,7 @@
 }
 
 #Cancel {
-    width: 100px;
+    width: 90px;
     margin-top: 0;
     margin-right: 5px;
     margin-bottom: 0;
@@ -131,11 +140,11 @@
     padding-right: 25px;
     padding-bottom: 10px;
     padding-left: 25px;
-    height: 70px;
-    border-top-left-radius: 35px;
-    border-top-right-radius: 35px;
-    border-bottom-right-radius: 35px;
-    border-bottom-left-radius: 35px;
+    height: 90px;
+    border-top-left-radius: 45px;
+    border-top-right-radius: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -243,4 +252,291 @@
     padding-right: 0;
     padding-bottom: 0;
     padding-left: 0;
+    white-space: normal;
+}
+
+.content-group-vertical .unity-text-field {
+    height: 70px;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+    border-bottom-left-radius: 35px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.content-group-vertical .unity-text-field__input {
+    height: 60px;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+    border-bottom-left-radius: 35px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.mini-content-group {
+    flex-direction: row;
+}
+
+.mini-content-group .unity-button {
+    width: 80px;
+    height: 60px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(236, 148, 41);
+}
+
+.mini-content-group .unity-button:hover {
+    width: 80px;
+    height: 60px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(188, 116, 29);
+}
+
+.mini-content-group .unity-button-selected {
+    width: 80px;
+    height: 60px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(70, 175, 188);
+}
+
+.mini-content-group .unity-button-selected:hover {
+    width: 80px;
+    height: 60px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(44, 123, 132);
+}
+
+.mini-content-group .texture-button {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    min-width: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    max-width: 50px;
+}
+
+.mini-content-group .texture-button:hover {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    min-width: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    max-width: 50px;
+}
+
+.color-picker-bg {
+    max-width: 250px;
+    min-width: 250px;
+    max-height: 250px;
+    min-height: 250px;
+    align-self: center;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.color-picker-wrapper {
+    flex-grow: 1;
+    flex-direction: row;
+    align-content: center;
+}
+
+.color-picker-widget {
+    background-color: rgb(0, 0, 0);
+    border-left-color: rgb(149, 149, 149);
+    border-right-color: rgb(149, 149, 149);
+    border-top-color: rgb(149, 149, 149);
+    border-bottom-color: rgb(149, 149, 149);
+    border-top-width: 0.5px;
+    border-right-width: 0.5px;
+    border-bottom-width: 0.5px;
+    border-left-width: 0.5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    width: 10px;
+    height: 10px;
+    min-height: 10px;
+    min-width: 10px;
+    max-width: 10px;
+    max-height: 10px;
+}
+
+.hue-picker-widget {
+    width: 100%;
+    height: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: rgb(0, 0, 0);
+    border-top-width: 0.5px;
+    border-right-width: 0.5px;
+    border-bottom-width: 0.5px;
+    border-left-width: 0.5px;
+    max-height: 10px;
+    border-left-color: rgb(149, 149, 149);
+    border-right-color: rgb(149, 149, 149);
+    border-top-color: rgb(149, 149, 149);
+    border-bottom-color: rgb(149, 149, 149);
+}
+
+.color-picker-side {
+    height: 250px;
+    width: 25px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.color-picker .unity-base-slider .unity-base-slider__tracker {
+    background-color: rgb(113, 58, 24);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    height: 5px;
+    border-top-left-radius: 2.5px;
+    border-top-right-radius: 2.5px;
+    border-bottom-right-radius: 2.5px;
+    border-bottom-left-radius: 2.5px;
+    top: 50%;
+}
+
+.color-picker .unity-base-slider .unity-base-slider__dragger {
+    width: 20px;
+    height: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-color: rgb(211, 118, 60);
+    top: 50%;
+}
+
+.color-picker .unity-base-field {
+    height: 50px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    letter-spacing: -5px;
+    -unity-text-align: middle-left;
+    font-size: 30px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.color-picker .unity-base-slider .unity-text-field__input {
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Gotham%20Rounded%20Book.otf?fileID=12800000&guid=4600605d0b7945940ac581b9f982e805&type=3#Gotham Rounded Book");
+    font-size: 18px;
+    height: 36px;
+    -unity-text-align: middle-center;
+}
+
+.color-picker .unity-base-slider .unity-text-field {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    height: 40px;
 }

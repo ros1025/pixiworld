@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2b6d40aa5c02f42b71fb7a226d6b18, type: 3}
   m_Name: TankTop001
   m_EditorClassIdentifier: 
-  <name>k__BackingField: Tank Top 001
-  <mesh>k__BackingField: {fileID: 4300000, guid: 01fec1eeddf614c5693a3b09e2ccbb62, type: 2}
+  <Name>k__BackingField: Tank Top 001
+  <ID>k__BackingField: 5
+  <mesh>k__BackingField: {fileID: 1205996035142996644, guid: 0ae562404c3ea4041a09fc40adfbc674, type: 3}
+  <clothingPreference>k__BackingField: 2
+  <ageGroup>k__BackingField: {fileID: 0}
   <clothingCategory>k__BackingField:
   - {fileID: 11400000, guid: 0b512139a1d2f8d4fab510707f4bd2da, type: 2}

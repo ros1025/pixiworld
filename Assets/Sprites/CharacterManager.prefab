@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characters: []
-  defaultCharPrefab: {fileID: 8703436453054203501, guid: 670cacf3576394b3bbaed1a5e64f172c, type: 3}
+  characterRules: {fileID: 11400000, guid: 104348634f9914a7aa9b497df521969a, type: 2}
