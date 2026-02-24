@@ -242,10 +242,10 @@ MonoBehaviour:
   cam: {fileID: 376258143}
   cameraObject: {fileID: 87938136}
   targetBox: {fileID: 2123737850}
-  posScale: 0.05
-  touchPosScale: 0.1
+  posScale: 0.005
+  touchPosScale: 0.001
   zoomScale: 0.001
-  touchZoomScale: 0.1
+  touchZoomScale: 0.001
   yawScale: 1
   rotateScale: 1
   touchRotateScale: 0.1
@@ -815,7 +815,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   document: {fileID: 1327637294}
   customizer: {fileID: 1464131812}
-  charLimit: 3
+  charLimit: 5
 --- !u!1 &1464131811
 GameObject:
   m_ObjectHideFlags: 0
@@ -845,9 +845,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83edc2cf82b142d4596475f97c2836e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentCharacter: {fileID: 0}
   characterManager: {fileID: 953345992}
-  categories: {fileID: 11400000, guid: c1393ce289ce74fe0b1b0210bf6583be, type: 2}
 --- !u!4 &1464131813
 Transform:
   m_ObjectHideFlags: 0
@@ -991,7 +989,9 @@ MonoBehaviour:
   document: {fileID: 1877391813}
   customizer: {fileID: 1464131812}
   clothesDB: {fileID: 11400000, guid: fda6f08eaa3fc0a4785678566599a5d3, type: 2}
-  categoriesDB: {fileID: 11400000, guid: c1393ce289ce74fe0b1b0210bf6583be, type: 2}
+  bodyItemsDB: {fileID: 11400000, guid: 607a4981d12584fb3a90de6fc9b40340, type: 2}
+  clothingCategoriesDB: {fileID: 11400000, guid: c1393ce289ce74fe0b1b0210bf6583be, type: 2}
+  bodyFeatureCategoriesDB: {fileID: 11400000, guid: 85fe345fc517748269a618eb8256cf09, type: 2}
 --- !u!1 &2055164293
 GameObject:
   m_ObjectHideFlags: 0
@@ -1060,6 +1060,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 1327637295}
+        m_TargetAssemblyTypeName: CharSelectorUI, Assembly-CSharp
+        m_MethodName: Show
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   ExitMainEvents:
     m_PersistentCalls:
       m_Calls:
@@ -1077,6 +1089,18 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1877391814}
         m_TargetAssemblyTypeName: CharCustomizerUI, Assembly-CSharp
+        m_MethodName: Hide
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1327637295}
+        m_TargetAssemblyTypeName: CharSelectorUI, Assembly-CSharp
         m_MethodName: Hide
         m_Mode: 1
         m_Arguments:
@@ -1177,5 +1201,5 @@ SceneRoots:
   - {fileID: 974680471}
   - {fileID: 84378241}
   - {fileID: 2055164295}
-  - {fileID: 1464131813}
   - {fileID: 1515573858}
+  - {fileID: 1464131813}

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b2b6d40aa5c02f42b71fb7a226d6b18, type: 3}
+  m_Name: Shorts003
+  m_EditorClassIdentifier: Assembly-CSharp::ClothingSO
+  <Name>k__BackingField: Shorts 003
+  <ID>k__BackingField: 3
+  <mesh>k__BackingField: {fileID: 2203272448658308144, guid: 5835aea193f224bf1b04df37141171ed, type: 3}
+  <clothingPreference>k__BackingField: 2
+  <ageGroup>k__BackingField: {fileID: 0}
+  <clothingCategory>k__BackingField:
+  - {fileID: 11400000, guid: eeb5c48866f95f6459ccb76df83759aa, type: 2}

@@ -4,6 +4,9 @@ using UnityEngine;
 public class MatData
 {
     public Color color;
+    public Texture2D matPattern;
+    public Color patternColor;
+    public Texture2D decal;
 
     public MatData()
     {

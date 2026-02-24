@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a46a4ecf7a19734ca5045be26f83a81, type: 3}
+  m_Name: HairCategories
+  m_EditorClassIdentifier: Assembly-CSharp::ClothingCategorySO
+  <name>k__BackingField: Hairs
+  <subcategories>k__BackingField:
+  - {fileID: 11400000, guid: bbbd87dada7ae43b0aa069f1a1c76f54, type: 2}
+  - {fileID: 11400000, guid: 5735030e0ee3d49ee8d1aa78a632068b, type: 2}
+  - {fileID: 11400000, guid: f59cbe8c11cc2466d99485ccd073a580, type: 2}
+  - {fileID: 11400000, guid: 2bacd7afb69474d74bcf9767d54c4b0a, type: 2}

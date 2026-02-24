@@ -1,27 +1,41 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Threading.Tasks;
+using System.Collections;
 
 public class CharacterCustomizer : MonoBehaviour
 {
-    [SerializeField]
     private Character currentCharacter;
     [SerializeField]
     private CharacterManager characterManager;
-    [SerializeField]
-    private ClothingCategoryDatabaseSO categories;
 
-    void Awake()
+
+    private void Awake()
     {
-        InitializeCustomiser();
+        StartCoroutine(InitializeCustomiser());
     }
 
-    public void InitializeCustomiser()
+    public void AddItemToCharacter(Character character, ClothingSO clothing)
     {
+        character.AddItemToCurrentOutfit(clothing);
+    }
+
+    public void AddItemToCharacter(Character character, BodyFeatureSO feature)
+    {
+        character.AddItemToCurrentOutfit(feature);
+    }
+
+    public IEnumerator InitializeCustomiser()
+    {
+        yield return new WaitUntil(() => CharacterManager.instance != null);
+
         if (currentCharacter == null)
         {
             if (characterManager.GetCharactersCount() == 0)
             {
-                characterManager.AddNewCharacter();
+                characterManager.AddNewCharacter(characterManager.characterRules.defaultAgeGroup);
             }
 
             currentCharacter = characterManager.GetLastCharacter();
@@ -43,12 +57,17 @@ public class CharacterCustomizer : MonoBehaviour
 
     public List<TransformGroups> GetTransformGroups()
     {
-        return currentCharacter.GetBodyShapeKeys();
+        return currentCharacter.shapeKeys;
     }
 
     public void ChangeCharacterClothing(ClothingSO clothing)
     {
-        currentCharacter.ChangeClothing(clothing, categories);
+        AddItemToCharacter(currentCharacter, clothing);
+    }
+
+    public void ChangeCharacterClothing(BodyFeatureSO bodyFeature)
+    {
+        AddItemToCharacter(currentCharacter, bodyFeature);
     }
 
     public List<Character> GetCharacters()
@@ -63,7 +82,7 @@ public class CharacterCustomizer : MonoBehaviour
 
     public void AddNewCharacter()
     {
-        characterManager.AddNewCharacter();
+        characterManager.AddNewCharacter(currentCharacter.ageGroup);
         currentCharacter = characterManager.GetLastCharacter();
     }
 }

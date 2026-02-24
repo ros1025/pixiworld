@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 873d7a98ca85d43a09ed3a39851343e1, type: 3}
+  m_Name: BodyItemsDatabaseSO
+  m_EditorClassIdentifier: Assembly-CSharp::BodyItemsDatabaseSO
+  <bodyFeatures>k__BackingField:
+  - {fileID: 11400000, guid: 0c95010a841114209a44e33f34b14174, type: 2}
+  - {fileID: 11400000, guid: 03bccf4e55aef402285d25d35aec8006, type: 2}
+  - {fileID: 11400000, guid: df7a16fbc51544a69b0e1e3185453f39, type: 2}

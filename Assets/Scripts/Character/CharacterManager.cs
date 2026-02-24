@@ -1,16 +1,30 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterManager : MonoBehaviour
 {
     public List<Character> characters;
-    [SerializeField]
-    private GameObject defaultCharPrefab;
+    public CharacterRulesSO characterRules;
+    public static CharacterManager instance { get; private set; }
 
-    public void AddNewCharacter()
+    private void Awake()
     {
-        GameObject newCharObject = Instantiate(defaultCharPrefab);
-        Character newCharacter = newCharObject.AddComponent<Character>();
+        if (instance != null)
+        {
+            characters.AddRange(instance.characters);
+            Destroy(instance.gameObject);
+        }
+        instance = this;
+    }
+
+    public void AddNewCharacter(AgeGroupSO ageGroup)
+    {
+        System.Random random = new System.Random();
+
+        //GameObject newCharObject = Instantiate(ageGroup.CharacterObjectReference.CharacterObject);
+        GenderSetting gender = characterRules.defaultGenders.defaultGenders[random.Next(0, characterRules.defaultGenders.defaultGenders.Count)].ConvertToGenderSettingObject();
+        Character newCharacter = new Character(ageGroup, gender);
         characters.Add(newCharacter);
     }
 
@@ -33,7 +47,7 @@ public class CharacterManager : MonoBehaviour
     {
         if (characters.Count == 0)
         {
-            AddNewCharacter();
+            AddNewCharacter(characterRules.defaultAgeGroup);
         }
 
         return characters[^1];

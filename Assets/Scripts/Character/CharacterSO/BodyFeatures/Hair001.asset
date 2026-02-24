@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b33976cfee31c49499925638520a928d, type: 3}
+  m_Name: Hair001
+  m_EditorClassIdentifier: Assembly-CSharp::BodyFeatureSO
+  <name>k__BackingField: Short Hair 001
+  <mesh>k__BackingField: {fileID: 8401256142160071479, guid: d0b3f5be28c3d4d93b97f63af53a6db5, type: 3}
+  <skinTexture>k__BackingField: {fileID: 0}
+  <featureTypes>k__BackingField:
+  - {fileID: 11400000, guid: 5735030e0ee3d49ee8d1aa78a632068b, type: 2}

@@ -8,7 +8,7 @@ public class TransformGroups
     public string name;
     public int index;
     public float weight;
-    public Character character;
+    private Character character;
 
     public TransformGroups(string name, int index, float weight, Character character)
     {
@@ -32,14 +32,6 @@ public class TransformGroups
     public void AdjustWeights()
     {
         character.attributes.body.SetBlendShapeWeight(index, weight);
-
-        foreach (CharacterItem additionalItems in character.attributes.items)
-        {
-            int customIndex = additionalItems.renderer.sharedMesh.GetBlendShapeIndex(name);
-            if (customIndex != -1)
-            {
-                additionalItems.renderer.SetBlendShapeWeight(customIndex, weight);
-            }
-        }
+        character.SetWeightForFeatures(this);
     }
 }
