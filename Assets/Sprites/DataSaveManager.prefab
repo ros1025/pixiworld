@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialiseDataWhenNull: 0
-  disableDataPersistence: 1
+  disableDataPersistence: 0
   overrideProfileId: 0
   testSelectedProfileId: 
   fileName: game.json

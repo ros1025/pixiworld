@@ -10,8 +10,9 @@ public class WorldSaveData
     public List<Pool> pools;
     public RoadMapSaveData roads;
     public WallMapSaveData mapWalls;
+    public List<Character> characters;
 
-    public WorldSaveData(List<ObjectSaveData> mapObjects, List<ZoneSaveData> zones, RoadMapSaveData roads, WallMapSaveData mapWalls, List<Pool> pools)
+    public WorldSaveData(List<ObjectSaveData> mapObjects, List<ZoneSaveData> zones, RoadMapSaveData roads, WallMapSaveData mapWalls, List<Pool> pools, List<Character> characters)
     {
         lastSaveDate = System.DateTime.Now.ToBinary();
         this.mapObjects = mapObjects;
@@ -19,6 +20,7 @@ public class WorldSaveData
         this.zones = zones;
         this.roads = roads;
         this.mapWalls = mapWalls;
+        this.characters = characters;
     }
 
     public WorldSaveData()

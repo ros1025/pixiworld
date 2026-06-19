@@ -29,20 +29,11 @@ public class ObjectPlacer : MonoBehaviour
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            /*
-            List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
-            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
             for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
             {
-                mats[j] = matList[j];
-            }
-            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
-            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
-            */
-            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
-            {
-                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(placementSystem.objectMaterial);
                 newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = materials[index].color;
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].SetTexture("_Pattern", materials[index].matPattern);
                 index++;
             }
         }
@@ -67,20 +58,11 @@ public class ObjectPlacer : MonoBehaviour
         int index = 0;
         for (int i = 0; i < newObject.GetComponentsInChildren<Renderer>().Length; i++)
         {
-            /*
-            List<Material> matList = materials.GetRange(index, newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length);
-            Material[] mats = new Material[newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length];
             for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
             {
-                mats[j] = matList[j];
-            }
-            newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials = mats;
-            index += newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length;
-            */
-            for (int j = 0; j < newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials.Length; j++)
-            {
-                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j]);
+                newObject.GetComponentsInChildren<Renderer>()[i].materials[j] = Instantiate(placementSystem.objectMaterial);
                 newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].color = objectData.materials[index].color;
+                newObject.GetComponentsInChildren<Renderer>()[i].sharedMaterials[j].SetTexture("_Pattern", objectData.materials[index].matPattern);
                 index++;
             }
         }

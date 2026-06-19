@@ -39,6 +39,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     //[SerializeField] private PreviewSystem preview2;
     private IPreviewSystem preview;
     [SerializeField] public Material previewMaterialPrefab;
+    [SerializeField] public Material objectMaterial;
     [SerializeField] public GameObject previewSelectorObject;
     [SerializeField] public GameObject expandingCursor;
     [SerializeField] public GameObject pointerCursor;
@@ -998,6 +999,6 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         mainZoneDB.LoadData(data.zones);
         roadsDBObject.LoadSaveData(data.roads);
         wallsDBObject.LoadSaveData(data.mapWalls);
-        pools.LoadData(data.pools);
+        mainPoolsDB.LoadData(data.pools);
     }
 }

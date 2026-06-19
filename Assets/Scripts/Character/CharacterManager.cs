@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CharacterManager : MonoBehaviour
+public class CharacterManager : MonoBehaviour, IDataPersistence
 {
     public List<Character> characters;
     public CharacterRulesSO characterRules;
@@ -56,5 +56,15 @@ public class CharacterManager : MonoBehaviour
     public int GetCharactersCount()
     {
         return characters.Count;
+    }
+
+    public void LoadData(WorldSaveData data)
+    {
+        characters = data.characters;
+    }
+
+    public void SaveData(WorldSaveData data)
+    {
+        data.characters = characters;
     }
 }

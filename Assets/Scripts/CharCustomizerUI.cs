@@ -87,11 +87,14 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ClothingCategorySO category in clothingCategoriesDB.clothingCategories)
         {
-            Button catButton = new();
-            catButton.name = category.name;
-            catButton.AddToClassList("category-button");
-            catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterClothingChoice, category);
-            categories.Add(catButton);
+            Task.Run(() =>
+            {
+                Button catButton = new();
+                catButton.name = category.name;
+                catButton.AddToClassList("category-button");
+                catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterClothingChoice, category);
+                categories.Add(catButton);
+            });
         }
 
         categories.scrollOffset = new Vector2(0, 0);
@@ -116,11 +119,14 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ObjectCategory subcategory in category.subcategories)
         {
-            Button subCatButton = new();
-            subCatButton.name = subcategory.name;
-            subCatButton.AddToClassList("category-button");
-            subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterClothingChoice, new List<ObjectCategory> {subcategory});
-            subcategories.Add(subCatButton);
+            Task.Run(() =>
+            {
+                Button subCatButton = new();
+                subCatButton.name = subcategory.name;
+                subCatButton.AddToClassList("category-button");
+                subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterClothingChoice, new List<ObjectCategory> {subcategory});
+                subcategories.Add(subCatButton);
+            });
         }
 
         FilterClothingChoice(category.subcategories);
@@ -146,7 +152,10 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (ClothingSO clothing in clothes)
             {
-                AddClothingButton(elements, clothing);
+                Task.Run(() =>
+                {
+                    AddClothingButton(elements, clothing);
+                });
             }
 
             if (clothes.Count == 0)
@@ -163,7 +172,7 @@ public class CharCustomizerUI : MonoBehaviour
         }
     }
 
-    private async Awaitable AddClothingButton(List<VisualElement> elements, ClothingSO clothing)
+    private void AddClothingButton(List<VisualElement> elements, ClothingSO clothing)
     {
         if (elements.Count == 0 || elements[^1].childCount >= 2)
         {
@@ -196,11 +205,14 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ClothingCategorySO category in bodyFeatureCategoriesDB.clothingCategories)
         {
-            Button catButton = new();
-            catButton.name = category.name;
-            catButton.AddToClassList("category-button");
-            catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterBodyItemChoice, category);
-            categories.Add(catButton);
+            Task.Run(() =>
+            {
+                Button catButton = new();
+                catButton.name = category.name;
+                catButton.AddToClassList("category-button");
+                catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterBodyItemChoice, category);
+                categories.Add(catButton);
+            });
         }
 
         categories.scrollOffset = new Vector2(0, 0);
@@ -225,11 +237,14 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ObjectCategory subcategory in category.subcategories)
         {
-            Button subCatButton = new();
-            subCatButton.name = subcategory.name;
-            subCatButton.AddToClassList("category-button");
-            subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterBodyItemChoice, new List<ObjectCategory> {subcategory});
-            subcategories.Add(subCatButton);
+            Task.Run(() =>
+            {
+                Button subCatButton = new();
+                subCatButton.name = subcategory.name;
+                subCatButton.AddToClassList("category-button");
+                subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterBodyItemChoice, new List<ObjectCategory> {subcategory});
+                subcategories.Add(subCatButton);
+            });
         }
 
         FilterBodyItemChoice(category.subcategories);
@@ -255,7 +270,10 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (BodyFeatureSO bodyFeature in clothes)
             {
-                AddBodyItemButton(elements, bodyFeature);
+                Task.Run(() =>
+                {
+                    AddBodyItemButton(elements, bodyFeature);
+                });
             }
 
             if (clothes.Count == 0)
@@ -272,7 +290,7 @@ public class CharCustomizerUI : MonoBehaviour
         }
     }
 
-    private async Awaitable AddBodyItemButton(List<VisualElement> elements, BodyFeatureSO bodyFeature)
+    private void AddBodyItemButton(List<VisualElement> elements, BodyFeatureSO bodyFeature)
     {
         if (elements.Count == 0 || elements[^1].childCount >= 2)
         {
@@ -309,31 +327,35 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (CharacterItem cloth in clothingList)
             {
-                VisualElement main = new();
-                main.name = $"{cloth.clothingItem.Name}";
-                main.AddToClassList("content-group-vertical");
-                items.Add(main);
+                Task.Run(() =>
+                {
+                    VisualElement main = new();
+                    main.name = $"{cloth.clothingItem.Name}";
+                    main.AddToClassList("content-group-vertical");
+                    items.Add(main);
 
-                Label label = new();
-                label.text = $"Clothing {cloth.clothingItem.Name}";
-                label.AddToClassList("group-label");
-                main.Add(label);
+                    Label label = new();
+                    label.text = $"Clothing {cloth.clothingItem.Name}";
+                    label.AddToClassList("group-label");
+                    main.Add(label);
 
-                VisualElement miniBox = new();
-                miniBox.AddToClassList("mini-content-group");
-                main.Add(miniBox);
+                    VisualElement miniBox = new();
+                    miniBox.AddToClassList("mini-content-group");
+                    main.Add(miniBox);
 
-                Button color = new();
-                color.name = "Colour";
-                color.AddToClassList("texture-button");
-                color.style.backgroundColor = cloth.matData.color;
-                color.RegisterCallback<ClickEvent, CharacterItem>(ColorPickerUI, cloth);
-                miniBox.Add(color);
+                    Button color = new();
+                    color.name = "Colour";
+                    color.AddToClassList("texture-button");
+                    color.style.backgroundColor = cloth.matData.color;
+                    color.RegisterCallback<ClickEvent, CharacterItem>(ColorPickerUI, cloth);
+                    miniBox.Add(color);
 
-                Button text = new();
-                text.name = "Texture";
-                text.AddToClassList("texture-button");
-                miniBox.Add(text);
+                    Button text = new();
+                    text.name = "Texture";
+                    text.AddToClassList("texture-button");
+                    text.RegisterCallback<ClickEvent, CharacterItem>(TexturePickerUI, cloth);
+                    miniBox.Add(text);
+                });
             }
         }
     }
@@ -355,27 +377,30 @@ public class CharCustomizerUI : MonoBehaviour
             List<TransformGroups> transformGroups = customizer.GetTransformGroups();
             foreach (TransformGroups group in transformGroups)
             {
-                VisualElement visualElement = new();
-                visualElement.name = group.name;
-                visualElement.AddToClassList("content-group-vertical");
-                items.Add(visualElement);
+                Task.Run(() =>
+                {
+                    VisualElement visualElement = new();
+                    visualElement.name = group.name;
+                    visualElement.AddToClassList("content-group-vertical");
+                    items.Add(visualElement);
 
-                Label label = new();
-                string displayName = group.name.Split("_")[1].Replace("-", " ");
-                label.text = displayName;
-                label.AddToClassList("group-label");
-                visualElement.Add(label);
+                    Label label = new();
+                    string displayName = group.name.Split("_")[1].Replace("-", " ");
+                    label.text = displayName;
+                    label.AddToClassList("group-label");
+                    visualElement.Add(label);
 
-                Slider weight = new();
-                weight.name = "Weight";
-                weight.label = "Weight";
-                weight.value = group.weight;
-                weight.lowValue = 0;
-                weight.highValue = 100;
-                weight.showInputField = false;
-                visualElement.Add(weight);
+                    Slider weight = new();
+                    weight.name = "Weight";
+                    weight.label = "Weight";
+                    weight.value = group.weight;
+                    weight.lowValue = 0;
+                    weight.highValue = 100;
+                    weight.showInputField = false;
+                    visualElement.Add(weight);
 
-                weight.RegisterValueChangedCallback(evt => group.SetTransformerWeights(evt.newValue));
+                    weight.RegisterValueChangedCallback(evt => customizer.GetCurrentCharacter().AdjustWeights(group, evt.newValue));
+                });
             }
         }
 
@@ -415,19 +440,22 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (GenderSettingSO defaultGenderSetting in CharacterManager.instance.characterRules.defaultGenders.defaultGenders)
             {
-                Button grpButton = new();
-                grpButton.name = defaultGenderSetting.Name;
-                grpButton.text = defaultGenderSetting.Name;
-                genderBoxContent.Add(grpButton);
-
-                if (character.GetCharacterGender().Name == defaultGenderSetting.Name)
+                Task.Run(() =>
                 {
-                    grpButton.AddToClassList("unity-button-selected");
-                }
+                    Button grpButton = new();
+                    grpButton.name = defaultGenderSetting.Name;
+                    grpButton.text = defaultGenderSetting.Name;
+                    genderBoxContent.Add(grpButton);
 
-                grpButton.RegisterCallback<ClickEvent>(evt => {
-                    character.SetCharacterGender(defaultGenderSetting.ConvertToGenderSettingObject());
-                    HighlightButtonInMiniGroup(evt.target as Button, genderBoxContent);
+                    if (character.GetCharacterGender().Name == defaultGenderSetting.Name)
+                    {
+                        grpButton.AddToClassList("unity-button-selected");
+                    }
+
+                    grpButton.RegisterCallback<ClickEvent>(evt => {
+                        character.SetCharacterGender(defaultGenderSetting.ConvertToGenderSettingObject());
+                        HighlightButtonInMiniGroup(evt.target as Button, genderBoxContent);
+                    });
                 });
             }
 
@@ -447,19 +475,22 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (AgeGroupSO ageGroup in CharacterManager.instance.characterRules.ageGroups.ageGroups)
             {
-                Button grpButton = new();
-                grpButton.name = ageGroup.Name;
-                grpButton.text = ageGroup.Name;
-                ageBoxContent.Add(grpButton);
-                
-                if (character.GetCharacterAge() == ageGroup)
+                Task.Run(() =>
                 {
-                    grpButton.AddToClassList("unity-button-selected");
-                }
+                    Button grpButton = new();
+                    grpButton.name = ageGroup.Name;
+                    grpButton.text = ageGroup.Name;
+                    ageBoxContent.Add(grpButton);
+                    
+                    if (character.GetCharacterAge() == ageGroup)
+                    {
+                        grpButton.AddToClassList("unity-button-selected");
+                    }
 
-                grpButton.RegisterCallback<ClickEvent>(evt => {
-                    character.SetAgeGroup(ageGroup);
-                    HighlightButtonInMiniGroup(evt.target as Button, ageBoxContent);
+                    grpButton.RegisterCallback<ClickEvent>(evt => {
+                        character.SetAgeGroup(ageGroup);
+                        HighlightButtonInMiniGroup(evt.target as Button, ageBoxContent);
+                    });
                 });
             }
         }
@@ -475,19 +506,22 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (OutfitTypeSO outfitType in CharacterManager.instance.characterRules.outfitTypes.outfitTypes)
         {
-            Button grpButton = new();
-            grpButton.name = outfitType.Name;
-            grpButton.text = outfitType.Name;
-            outfitTypeBox.Add(grpButton);
-
-            if (outfitType == currentOutfitType)
+            Task.Run(() =>
             {
-                grpButton.AddToClassList("unity-button-selected");
-            }
+                Button grpButton = new();
+                grpButton.name = outfitType.Name;
+                grpButton.text = outfitType.Name;
+                outfitTypeBox.Add(grpButton);
 
-            grpButton.RegisterCallback<ClickEvent>((evt) => {
-                GetOutfitBox(outfitType);
-                HighlightButtonInMiniGroup(evt.target as Button, outfitTypeBox);
+                if (outfitType == currentOutfitType)
+                {
+                    grpButton.AddToClassList("unity-button-selected");
+                }
+
+                grpButton.RegisterCallback<ClickEvent>((evt) => {
+                    GetOutfitBox(outfitType);
+                    HighlightButtonInMiniGroup(evt.target as Button, outfitTypeBox);
+                });
             });
         }
 
@@ -503,19 +537,22 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (SavedCharacterOutfits outfit in outfits)
         {
-            Button grpButton = new();
-            grpButton.name = $"{outfits.IndexOf(outfit)}";
-            grpButton.text = $"{outfits.IndexOf(outfit)}";
-            outfitBox.Add(grpButton);
-
-            if (outfit == currentOutfit)
+            Task.Run(() =>
             {
-                grpButton.AddToClassList("unity-button-selected");
-            }
+                Button grpButton = new();
+                grpButton.name = $"{outfits.IndexOf(outfit)}";
+                grpButton.text = $"{outfits.IndexOf(outfit)}";
+                outfitBox.Add(grpButton);
 
-            grpButton.RegisterCallback<ClickEvent>((evt) => {
-                customizer.GetCurrentCharacter().SwitchOutfit(outfit);
-                HighlightButtonInMiniGroup(evt.target as Button, outfitBox);
+                if (outfit == currentOutfit)
+                {
+                    grpButton.AddToClassList("unity-button-selected");
+                }
+
+                grpButton.RegisterCallback<ClickEvent>((evt) => {
+                    customizer.GetCurrentCharacter().SwitchOutfit(outfit);
+                    HighlightButtonInMiniGroup(evt.target as Button, outfitBox);
+                });
             });
         }
 
@@ -768,6 +805,171 @@ public class CharCustomizerUI : MonoBehaviour
 
         Color c = Color.HSVToRGB(H, S, V);
         mat.color = c;
+        outputImage.style.backgroundColor = c;
+
+        customizer.GetCurrentCharacter().RenderOutfit();
+        GenerateImages(H, S, V);
+    }
+
+    public void TexturePickerUI(ClickEvent evt, CharacterItem characterItem)
+    {
+        Button tCancel = new();
+        tCancel.AddToClassList("mini-content-group");
+        tCancel.RegisterCallback<ClickEvent>(TriggerTraitsCustomisation);
+
+        items.Clear();
+        Texture2D svTexture = new Texture2D(16, 16); 
+        Texture2D hueTexture = new Texture2D(1, 10);
+
+        bool hueDragModifyState = false;
+        bool svDragModifyState = false;
+
+        MatData mat = characterItem.matData;
+        Color.RGBToHSV(mat.patternColor, out float H, out float S, out float V);
+
+        VisualElement parent = new();
+        parent.name = $"Color Picker";
+        parent.AddToClassList("color-picker");
+        items.Add(parent);
+
+        VisualElement preview = new();
+        preview.name = $"Color Preview";
+        preview.AddToClassList("color-picker-wrapper");
+        parent.Add(preview);
+
+        Image previewImage = new();
+        previewImage.name = $"Color Preview Image";
+        previewImage.AddToClassList("color-picker-bg");
+        previewImage.image = svTexture;
+        preview.Add(previewImage);
+
+        Image hueImage = new();
+        hueImage.name = $"Color Hue Image";
+        hueImage.AddToClassList("color-picker-side");
+        hueImage.image = hueTexture;
+        preview.Add(hueImage);
+
+        Image outputImage = new();
+        outputImage.name = $"Color Output Image";
+        outputImage.AddToClassList("color-picker-side");
+        outputImage.style.backgroundColor = mat.patternColor;
+        preview.Add(outputImage);
+
+        VisualElement colorCursor = new();
+        colorCursor.name = $"Color Preview Cursor";
+        colorCursor.AddToClassList("color-picker-widget");
+        previewImage.Add(colorCursor);
+
+        VisualElement hueCursor = new();
+        hueCursor.name = $"Hue Cursor";
+        hueCursor.AddToClassList("hue-picker-widget");
+        hueImage.Add(hueCursor);
+
+        Slider hue = new();
+        hue.name = "Hue";
+        hue.label = "Hue";
+        hue.value = H;
+        hue.lowValue = 0;
+        hue.highValue = 1;
+        hue.showInputField = true;
+        parent.Add(hue);
+
+        Slider saturation = new();
+        saturation.name = "Saturation";
+        saturation.label = "Saturation";
+        saturation.value = S;
+        saturation.lowValue = 0;
+        saturation.highValue = 1;
+        saturation.showInputField = true;
+        parent.Add(saturation);
+
+        Slider value = new();
+        value.name = "Value";
+        value.label = "Value";
+        value.value = V;
+        value.lowValue = 0;
+        value.highValue = 1;
+        value.showInputField = true;
+        parent.Add(value);
+
+        hue.RegisterValueChangedCallback(evt => SetTextureHSV(evt.newValue, saturation.value, value.value, mat));
+        saturation.RegisterValueChangedCallback(evt => SetTextureHSV(hue.value, evt.newValue, value.value, mat));
+        value.RegisterValueChangedCallback(evt => SetTextureHSV(hue.value, saturation.value, evt.newValue, mat));
+        previewImage.RegisterCallback<PointerDownEvent>(evt => {
+            svDragModifyState = true;
+        });
+        previewImage.RegisterCallback<PointerMoveEvent>(evt => {
+            if (svDragModifyState)
+            {
+                SetTextureHSVByPreview(hue.value, evt.localPosition.x, evt.localPosition.y, mat);
+            }
+        });
+        previewImage.RegisterCallback<PointerLeaveEvent>(evt => {
+            if (svDragModifyState)
+            {
+                SetTextureHSVByPreview(hue.value, evt.localPosition.x, evt.localPosition.y, mat);
+            }
+        });
+
+        hueImage.RegisterCallback<PointerDownEvent>(evt => {
+            hueDragModifyState = true;
+        });
+        hueImage.RegisterCallback<PointerMoveEvent>(evt => {
+            if (hueDragModifyState)
+            {
+                SetTextureHSVByHueSlider(evt.localPosition.y, saturation.value, value.value, mat);
+            }
+        });
+        hueImage.RegisterCallback<PointerLeaveEvent>(evt => {
+            if (hueDragModifyState)
+            {
+                SetTextureHSVByHueSlider(evt.localPosition.y, saturation.value, value.value, mat);
+            }
+        });
+
+        root.RegisterCallback<PointerUpEvent>(evt => {
+            hueDragModifyState = false;
+            svDragModifyState = false;
+        });
+
+        SetTextureHSV(H, S, V, mat);
+    }
+
+    private void SetTextureHSVByPreview(float H, float mouseX, float mouseY, MatData mat)
+    {
+        VisualElement colorCursor = items.Q<VisualElement>("Color Picker").Q<VisualElement>($"Color Preview Cursor");
+        Image previewImage = items.Q<VisualElement>("Color Picker").Q<Image>($"Color Preview Image");
+
+        float height = previewImage.resolvedStyle.height - colorCursor.resolvedStyle.height - previewImage.resolvedStyle.marginBottom - previewImage.resolvedStyle.marginTop;
+        float width = previewImage.resolvedStyle.width - colorCursor.resolvedStyle.width;
+
+        float S = Mathf.Clamp(mouseX / width, 0, 1);
+        float V = Mathf.Clamp((height - mouseY) / height, 0, 1);
+
+        SetTextureHSV(H, S, V, mat);
+    }
+
+    private void SetTextureHSVByHueSlider(float mouseY, float S, float V, MatData mat)
+    {
+        VisualElement hueCursor = items.Q<VisualElement>("Color Picker").Q<VisualElement>($"Hue Cursor");
+        Image hueImage = items.Q<VisualElement>("Color Picker").Q<Image>($"Color Hue Image");
+
+        float height = hueImage.resolvedStyle.height - hueCursor.resolvedStyle.height - hueImage.resolvedStyle.marginBottom - hueImage.resolvedStyle.marginTop;
+
+        float H = Mathf.Clamp((height - mouseY) / height, 0, 1);
+        SetTextureHSV(H, S, V, mat);
+    }
+
+    public void SetTextureHSV(float H, float S, float V, MatData mat)
+    {
+        Image outputImage = items.Q<VisualElement>("Color Picker").Q<Image>($"Color Output Image");
+        Slider hue = items.Q<VisualElement>("Color Picker").Q<Slider>("Hue");
+        Slider saturation = items.Q<VisualElement>("Color Picker").Q<Slider>("Saturation");
+        Slider value = items.Q<VisualElement>("Color Picker").Q<Slider>("Value");
+        hue.value = H; saturation.value = S; value.value = V;
+
+        Color c = Color.HSVToRGB(H, S, V);
+        mat.patternColor = c;
         outputImage.style.backgroundColor = c;
 
         customizer.GetCurrentCharacter().RenderOutfit();

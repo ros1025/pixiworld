@@ -56,7 +56,7 @@ public class Character
 
             if (nameFragments[0] == "m")
             {
-                TransformGroups blendShape = new TransformGroups(name, j, weight, this);
+                TransformGroups blendShape = new TransformGroups(name, j, weight);
                 shapeKeys.Add(blendShape);
             }
             j++;
@@ -357,5 +357,12 @@ public class Character
         }
 
         return items;
+    }
+
+    public void AdjustWeights(TransformGroups transformGroup, float weight)
+    {
+        transformGroup.SetTransformerWeights(weight);
+        attributes.body.SetBlendShapeWeight(transformGroup.index, transformGroup.weight);
+        SetWeightForFeatures(transformGroup);
     }
 }
