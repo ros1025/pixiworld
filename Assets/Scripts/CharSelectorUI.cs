@@ -55,16 +55,19 @@ public class CharSelectorUI : MonoBehaviour
 
         for (int i = 0; i < characters.Count; i++)
         {
-            Character character = characters[i]; 
-
-            if (i < charLimit)
+            Task.Run(() =>
             {
-                AddCharacterButton(character);
-            }
+                Character character = characters[i]; 
+
+                if (i < charLimit)
+                {
+                    AddCharacterButton(character);
+                }
+            });
         }
     }
 
-    private async Awaitable AddCharacterButton(Character character)
+    private void AddCharacterButton(Character character)
     {
         Button button = new();
         button.name = character.GetCharacterName();

@@ -2730,6 +2730,7 @@ Terrain:
   m_AllowAutoConnect: 1
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
+  m_EnableHeightmapLODFrustumCulling: 1
   m_TreeMotionVectorModeOverride: 3
 --- !u!4 &1898842246
 Transform:
@@ -3288,6 +3289,10 @@ PrefabInstance:
     - target: {fileID: 6318165541734854989, guid: c707dd9ff89ea8d4d96dbacd76ef87bb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8794301572159040097, guid: c707dd9ff89ea8d4d96dbacd76ef87bb, type: 3}
+      propertyPath: disableDataPersistence
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

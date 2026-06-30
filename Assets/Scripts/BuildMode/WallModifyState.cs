@@ -37,7 +37,7 @@ public class WallModifyState : IBuildingState
             return;
         for (int i = 0; i < points.Count; i++)
         {
-            posList.Add(grid.WorldToLocal(points[i]));
+            posList.Add(points[i]);
         }
         originalPosList = posList;
         CalculateLength();
@@ -75,7 +75,7 @@ public class WallModifyState : IBuildingState
         if (previewSystem.GetModifyState() == true)
         {
             int index = previewSystem.expanders.IndexOf(previewSystem.selectedCursor);
-            posList[index] = gridPosition;
+            posList[index] = grid.LocalToWorld(gridPosition);
             CalculateLength();
             previewSystem.ModifyPointer(index, grid.LocalToWorld(gridPosition));
 
@@ -112,7 +112,7 @@ public class WallModifyState : IBuildingState
         List<Vector3> displayPos = new();
         for (int i = 0; i < posList.Count; i++)
         {
-            displayPos.Add(grid.LocalToWorld(posList[i]));
+            displayPos.Add(posList[i]);
         }
 
         materials.Clear();

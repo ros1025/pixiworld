@@ -32,6 +32,8 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float touchRotateScale = 0.1f;
     [SerializeField]
+    private float zoomMoveScale = 0.1f;
+    [SerializeField]
     private bool rotateCameraMovement;
     [SerializeField]
     private float defaultZoom;
@@ -148,13 +150,15 @@ public class CameraController : MonoBehaviour
                 }
                 Vector2 currentTouchPosition = touch;
                 Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
+                float cameraMoveScale = framingTransposer.CameraDistance * zoomMoveScale;
+
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, -touchDelta.y * touchPosScale, 0));
+                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale * cameraMoveScale, -touchDelta.y * touchPosScale * cameraMoveScale, 0));
                 }
                 else
                 {
-                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale, 0, -touchDelta.y * touchPosScale));
+                    targetBox.transform.Translate(new Vector3(-touchDelta.x * touchPosScale * cameraMoveScale, 0, -touchDelta.y * touchPosScale * cameraMoveScale));
                 }
 
                 previousTouchPosition = currentTouchPosition;
@@ -196,13 +200,15 @@ public class CameraController : MonoBehaviour
         {
             if (posAdjustable == true)
             {
+                float cameraMoveScale = framingTransposer.CameraDistance * zoomMoveScale;
+
                 if (rotateCameraMovement)
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, -delta.y * posScale, 0));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale * cameraMoveScale, -delta.y * posScale * cameraMoveScale, 0));
                 }
                 else
                 {
-                    targetBox.transform.Translate(new Vector3(-delta.x * posScale, 0, -delta.y * posScale));
+                    targetBox.transform.Translate(new Vector3(-delta.x * posScale * cameraMoveScale, 0, -delta.y * posScale * cameraMoveScale));
                 }
             }
             AdjustCameraBox();

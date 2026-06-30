@@ -125,8 +125,6 @@ public class RoadMapping : MonoBehaviour
         int count = 0;
         //List<Vector3> points = new List<Vector3>();
         List<Intersection.JunctionEdge> junctionEdges = new List<Intersection.JunctionEdge>();
-
-        Vector3 center = new Vector3();
         foreach (Intersection.JunctionInfo junction in intersection.GetJunctions())
         {
             int splineIndex = junction.GetSplineIndex(m_SplineContainer);
@@ -142,12 +140,12 @@ public class RoadMapping : MonoBehaviour
                 junctionEdges.Add(new Intersection.JunctionEdge(p2, p1));
             }
 
-            center += p1;
-            center += p2;
             count++;
         }
 
-        center /= (junctionEdges.Count * 2);
+        Vector3 center = CalculateIntersectionCenter(intersection);
+
+        Vector3 sDir = junctionEdges[0].center - center;
 
         junctionEdges.Sort((x, y) => {
             Vector3 xDir = x.center - center;
@@ -171,25 +169,22 @@ public class RoadMapping : MonoBehaviour
         });
 
         List<Vector3> curvePoints = new List<Vector3>();
-        //Additional points
-        Vector3 mid;
-        Vector3 c;
-        Vector3 b;
-        Vector3 a;
-        BezierCurve curve;
+
         for (int j = 1; j <= junctionEdges.Count; j++)
         {
-            a = junctionEdges[j - 1].left;
+            Intersection.JunctionEdge bJunction = (j < junctionEdges.Count) ? junctionEdges[j] : junctionEdges[0];
+            Vector3 a = junctionEdges[j - 1].left;
             curvePoints.Add(a);
-            b = (j < junctionEdges.Count) ? junctionEdges[j].right : junctionEdges[0].right;
-            intersection.curves[j - 1] = 0.5f + 
-                                        (0.1f * Mathf.Sin(Vector3.SignedAngle(junctionEdges[j - 1].center - center, ((j < junctionEdges.Count) ? junctionEdges[j].center : junctionEdges[0].center) - center, Vector3.down)));
-            mid = Vector3.Lerp(a, b, 0.5f);
+            Vector3 b = bJunction.right;
+            float curves = 0.5f + (0.1f * Mathf.Sin(Vector3.SignedAngle(bJunction.center - center, junctionEdges[j - 1].center - center, Vector3.up) * (Mathf.PI/180f)));
+            intersection.curves[j - 1] = curves;
+            Vector3 mid = Vector3.Lerp(a, b, 0.5f);
             Vector3 dir = center - mid;
             mid = mid - dir;
-            c = Vector3.Lerp(mid, center, intersection.curves[j - 1]);
+            
+            Vector3 c = Vector3.Lerp(mid, center, curves);
 
-            curve = new BezierCurve(a, c, b);
+            BezierCurve curve = new BezierCurve(a, c, b);
             for (float t = 0f; t < 1f; t += 0.2f)
             {
                 Vector3 pos = CurveUtility.EvaluatePosition(curve, t);
@@ -276,53 +271,6 @@ public class RoadMapping : MonoBehaviour
         {
             BuildIntersectionMesh(i);
         }
-    }
-
-    //remove points from road after the intersection and place them into a new road
-    private void FilterPoints(Spline road, Spline road2, List<Vector3> points, Dictionary<Vector3, List<BezierKnot>> pointMap, float ratio, float width, out List<Vector3> points2, out Dictionary<Vector3, List<BezierKnot>> pointMap2, out bool splitSpline)
-    {
-        List<BezierKnot> knotList = new(); List<BezierKnot> knotList2 = new();
-        List<Vector3> removePoints = new();
-        points2 = new(); pointMap2 = new();
-        splitSpline = true;
-        float widthT = width / road.GetLength();
-
-        foreach (Vector3 point in points)
-        {
-            List<bool> isAhead = new();
-            foreach (BezierKnot roadKnot in pointMap[point])
-            {
-                int j = road.IndexOf(roadKnot);
-                float knotT = road.ConvertIndexUnit(j, PathIndexUnit.Knot, PathIndexUnit.Normalized);
-                if (knotT > ratio + widthT)
-                {
-                    knotList.Add(roadKnot);
-                    isAhead.Add(true);
-                    if (pointMap[point].IndexOf(roadKnot) > 0 && isAhead[0] == false)
-                    {
-                        splitSpline = false;
-                    }
-                }
-                else
-                {
-                    knotList2.Add(roadKnot);
-                    removePoints.Add(point);
-                    if (!points2.Contains(point))
-                    {
-                        points2.Add(point);
-                    }
-                    if (!pointMap2.ContainsKey(point))
-                    {
-                        pointMap2.Add(point, pointMap[point]);
-                    }
-                    isAhead.Add(false);
-                }
-            }
-        }
-        foreach (Vector3 point in removePoints) { points.Remove(point); pointMap.Remove(point); }
-        road.Clear(); road2.Clear();
-        foreach (BezierKnot roadKnot in knotList) { road.Add(roadKnot); }
-        foreach (BezierKnot roadKnot in knotList2) { road2.Add(roadKnot); }
     }
 
     private void FilterPoints(Spline road, Spline road2, List<Vector3> points, float ratio, int width, out List<Vector3> points2, out Vector3 dir1, out Vector3 dir2)
@@ -622,11 +570,11 @@ public class RoadMapping : MonoBehaviour
             Vector3 tangent1 = intersection.junctions[i].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[i].spline.EvaluateTangent(1));
             Vector3 tangent2 = intersection.junctions[0].knotIndex == 0 ? -Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(0)) : Vector3.Normalize(intersection.junctions[0].spline.EvaluateTangent(1));
             Vector3 localCenter = GetPointCenter((Vector3)intersection.junctions[i].knot.Position, tangent1, (Vector3)intersection.junctions[0].knot.Position, tangent2);
-            Debug.Log($"{(Vector3)intersection.junctions[i].knot.Position}:{tangent1} {(Vector3)intersection.junctions[0].knot.Position}:{tangent2} || Center: {localCenter}");
+            //Debug.Log($"{(Vector3)intersection.junctions[i].knot.Position}:{tangent1} {(Vector3)intersection.junctions[0].knot.Position}:{tangent2} || Center: {localCenter}");
             center += localCenter;
         }
 
-        center /= (intersection.GetJunctions().Count() - 1);
+        center /= intersection.GetJunctions().Count() - 1;
 
         return transform.TransformPoint(placementSystem.SmoothenPosition(center));
     }
@@ -790,7 +738,7 @@ public class RoadMapping : MonoBehaviour
                         || (Mathf.Abs(hit.point.x - item.Item2.x) < Mathf.Abs(item.Item3.x) && Mathf.Abs(hit.point.y - item.Item2.y) < Mathf.Abs(item.Item3.y) && Mathf.Abs(hit.point.z - item.Item2.z) < Mathf.Abs(item.Item3.z))
                     )) == -1)
                     {
-                        Debug.Log($"{roads.IndexOf(roadJ)} {hit.point} {intersectingSplinePoint}");
+                        //Debug.Log($"{roads.IndexOf(roadJ)} {hit.point} {intersectingSplinePoint}");
 
                         //insert incoming spline
                         if (EvaluateT(spline, intersectingSplinePoint + (dir1.normalized * (width + 0.5f))) < 1 && EvaluateT(spline, intersectingSplinePoint - (dir1.normalized * (width + 0.5f))) > 0)
@@ -883,7 +831,7 @@ public class RoadMapping : MonoBehaviour
                         knotsList.Add(internalKnotsList);
                         hitRemoveList.Add((roadJ.road, intersectingSplinePoint, (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 1.5f, 0.1f, width + 1.5f)));
                         hitRemoveList.Add((roadJ.road, roadJ.points[0], (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 1.5f)));
-                        Debug.Log(roadJ.points[0] + (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 0.5f));
+                        //Debug.Log(roadJ.points[0] + (Quaternion)roadJ.road[^1].Rotation * new Vector3(width + 0.5f, 0.1f, 0.5f));
 
                         BuildRoadMesh(roads.IndexOf(roadJ));
                     }
@@ -1046,6 +994,8 @@ public class RoadMapping : MonoBehaviour
 
                     intersection.junctions[intersection.junctions.FindIndex(item => item.spline == spline)] = newJunction;
                 }
+
+                BuildIntersectionMesh(intersections.IndexOf(intersection));
             }
         }
 
@@ -1288,6 +1238,7 @@ public class RoadMapping : MonoBehaviour
 
     private void DeleteRoad(Roads road)
     {
+        List<int> rerenderIntersection = new();
         foreach (Intersection intersection in intersections)
         {
             List<Intersection.JunctionInfo> removeJunctions = new();
@@ -1296,12 +1247,17 @@ public class RoadMapping : MonoBehaviour
                 if (junction.spline == road.road)
                 {
                     removeJunctions.Add(junction);
+                    rerenderIntersection.Add(intersections.IndexOf(intersection));
                 }
             }
             foreach (Intersection.JunctionInfo junction in removeJunctions)
             {
                 intersection.junctions.Remove(junction);
             }
+        }
+        foreach (int index in rerenderIntersection)
+        {
+            BuildIntersectionMesh(index);
         }
         m_SplineContainer.RemoveSpline(road.road);
         Destroy(road.collider.gameObject);
