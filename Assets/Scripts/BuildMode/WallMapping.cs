@@ -597,9 +597,7 @@ public class WallMapping : MonoBehaviour
             }
             else if (Math.Sign(localAngle) == Math.Sign(angle))
             {
-                int vertSteps = ((i + 2) % remainingVerts.Count > i % remainingVerts.Count) ? remainingVerts.Count - (((i + 2) % remainingVerts.Count) - (i % remainingVerts.Count)) : ((i + 2) % remainingVerts.Count) - (i % remainingVerts.Count);
-
-                for (int j = 0; j < vertSteps; j++)
+                for (int j = 0; j < remainingVerts.Count - 2; j++)
                 {
                     Vector3 pointJ = remainingVerts[(i + j + 2) % remainingVerts.Count];
 
@@ -611,7 +609,7 @@ public class WallMapping : MonoBehaviour
                         break;
                     }
 
-                    if (j == vertSteps - 1)
+                    if (j == remainingVerts.Count - 3)
                     {
                         tris.AddRange(new List<int> {totalVerts.IndexOf(point1), totalVerts.IndexOf(point2), totalVerts.IndexOf(point3)});
                         remainingVerts.RemoveAt((i + 1) % remainingVerts.Count);
@@ -1022,7 +1020,7 @@ public class WallMapping : MonoBehaviour
                         {
                             Vector3 nearestPoint = new();
                             Vector3 roomAnchorPoint = room.points[0];
-                            bool isEncapsulated = false;
+                            bool isEncapsulated = true;
 
                             for (int j = 0; j < room.points.Count; j++)
                             {
@@ -1030,9 +1028,12 @@ public class WallMapping : MonoBehaviour
                                 Vector3 p2 = room.points[(j + 1) % room.points.Count];
 
                                 Vector3 c1 = GetNearestPoint(p1, selectedRoom.points);
-                                if (CheckPointEncapsulated(c1, room.points, angle))
+                                if (!CheckPointEncapsulated(c1, room.points, angle))
                                 {
-                                    isEncapsulated = true;
+                                    isEncapsulated = false;
+                                }
+                                else
+                                {
                                     if (p1 == room.points[0] || Vector3.Distance(p1, c1) < Vector3.Distance(nearestPoint, roomAnchorPoint))
                                     {
                                         nearestPoint = c1;
