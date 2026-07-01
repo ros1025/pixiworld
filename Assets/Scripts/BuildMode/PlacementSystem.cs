@@ -614,26 +614,22 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         if (inputManager.IsPointerOverUI())
             return;
         GetGridPosition();
-        if (preview is IStaticPreviewSystem)
+        if (preview.CheckExpansionHandles() == true)
         {
-            IStaticPreviewSystem staticPreview = (IStaticPreviewSystem)preview;
-            if (staticPreview.CheckExpansionHandles() == true)
-            {
-                staticPreview.SetExpansionState(true);
-                cameraController.posAdjustable = false;
-                inputManager.OnMoved += PingUpdate;
-            }
-            else if (staticPreview.CheckPreviewObject() == true)
-            {
-                staticPreview.SetExpansionState(false);
-                cameraController.posAdjustable = false;
-                inputManager.OnMoved += PingUpdate;
-                inputManager.OnRightClick += () => 
-                { 
-                if (itemMode == Door || itemMode == Window)
-                    ChangeRotation(180); 
-                else ChangeRotation(15); } ;
-            }
+            preview.SetModifyState(true);
+            cameraController.posAdjustable = false;
+            inputManager.OnMoved += PingUpdate;
+        }
+        else if (preview.CheckPreviewObject() == true)
+        {
+            preview.SetModifyState(false);
+            cameraController.posAdjustable = false;
+            inputManager.OnMoved += PingUpdate;
+            inputManager.OnRightClick += () => 
+            { 
+            if (itemMode == Door || itemMode == Window)
+                ChangeRotation(180); 
+            else ChangeRotation(15); } ;
         }
         else
             return;
@@ -646,27 +642,23 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         if (inputManager.IsPointerOverUI())
             return;
         GetGridPosition();
-        if (preview is IDynamicPreviewSystem)
+        if (preview.CheckExpansionHandles() == true)
         {
-            IDynamicPreviewSystem dynamicPreview = (IDynamicPreviewSystem)preview;
-            if (dynamicPreview.CheckExpansionHandles() == true)
-            {
-                dynamicPreview.SetModifyState(true);
-                cameraController.posAdjustable = false;
-                inputManager.OnMoved += PingUpdate;
-            }
-            else if (dynamicPreview.CheckPreviewSplines() == true)
-            {
-                dynamicPreview.SetModifyState(false);
-                cameraController.posAdjustable = false;
-                PingUpdate();
-            }
-            else
-            {
-                dynamicPreview.SetModifyState(false);
-                cameraController.posAdjustable = false;
-                PingUpdate();
-            }
+            preview.SetModifyState(true);
+            cameraController.posAdjustable = false;
+            inputManager.OnMoved += PingUpdate;
+        }
+        else if (preview.CheckPreviewObject() == true)
+        {
+            preview.SetModifyState(false);
+            cameraController.posAdjustable = false;
+            PingUpdate();
+        }
+        else
+        {
+            preview.SetModifyState(false);
+            cameraController.posAdjustable = false;
+            PingUpdate();
         }
     }
 

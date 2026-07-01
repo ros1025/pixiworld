@@ -243,7 +243,7 @@ public class WallCreatePreview : IDynamicPreviewSystem
         return ans;
     }
 
-    public bool CheckPreviewSplines()
+    public bool CheckPreviewObject()
     {
         if (input.RayHitObject(system.dynamicCollider.gameObject))
         {

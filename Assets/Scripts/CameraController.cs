@@ -34,6 +34,10 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float zoomMoveScale = 0.1f;
     [SerializeField]
+    private int clipFactor = 10;
+    [SerializeField]
+    private int baseCamClip = 10;
+    [SerializeField]
     private bool rotateCameraMovement;
     [SerializeField]
     private float defaultZoom;
@@ -61,14 +65,13 @@ public class CameraController : MonoBehaviour
     void Awake()
     {
         framingTransposer = cameraObject.GetComponent<CinemachinePositionComposer>();
-        framingTransposer.CameraDistance = defaultZoom;
         targetBox.transform.position = defaultPos;
         yawAdjustable = true; posAdjustable = true;
         ResetTouchDefaults();
 
         system = new BuilderInputs();
-
         system.camera.Enable();
+
         system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<float>());
         system.camera.move.performed += _ =>
         {
@@ -100,6 +103,7 @@ public class CameraController : MonoBehaviour
             }
         };
 
+        AdjustCameraDistance(defaultZoom);
         AdjustCameraBox();
     }
 
@@ -246,6 +250,7 @@ public class CameraController : MonoBehaviour
             framingTransposer.CameraDistance = maxZoom;
         else
             framingTransposer.CameraDistance = minZoom;
+        vcam.Lens.FarClipPlane = (framingTransposer.CameraDistance * clipFactor) + baseCamClip;
         AdjustCameraBox();
     }
 

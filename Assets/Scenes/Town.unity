@@ -653,7 +653,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 150
+  far clip plane: 210
   field of view: 60.000004
   orthographic: 0
   orthographic size: 5
@@ -3155,6 +3155,9 @@ MonoBehaviour:
   yawScale: 0.25
   rotateScale: 0.25
   touchRotateScale: 0.25
+  zoomMoveScale: 0.1
+  clipFactor: 100
+  baseCamClip: 10
   rotateCameraMovement: 0
   defaultZoom: 20
   defaultPos: {x: 0, y: 0, z: 0}
@@ -3222,7 +3225,7 @@ MonoBehaviour:
     FieldOfView: 60.000004
     OrthographicSize: 5
     NearClipPlane: 0.3
-    FarClipPlane: 150
+    FarClipPlane: 210
     Dutch: 0
     ModeOverride: 0
     PhysicalProperties:
