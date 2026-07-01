@@ -73,7 +73,7 @@ public class ObjectPlacementPreview : IStaticPreviewSystem
         return previewPos;
     }
 
-    public void SetExpansionState(bool state)
+    public void SetModifyState(bool state)
     {
         return;
     }

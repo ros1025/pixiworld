@@ -230,7 +230,7 @@ public class RoadIntersectionModifyPreview : IDynamicPreviewSystem
         StopPreview();
     }
 
-    public bool CheckPreviewSplines()
+    public bool CheckPreviewObject()
     {
         return false;
     }

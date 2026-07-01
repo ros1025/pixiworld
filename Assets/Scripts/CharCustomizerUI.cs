@@ -87,14 +87,11 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ClothingCategorySO category in clothingCategoriesDB.clothingCategories)
         {
-            Task.Run(() =>
-            {
-                Button catButton = new();
-                catButton.name = category.name;
-                catButton.AddToClassList("category-button");
-                catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterClothingChoice, category);
-                categories.Add(catButton);
-            });
+            Button catButton = new();
+            catButton.name = category.name;
+            catButton.AddToClassList("category-button");
+            catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterClothingChoice, category);
+            categories.Add(catButton);
         }
 
         categories.scrollOffset = new Vector2(0, 0);
@@ -119,14 +116,11 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ObjectCategory subcategory in category.subcategories)
         {
-            Task.Run(() =>
-            {
-                Button subCatButton = new();
-                subCatButton.name = subcategory.name;
-                subCatButton.AddToClassList("category-button");
-                subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterClothingChoice, new List<ObjectCategory> {subcategory});
-                subcategories.Add(subCatButton);
-            });
+            Button subCatButton = new();
+            subCatButton.name = subcategory.name;
+            subCatButton.AddToClassList("category-button");
+            subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterClothingChoice, new List<ObjectCategory> {subcategory});
+            subcategories.Add(subCatButton);
         }
 
         FilterClothingChoice(category.subcategories);
@@ -152,10 +146,7 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (ClothingSO clothing in clothes)
             {
-                Task.Run(() =>
-                {
-                    AddClothingButton(elements, clothing);
-                });
+                AddClothingButton(elements, clothing);
             }
 
             if (clothes.Count == 0)
@@ -205,14 +196,11 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ClothingCategorySO category in bodyFeatureCategoriesDB.clothingCategories)
         {
-            Task.Run(() =>
-            {
-                Button catButton = new();
-                catButton.name = category.name;
-                catButton.AddToClassList("category-button");
-                catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterBodyItemChoice, category);
-                categories.Add(catButton);
-            });
+            Button catButton = new();
+            catButton.name = category.name;
+            catButton.AddToClassList("category-button");
+            catButton.RegisterCallback<ClickEvent, ClothingCategorySO>(FilterBodyItemChoice, category);
+            categories.Add(catButton);
         }
 
         categories.scrollOffset = new Vector2(0, 0);
@@ -237,14 +225,11 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (ObjectCategory subcategory in category.subcategories)
         {
-            Task.Run(() =>
-            {
-                Button subCatButton = new();
-                subCatButton.name = subcategory.name;
-                subCatButton.AddToClassList("category-button");
-                subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterBodyItemChoice, new List<ObjectCategory> {subcategory});
-                subcategories.Add(subCatButton);
-            });
+            Button subCatButton = new();
+            subCatButton.name = subcategory.name;
+            subCatButton.AddToClassList("category-button");
+            subCatButton.RegisterCallback<ClickEvent, List<ObjectCategory>>(FilterBodyItemChoice, new List<ObjectCategory> {subcategory});
+            subcategories.Add(subCatButton);
         }
 
         FilterBodyItemChoice(category.subcategories);
@@ -270,10 +255,7 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (BodyFeatureSO bodyFeature in clothes)
             {
-                Task.Run(() =>
-                {
-                    AddBodyItemButton(elements, bodyFeature);
-                });
+                AddBodyItemButton(elements, bodyFeature);
             }
 
             if (clothes.Count == 0)
@@ -327,35 +309,32 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (CharacterItem cloth in clothingList)
             {
-                Task.Run(() =>
-                {
-                    VisualElement main = new();
-                    main.name = $"{cloth.clothingItem.Name}";
-                    main.AddToClassList("content-group-vertical");
-                    items.Add(main);
+                VisualElement main = new();
+                main.name = $"{cloth.clothingItem.Name}";
+                main.AddToClassList("content-group-vertical");
+                items.Add(main);
 
-                    Label label = new();
-                    label.text = $"Clothing {cloth.clothingItem.Name}";
-                    label.AddToClassList("group-label");
-                    main.Add(label);
+                Label label = new();
+                label.text = $"Clothing {cloth.clothingItem.Name}";
+                label.AddToClassList("group-label");
+                main.Add(label);
 
-                    VisualElement miniBox = new();
-                    miniBox.AddToClassList("mini-content-group");
-                    main.Add(miniBox);
+                VisualElement miniBox = new();
+                miniBox.AddToClassList("mini-content-group");
+                main.Add(miniBox);
 
-                    Button color = new();
-                    color.name = "Colour";
-                    color.AddToClassList("texture-button");
-                    color.style.backgroundColor = cloth.matData.color;
-                    color.RegisterCallback<ClickEvent, CharacterItem>(ColorPickerUI, cloth);
-                    miniBox.Add(color);
+                Button color = new();
+                color.name = "Colour";
+                color.AddToClassList("texture-button");
+                color.style.backgroundColor = cloth.matData.color;
+                color.RegisterCallback<ClickEvent, CharacterItem>(ColorPickerUI, cloth);
+                miniBox.Add(color);
 
-                    Button text = new();
-                    text.name = "Texture";
-                    text.AddToClassList("texture-button");
-                    text.RegisterCallback<ClickEvent, CharacterItem>(TexturePickerUI, cloth);
-                    miniBox.Add(text);
-                });
+                Button text = new();
+                text.name = "Texture";
+                text.AddToClassList("texture-button");
+                text.RegisterCallback<ClickEvent, CharacterItem>(TexturePickerUI, cloth);
+                miniBox.Add(text);
             }
         }
     }
@@ -377,30 +356,27 @@ public class CharCustomizerUI : MonoBehaviour
             List<TransformGroups> transformGroups = customizer.GetTransformGroups();
             foreach (TransformGroups group in transformGroups)
             {
-                Task.Run(() =>
-                {
-                    VisualElement visualElement = new();
-                    visualElement.name = group.name;
-                    visualElement.AddToClassList("content-group-vertical");
-                    items.Add(visualElement);
+                VisualElement visualElement = new();
+                visualElement.name = group.name;
+                visualElement.AddToClassList("content-group-vertical");
+                items.Add(visualElement);
 
-                    Label label = new();
-                    string displayName = group.name.Split("_")[1].Replace("-", " ");
-                    label.text = displayName;
-                    label.AddToClassList("group-label");
-                    visualElement.Add(label);
+                Label label = new();
+                string displayName = group.name.Split("_")[1].Replace("-", " ");
+                label.text = displayName;
+                label.AddToClassList("group-label");
+                visualElement.Add(label);
 
-                    Slider weight = new();
-                    weight.name = "Weight";
-                    weight.label = "Weight";
-                    weight.value = group.weight;
-                    weight.lowValue = 0;
-                    weight.highValue = 100;
-                    weight.showInputField = false;
-                    visualElement.Add(weight);
+                Slider weight = new();
+                weight.name = "Weight";
+                weight.label = "Weight";
+                weight.value = group.weight;
+                weight.lowValue = 0;
+                weight.highValue = 100;
+                weight.showInputField = false;
+                visualElement.Add(weight);
 
-                    weight.RegisterValueChangedCallback(evt => customizer.GetCurrentCharacter().AdjustWeights(group, evt.newValue));
-                });
+                weight.RegisterValueChangedCallback(evt => customizer.GetCurrentCharacter().AdjustWeights(group, evt.newValue));
             }
         }
 
@@ -440,22 +416,19 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (GenderSettingSO defaultGenderSetting in CharacterManager.instance.characterRules.defaultGenders.defaultGenders)
             {
-                Task.Run(() =>
+                Button grpButton = new();
+                grpButton.name = defaultGenderSetting.Name;
+                grpButton.text = defaultGenderSetting.Name;
+                genderBoxContent.Add(grpButton);
+
+                if (character.GetCharacterGender().Name == defaultGenderSetting.Name)
                 {
-                    Button grpButton = new();
-                    grpButton.name = defaultGenderSetting.Name;
-                    grpButton.text = defaultGenderSetting.Name;
-                    genderBoxContent.Add(grpButton);
+                    grpButton.AddToClassList("unity-button-selected");
+                }
 
-                    if (character.GetCharacterGender().Name == defaultGenderSetting.Name)
-                    {
-                        grpButton.AddToClassList("unity-button-selected");
-                    }
-
-                    grpButton.RegisterCallback<ClickEvent>(evt => {
-                        character.SetCharacterGender(defaultGenderSetting.ConvertToGenderSettingObject());
-                        HighlightButtonInMiniGroup(evt.target as Button, genderBoxContent);
-                    });
+                grpButton.RegisterCallback<ClickEvent>(evt => {
+                    character.SetCharacterGender(defaultGenderSetting.ConvertToGenderSettingObject());
+                    HighlightButtonInMiniGroup(evt.target as Button, genderBoxContent);
                 });
             }
 
@@ -475,22 +448,19 @@ public class CharCustomizerUI : MonoBehaviour
 
             foreach (AgeGroupSO ageGroup in CharacterManager.instance.characterRules.ageGroups.ageGroups)
             {
-                Task.Run(() =>
+                Button grpButton = new();
+                grpButton.name = ageGroup.Name;
+                grpButton.text = ageGroup.Name;
+                ageBoxContent.Add(grpButton);
+                
+                if (character.GetCharacterAge() == ageGroup)
                 {
-                    Button grpButton = new();
-                    grpButton.name = ageGroup.Name;
-                    grpButton.text = ageGroup.Name;
-                    ageBoxContent.Add(grpButton);
-                    
-                    if (character.GetCharacterAge() == ageGroup)
-                    {
-                        grpButton.AddToClassList("unity-button-selected");
-                    }
+                    grpButton.AddToClassList("unity-button-selected");
+                }
 
-                    grpButton.RegisterCallback<ClickEvent>(evt => {
-                        character.SetAgeGroup(ageGroup);
-                        HighlightButtonInMiniGroup(evt.target as Button, ageBoxContent);
-                    });
+                grpButton.RegisterCallback<ClickEvent>(evt => {
+                    character.SetAgeGroup(ageGroup);
+                    HighlightButtonInMiniGroup(evt.target as Button, ageBoxContent);
                 });
             }
         }
@@ -506,22 +476,19 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (OutfitTypeSO outfitType in CharacterManager.instance.characterRules.outfitTypes.outfitTypes)
         {
-            Task.Run(() =>
+            Button grpButton = new();
+            grpButton.name = outfitType.Name;
+            grpButton.text = outfitType.Name;
+            outfitTypeBox.Add(grpButton);
+
+            if (outfitType == currentOutfitType)
             {
-                Button grpButton = new();
-                grpButton.name = outfitType.Name;
-                grpButton.text = outfitType.Name;
-                outfitTypeBox.Add(grpButton);
+                grpButton.AddToClassList("unity-button-selected");
+            }
 
-                if (outfitType == currentOutfitType)
-                {
-                    grpButton.AddToClassList("unity-button-selected");
-                }
-
-                grpButton.RegisterCallback<ClickEvent>((evt) => {
-                    GetOutfitBox(outfitType);
-                    HighlightButtonInMiniGroup(evt.target as Button, outfitTypeBox);
-                });
+            grpButton.RegisterCallback<ClickEvent>((evt) => {
+                GetOutfitBox(outfitType);
+                HighlightButtonInMiniGroup(evt.target as Button, outfitTypeBox);
             });
         }
 
@@ -537,22 +504,19 @@ public class CharCustomizerUI : MonoBehaviour
 
         foreach (SavedCharacterOutfits outfit in outfits)
         {
-            Task.Run(() =>
+            Button grpButton = new();
+            grpButton.name = $"{outfits.IndexOf(outfit)}";
+            grpButton.text = $"{outfits.IndexOf(outfit)}";
+            outfitBox.Add(grpButton);
+
+            if (outfit == currentOutfit)
             {
-                Button grpButton = new();
-                grpButton.name = $"{outfits.IndexOf(outfit)}";
-                grpButton.text = $"{outfits.IndexOf(outfit)}";
-                outfitBox.Add(grpButton);
+                grpButton.AddToClassList("unity-button-selected");
+            }
 
-                if (outfit == currentOutfit)
-                {
-                    grpButton.AddToClassList("unity-button-selected");
-                }
-
-                grpButton.RegisterCallback<ClickEvent>((evt) => {
-                    customizer.GetCurrentCharacter().SwitchOutfit(outfit);
-                    HighlightButtonInMiniGroup(evt.target as Button, outfitBox);
-                });
+            grpButton.RegisterCallback<ClickEvent>((evt) => {
+                customizer.GetCurrentCharacter().SwitchOutfit(outfit);
+                HighlightButtonInMiniGroup(evt.target as Button, outfitBox);
             });
         }
 

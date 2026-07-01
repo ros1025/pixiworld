@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -112,6 +113,7 @@ public class BuildModeMenu : MonoBehaviour
         button.text = label;
         button.AddToClassList("tools-button");
         categories.Add(button);
+        Debug.Log(type.Name);
         button.RegisterCallback<ClickEvent, ObjectCategory>(ShowCategoriesOnClick, type);
     }
 

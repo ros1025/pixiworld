@@ -131,7 +131,7 @@ public class ZoneSelectionPreview : IStaticPreviewSystem
         return previewSize;
     }
 
-    public void SetExpansionState(bool state)
+    public void SetModifyState(bool state)
     {
         this.expand = state;
     }

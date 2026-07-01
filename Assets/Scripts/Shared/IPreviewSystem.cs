@@ -8,16 +8,17 @@ public interface IPreviewSystem
     Vector3 GetPreviewPosition();
     Vector2Int GetPreviewSize();
     GameObject GetPreviewObject();
+    bool CheckExpansionHandles();
+    bool CheckPreviewObject();
+    void SetModifyState(bool state);
     void Deselect();
 }
 
 public interface IStaticPreviewSystem : IPreviewSystem
 {
     void UpdatePreview(Vector3 pos, Vector2Int size, int cost, float rotation);
-    bool CheckPreviewObject();
-    bool CheckExpansionHandles();
     bool GetExpansionState();
-    void SetExpansionState(bool state);
+    //void SetExpansionState(bool state);
 }
 
 public interface IDynamicPreviewSystem : IPreviewSystem
@@ -26,8 +27,5 @@ public interface IDynamicPreviewSystem : IPreviewSystem
     void AddPoint(int index, Vector3 pos);
     void DeletePointer(int index);
     void ClearPointer();
-    bool CheckPreviewSplines();
-    bool CheckExpansionHandles();
-    void SetModifyState(bool state);
     bool GetModifyState();
 }

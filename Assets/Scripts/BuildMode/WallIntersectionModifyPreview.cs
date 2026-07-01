@@ -233,7 +233,7 @@ public class WallIntersectionModifyPreview : IDynamicPreviewSystem
         StopPreview();
     }
 
-    public bool CheckPreviewSplines()
+    public bool CheckPreviewObject()
     {
         return false;
     }
