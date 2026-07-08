@@ -48,6 +48,7 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
     [SerializeField] public  MeshRenderer dynamicRenderer;
     [SerializeField] public MeshCollider dynamicCollider;
     [SerializeField] public GameObject expanderParent;
+    [SerializeField] private Terrain terrain;
     public GameObject cellIndicator;
 
     private Vector3 gridPosition = Vector3.zero;
@@ -87,7 +88,20 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         gridVisualization = mainGridPlane;
         GoToMainMap();
         inMapMode = true;
-        gridSnap = true;
+        gridSnap = true;      
+
+        /*  
+        Texture2D heightTex = new Texture2D(terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution);
+        for (int i = 0; i < terrain.terrainData.heightmapResolution; i++)
+        {
+            for (int j = 0; j < terrain.terrainData.heightmapResolution; j++)
+            {
+                heightTex.SetPixel(i, j, new Color(terrain.terrainData.GetHeight(i, j), terrain.terrainData.GetHeight(i, j), terrain.terrainData.GetHeight(i, j)));
+            }
+        }
+        heightTex.Apply();
+        mainGridPlane.GetComponentInChildren<MeshRenderer>().material.SetTexture("_HeightMap", heightTex);
+        */
     }
 
     public void EnterBuildMode()
@@ -99,9 +113,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildModeUI.InvokeBuildMenu();
         buildToolsUI.Hide();
         inputManager.OnHold += SelectObject;
-        cameraController.TopDownView();
+        //cameraController.TopDownView();
         timeManager.StopTime();
-        cameraController.yawAdjustable = false;
+        //cameraController.yawAdjustable = false;
         itemMode = -1;
     }
 
@@ -114,9 +128,9 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
         buildModeUI.ExitBuildMenu();
         buildToolsUI.Hide();
         inputManager.ClearActions();
-        cameraController.PerspectiveView();
+        //cameraController.PerspectiveView();
         timeManager.ResumeTime();
-        cameraController.yawAdjustable = true;
+        //cameraController.yawAdjustable = true;
         itemMode = -1;
     }
 

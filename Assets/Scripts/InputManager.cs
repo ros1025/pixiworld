@@ -19,25 +19,30 @@ public class InputManager : MonoBehaviour
     private LayerMask selectorLayermask;
     [SerializeField]
     private PlayerInput inputs;
-    private BuilderInputs builder;
+    private BuilderInputs input;
 
     public event Action OnClicked, OnMoved, OnRelease, OnHold, OnAction, OnExit, OnRightClick;
     private Ray ray; private RaycastHit hit;
 
     private float timeSinceMoved;
 
+    public BuilderInputs GetBuilderInputs()
+    {
+        return input;
+    }
+
     private void Awake()
     {
-        builder = new BuilderInputs();
-        builder.Enable();
-        builder.builder.OnHold.performed += OnHold_performed;
-        builder.builder.OnHold.canceled += OnMouseReleased;
-        builder.builder.OnClicked.performed += OnClicked_performed;
-        builder.builder.OnClicked.canceled += OnMouseReleased;
-        builder.builder.OnExit.performed += OnExit_performed;
-        builder.builder.OnAction.performed += OnAction_performed;
-        builder.builder.OnMoved.started += OnMoved_performed;
-        builder.builder.OnRightClick.performed += OnRightClick_performed;
+        input = new BuilderInputs();
+        input.Enable();
+        input.builder.OnHold.performed += OnHold_performed;
+        input.builder.OnHold.canceled += OnMouseReleased;
+        input.builder.OnClicked.performed += OnClicked_performed;
+        input.builder.OnClicked.canceled += OnMouseReleased;
+        input.builder.OnExit.performed += OnExit_performed;
+        input.builder.OnAction.performed += OnAction_performed;
+        input.builder.OnMoved.started += OnMoved_performed;
+        input.builder.OnRightClick.performed += OnRightClick_performed;
     }
 
     private void OnRightClick_performed(InputAction.CallbackContext obj)
@@ -165,7 +170,7 @@ public class InputManager : MonoBehaviour
     public Vector3 GetMousePosition()
     {
         Vector3 mousePos;
-        mousePos = builder.camera.Touch0.ReadValue<Vector2>();
+        mousePos = input.camera.Touch0.ReadValue<Vector2>();
         //Debug.Log(mousePos);
         return mousePos;
     }
@@ -173,7 +178,7 @@ public class InputManager : MonoBehaviour
     public Vector3 GetSelectedMapPosition()
     {
         Vector3 mousePos;
-        mousePos = builder.camera.Touch0.ReadValue<Vector2>();
+        mousePos = input.camera.Touch0.ReadValue<Vector2>();
         mousePos.z = sceneCamera.nearClipPlane;
         ray = sceneCamera.ScreenPointToRay(mousePos);
         if (Physics.Raycast(ray, out hit, float.PositiveInfinity, placementLayermask))
