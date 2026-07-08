@@ -156,7 +156,7 @@ MonoBehaviour:
   selectorLayermask:
     serializedVersion: 2
     m_Bits: 128
-  inputs: {fileID: 107182444}
+  inputs: {fileID: 0}
 --- !u!4 &107182441
 Transform:
   m_ObjectHideFlags: 0
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: builder
+  m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!1 &149153309
@@ -586,6 +586,7 @@ MonoBehaviour:
   dynamicRenderer: {fileID: 727195807}
   dynamicCollider: {fileID: 727195809}
   expanderParent: {fileID: 806249152}
+  terrain: {fileID: 1898842245}
   cellIndicator: {fileID: 1347465344}
   screenSelectPosition: {x: 0, y: 0, z: 0}
   itemMode: 0
@@ -2614,7 +2615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1803802494
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2646,7 +2647,7 @@ Transform:
   m_GameObject: {fileID: 1803802493}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.04, z: 0}
   m_LocalScale: {x: 1000, y: 1000, z: 1000}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2664,7 +2665,7 @@ GameObject:
   - component: {fileID: 1898842246}
   - component: {fileID: 1898842245}
   - component: {fileID: 1898842244}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3148,6 +3149,7 @@ MonoBehaviour:
   cam: {fileID: 330585545}
   cameraObject: {fileID: 2027412265}
   targetBox: {fileID: 569444962}
+  inputManager: {fileID: 107182440}
   posScale: 0.25
   touchPosScale: 0.05
   zoomScale: 0.025
@@ -3320,6 +3322,6 @@ SceneRoots:
   - {fileID: 975606234}
   - {fileID: 874038261}
   - {fileID: 693888270}
-  - {fileID: 1914537859}
   - {fileID: 1777656307}
   - {fileID: 5496290696834282414}
+  - {fileID: 1914537859}

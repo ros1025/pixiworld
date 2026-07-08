@@ -13,7 +13,8 @@ public class CameraController : MonoBehaviour
     public Camera cam;
     public GameObject cameraObject;
     public GameObject targetBox;
-    private BuilderInputs system;
+    [SerializeField]
+    private InputManager inputManager;
 
     private CinemachinePositionComposer framingTransposer;
 
@@ -69,8 +70,8 @@ public class CameraController : MonoBehaviour
         yawAdjustable = true; posAdjustable = true;
         ResetTouchDefaults();
 
-        system = new BuilderInputs();
-        system.camera.Enable();
+        BuilderInputs system = inputManager.GetBuilderInputs();
+        system.Enable();
 
         system.camera.zoom.performed += _ => OnScroll(system.camera.zoom.ReadValue<float>());
         system.camera.move.performed += _ =>
@@ -268,7 +269,7 @@ public class CameraController : MonoBehaviour
 
     public void MoveMouseX(int shift = 0)
     {
-        Vector2 currentTouchPosition = system.camera.Touch0.ReadValue<Vector2>();
+        Vector2 currentTouchPosition = inputManager.GetBuilderInputs().camera.Touch0.ReadValue<Vector2>();
         Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
         float delta = touchDelta.x;
 
@@ -286,7 +287,7 @@ public class CameraController : MonoBehaviour
 
     public void MoveMouseY(int shift = 0)
     {
-        Vector2 currentTouchPosition = system.camera.Touch0.ReadValue<Vector2>();
+        Vector2 currentTouchPosition = inputManager.GetBuilderInputs().camera.Touch0.ReadValue<Vector2>();
         Vector2 touchDelta = currentTouchPosition - previousTouchPosition;
         float delta = touchDelta.y;
 

@@ -149,7 +149,7 @@ public class ObjectPlacementPreview : IStaticPreviewSystem
             localCursorOffsetTranslate = previewObject.transform.TransformDirection(new Vector3(cursorOffset.x, 0, cursorOffset.y));
 
         system.cellIndicator.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y + previewYOffset, position.z + localCursorOffsetTranslate.z);
-        previewSelector.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y, position.z + + localCursorOffsetTranslate.z);
+        previewSelector.transform.position = new Vector3(position.x + localCursorOffsetTranslate.x, position.y + previewYOffset, position.z + + localCursorOffsetTranslate.z);
     }
 
     private void MovePreview(Vector3 position)
