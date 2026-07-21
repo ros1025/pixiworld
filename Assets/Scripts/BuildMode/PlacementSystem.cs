@@ -454,6 +454,54 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
+        else if (IsDoor())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Door;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            ObjectSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
+            buildingState = new DoorModifyState(gridPosition,
+                grid,
+                selectionPreview,
+                this,
+                databaseDoors,
+                walls,
+                inputManager);
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
+        else if (IsWindow())
+        {
+            StopPlacement();
+            gridVisualization.SetActive(true);
+            buildModeUI.isActive(false);
+            GetGridPosition();
+            itemMode = Window;
+            isCreate = false;
+            buildToolsUI.Call();
+            selectedPosition = gridPosition;
+            ObjectSelectionPreview selectionPreview = new();
+            preview = selectionPreview;
+            buildingState = new WindowModifyState(gridPosition,
+                grid,
+                selectionPreview,
+                this,
+                databaseWindows,
+                walls,
+                inputManager);
+            inputManager.ClearActions();
+            inputManager.OnHold += TriggerUpdate;
+            inputManager.OnAction += PlaceStructure;
+            inputManager.OnExit += StopPlacement;
+        }
         else if (IsRoadIntersection())
         {
             StopPlacement();
@@ -546,54 +594,6 @@ public class PlacementSystem : MonoBehaviour, IDataPersistence
                 inputManager);
             inputManager.ClearActions();
             inputManager.OnHold += TriggerLiveUpdate;
-            inputManager.OnAction += PlaceStructure;
-            inputManager.OnExit += StopPlacement;
-        }
-        else if (IsDoor())
-        {
-            StopPlacement();
-            gridVisualization.SetActive(true);
-            buildModeUI.isActive(false);
-            GetGridPosition();
-            itemMode = Door;
-            isCreate = false;
-            buildToolsUI.Call();
-            selectedPosition = gridPosition;
-            ObjectSelectionPreview selectionPreview = new();
-            preview = selectionPreview;
-            buildingState = new DoorModifyState(gridPosition,
-                grid,
-                selectionPreview,
-                this,
-                databaseDoors,
-                walls,
-                inputManager);
-            inputManager.ClearActions();
-            inputManager.OnHold += TriggerUpdate;
-            inputManager.OnAction += PlaceStructure;
-            inputManager.OnExit += StopPlacement;
-        }
-        else if (IsWindow())
-        {
-            StopPlacement();
-            gridVisualization.SetActive(true);
-            buildModeUI.isActive(false);
-            GetGridPosition();
-            itemMode = Window;
-            isCreate = false;
-            buildToolsUI.Call();
-            selectedPosition = gridPosition;
-            ObjectSelectionPreview selectionPreview = new();
-            preview = selectionPreview;
-            buildingState = new WindowModifyState(gridPosition,
-                grid,
-                selectionPreview,
-                this,
-                databaseWindows,
-                walls,
-                inputManager);
-            inputManager.ClearActions();
-            inputManager.OnHold += TriggerUpdate;
             inputManager.OnAction += PlaceStructure;
             inputManager.OnExit += StopPlacement;
         }
